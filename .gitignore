@@ -1,0 +1,14 @@
+*.egg-info/
+*.xml
+.coverage
+.tox
+.venv
+.mypy_cache
+/.vscode
+/docs/api
+__pycache__
+build
+dist/
+_readthedocs/
+poetry.lock
+setup.py
