@@ -62,7 +62,7 @@ intersphinx_mapping = {
     "aligntext": ("https://aligntext.readthedocs.io/en/latest/", None),
     "attr": ("https://www.attrs.org/en/stable/", None),
     "humannum": ("https://humannum.readthedocs.io/en/latest/", None),
-    "icutil": ("https://icutil.readthedocs.io/en/latest/", None),
+    "icdutil": ("https://icdutil.readthedocs.io/en/latest/", None),
     "mako": ("https://docs.makotemplates.org/en/latest/", None),
     "makolator": ("https://makolator.readthedocs.io/en/latest/", None),
     "matchor": ("https://matchor.readthedocs.io/en/latest/", None),

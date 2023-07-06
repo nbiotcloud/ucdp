@@ -30,13 +30,11 @@ Especially :any:`Doc.from_type()` serves the standard approach, to create doc fo
 """
 import typing
 
-from mementos import mementos
-
-from .attrs import NOTHING, field, frozen
+from .attrs import NOTHING, ReusedFrozen, field, frozen
 
 
 @frozen
-class Doc(mementos):
+class Doc(ReusedFrozen):
 
     """
     Documentation Container.
@@ -79,13 +77,30 @@ class Doc(mementos):
     # pylint: disable=too-few-public-methods
 
     title: typing.Optional[str] = field(default=None)
-    """Full Spoken Name."""
+    """
+    Full Spoken Name.
+
+    Identifier are often appreviations.
+    The ``title`` should contain the full spoken name.
+
+    A signal ``amp_gain`` should have the title ``Amplifier Gain``.
+    """
 
     descr: typing.Optional[str] = field(default=None)
-    """Documentation Description."""
+    """
+    Documentation Description.
+
+    The ``descr`` can contain any multiline **user** documentation.
+    """
 
     comment: typing.Optional[str] = field()
-    """Source Code Comment. Default is 'title'."""
+    """
+    Source Code Comment. Default is 'title'.
+
+    Source code should be commented.
+    The ``comment`` can contain any developer / **non-user** documentation.
+    Anything useful developer information.
+    """
 
     @comment.default  # type: ignore[union-attr]
     def _comment_default(self):

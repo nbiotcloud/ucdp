@@ -21,26 +21,43 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+
 """
-Unified Chip Design Platform.
+Utilities
 """
 
-from .attrs import NOTHING, Factory, field, frozen
-from .doc import Doc
-from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix
-from .types.array import ArrayType
-from .types.base import ACompositeType, AScalarType, AType, AVecType
-from .types.clkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType
-from .types.enum import AEnumType, ASharedEnumType, BaseEnumType, BusyType, DisType, DynamicEnumType, EnaType, EnumItem
-from .types.iter import typeiter
-from .types.orientation import BIDIR, BWD, FWD, IN, INOUT, OUT, AOrientation, Direction, Orientation
-from .types.scalar import BitType, BoolType, IntegerType, RailType, SintType, StringType, UintType
-from .types.struct import (
-    ASharedStructType,
-    AStructType,
-    BaseStructType,
-    DynamicStructType,
-    StructItem,
-    bwdfilter,
-    fwdfilter,
-)
+import re
+from typing import Any
+
+_RE_IDENTIFIER = re.compile(r"([a-zA-Z0-9][a-zA-Z_0-9\-]*)?")
+
+
+def check_name(value: Any):
+    """Check `value` against regular expression."""
+    if not _RE_IDENTIFIER.fullmatch(str(value)):
+        raise ValueError("Invalid identifier '{value}'")
+    return value
+
+
+class AutoNum:
+
+    """
+    Auto Numbering.
+
+    >>> autonum = AutoNum()
+    >>> autonum.get()
+    0
+    >>> autonum.get()
+    1
+    """
+
+    # pylint: disable=too-few-public-methods
+
+    def __init__(self, start=0):
+        self.cnt = start
+
+    def get(self):
+        """Get Fresh Number."""
+        num = self.cnt
+        self.cnt += 1
+        return num

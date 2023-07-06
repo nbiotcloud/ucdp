@@ -12,10 +12,15 @@ Overview
 .. figure:: arch.drawio.png
    :alt: Architecture Overview
 
-The base idea of `ucdp` is to describe the chip `Modules`_,
-their intend, hierarchy and:
+The central idea of `ucdp` is to describe the chip `Modules`_ and their:
 
-* `Identifier`_ (:any:`Port`, :any:`Signal`, :any:`Parameter`) and their `Types`_
+* `Identifier`_ (:any:`Port`, :any:`Signal`, :any:`Parameter`) including their `Types`_
+* Logical Expressions in Python which get translated to HDL by the `Expression Engine`_.
+* Connections (`Assigns`_) of signals and ports, `Flip-Flop`_ and `Multiplexer`_. A `Router`_ eases connection creation.
+* Module Hierarchy (`Modules`) - other submodules
+* and document (`Documentation`_) well!
+
+The `Loader`_ searches a specific top module and creates the entire datamodel.
 
 Types
 ~~~~~
@@ -41,106 +46,15 @@ Router
 Modules
 ~~~~~~~
 
-Loader
-~~~~~~
-
-FileSet-Engine
-~~~~~~~~~~~~~~
-
 Documentation
 ~~~~~~~~~~~~~
 
-.. -----------------
+All :any:`Identifier` (:any:`Port`, :any:`Signal`, :any:`Parameter`) and module instances
+should be well documented. The documentation container :any:`Doc` stores the triple of
+``title``, ``descr`` and ``comment``.
 
-.. * Documentation Container
-..   * :any:`doc`
-
-.. * Multiplexer
-
-.. * Types
-
-..   * :any:`clkrsttypes`
-..   * :any:`descriptivestruct`
-..   * :any:`enumtypes`
-..   * :any:`structtypes`
-..   * :any:`types`
-
-.. * Identifier
-..   * Signal
-..   * SignalTracer
-..   * Namespace
-..   * Ident
-..   * Parameter
-
-.. * Expressions
-
-.. * FlipFlop
-.. * Router
-.. * Mux
-.. * Assigns
-.. * Multiplexer
-.. * Loader
-..   * IcTop
-
-.. * Module + Config
-
-..   * :any:`basemod` - Base Class for all module flavours
-..   * :any:`config`
-..       * :any:`BaseConfig`
-..       * :any:`AConfig`
-..       * :any:`VersionConfig`
-..       * :any:`UniqueConfig`
-
-.. * Router
-
-..   * :any:`assigns` - Port and Signal Assignment Handling
-
-.. * Gen
-.. * Module Iterator
-.. * Orientation
-.. * Slice
-.. * Test
-
-.. * FileList Support
-
-.. Exclude List
-
-.. * File Handling
-.. * Coverage Exclude
-.. * Engine
-
-
-
-.. * :any:`expr`
-.. * :any:`fileset`
-.. * :any:`filesetrule`
-.. * :any:`flipflop`
-.. * :any:`gen`
-.. * :any:`hdlruleset`
-.. * :any:`ictop`
-.. * :any:`ictopspec`
-.. * :any:`ident`
-.. * :any:`__init__`
-.. * :any:`loader`
-.. * :any:`moditer`
-.. * :any:`mods`
-.. * :any:`modutil`
-.. * :any:`mux`
-.. * :any:`namespace`
-.. * :any:`nameutil`
-.. * :any:`orient`
-.. * :any:`param`
-.. * :any:`router`
-.. * :any:`signal`
-.. * :any:`signaltracer`
-.. * :any:`slices`
-.. * :any:`svutil`
-.. * :any:`test`
-.. * :any:`typeiter`
-.. * :any:`types`
-.. * :any:`typeutil`
-.. * :any:`util`
-.. * :any:`version`
+Loader
+~~~~~~
 
 
 Utilties
@@ -192,8 +106,8 @@ This section lists all external libraries and their usage
      - | **Name Converter.**
        | Convert names between different name schemes:
        | ``PascalCase``, ``camelCase``, ``snake_case``,
-   * - :any:`icutil`
-     - | **IC Utilties.**
+   * - :any:`icdutil`
+     - | **IC Design Utilties.**
        | Helper for binary related chip infrastructure.
    * - :any:`matchor`
      - | **String Pattern Matching.**

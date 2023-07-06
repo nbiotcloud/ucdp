@@ -21,26 +21,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""
-Unified Chip Design Platform.
-"""
 
-from .attrs import NOTHING, Factory, field, frozen
-from .doc import Doc
-from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix
-from .types.array import ArrayType
-from .types.base import ACompositeType, AScalarType, AType, AVecType
-from .types.clkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType
-from .types.enum import AEnumType, ASharedEnumType, BaseEnumType, BusyType, DisType, DynamicEnumType, EnaType, EnumItem
-from .types.iter import typeiter
-from .types.orientation import BIDIR, BWD, FWD, IN, INOUT, OUT, AOrientation, Direction, Orientation
-from .types.scalar import BitType, BoolType, IntegerType, RailType, SintType, StringType, UintType
-from .types.struct import (
-    ASharedStructType,
-    AStructType,
-    BaseStructType,
-    DynamicStructType,
-    StructItem,
-    bwdfilter,
-    fwdfilter,
-)
+"""
+Type Engine.
+"""

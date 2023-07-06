@@ -31,14 +31,18 @@ We restrict ourself to
     * :any:`attrs.field`
     * :any:`attrs.NOTHING`
     * :any:`attrs.Factory`
+    * :any:`attrs.evolve`
 
 We use a condensed ``repr()`` implementation, which just shows fields different from its default.
 """
 import attrs
+import mementos
 
 field = attrs.field
 NOTHING = attrs.NOTHING
 Factory = attrs.Factory
+evolve = attrs.evolve
+ReusedFrozen = mementos.mementos
 
 
 def _iter_signature(inst):
@@ -66,6 +70,13 @@ def _repr(self):
 
 def frozen(cls):
     """Decorator Which Creates Immutable Object."""
-    cls = attrs.define(cls, frozen=True, on_setattr=None, repr=False)
+    cls = attrs.define(cls, frozen=True, on_setattr=None, repr=False, auto_attribs=False)
+    cls.__repr__ = _repr
+    return cls
+
+
+def define(cls):
+    """Decorator Which Creates Mutable Object."""
+    cls = attrs.define(cls, frozen=False, repr=False, auto_attribs=False)
     cls.__repr__ = _repr
     return cls
