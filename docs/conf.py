@@ -59,6 +59,13 @@ html_theme = "sphinx_rtd_theme"
 # html_static_path = ["static"]
 
 intersphinx_mapping = {
-    "attrs": ("https://www.attrs.org/en/stable/", None),
+    "aligntext": ("https://aligntext.readthedocs.io/en/latest/", None),
+    "attr": ("https://www.attrs.org/en/stable/", None),
+    "humannum": ("https://humannum.readthedocs.io/en/latest/", None),
+    "icutil": ("https://icutil.readthedocs.io/en/latest/", None),
+    "mako": ("https://docs.makotemplates.org/en/latest/", None),
+    "makolator": ("https://makolator.readthedocs.io/en/latest/", None),
+    "matchor": ("https://matchor.readthedocs.io/en/latest/", None),
     "outputfile": ("https://outputfile.readthedocs.io/en/latest/", None),
+    "uniquer": ("https://uniquer.readthedocs.io/en/latest/", None),
 }

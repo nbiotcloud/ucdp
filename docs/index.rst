@@ -13,6 +13,13 @@ Links
    :maxdepth: 2
    :caption: User Manual:
 
+   manual/intro
+
+.. toctree::
+   :maxdepth: 1
+   :caption: API Documentation:
+
+   arch
    api/ucdp
 
 
