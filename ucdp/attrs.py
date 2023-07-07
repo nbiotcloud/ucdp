@@ -68,15 +68,21 @@ def _repr(self):
     return f"{self.__class__.__qualname__}({signature})"
 
 
-def frozen(cls):
-    """Decorator Which Creates Immutable Object."""
-    cls = attrs.define(cls, frozen=True, on_setattr=None, repr=False, auto_attribs=False)
-    cls.__repr__ = _repr
-    return cls
+# pylint: disable=redefined-outer-name,redefined-builtin,unused-argument
+def define(maybe_cls=None, frozen=True, repr=True, cmp=None, **kwargs):
+    """Recommended attrs Decorator."""
+
+    def wrap(cls):
+        cls = attrs.define(cls, frozen=frozen, repr=False, auto_attribs=False, **kwargs)
+        if repr:
+            cls.__repr__ = _repr
+        return cls
+
+    if maybe_cls is None:
+        return wrap
+    return wrap(maybe_cls)
 
 
-def define(cls):
-    """Decorator Which Creates Mutable Object."""
-    cls = attrs.define(cls, frozen=False, repr=False, auto_attribs=False)
-    cls.__repr__ = _repr
-    return cls
+def frozen(maybe_cls=None, repr=True, **kwargs):
+    """Recommended attrs Decorator."""
+    return define(maybe_cls, frozen=True, on_setattr=None, repr=repr, **kwargs)

@@ -26,18 +26,6 @@
 Utilities
 """
 
-import re
-from typing import Any
-
-_RE_IDENTIFIER = re.compile(r"([a-zA-Z0-9][a-zA-Z_0-9\-]*)?")
-
-
-def check_name(value: Any):
-    """Check `value` against regular expression."""
-    if not _RE_IDENTIFIER.fullmatch(str(value)):
-        raise ValueError("Invalid identifier '{value}'")
-    return value
-
 
 class AutoNum:
 

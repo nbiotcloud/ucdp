@@ -29,14 +29,15 @@ A structure assembles multiple type, name, orientation pairs.
 
 * :any:`StructItem` - Struct item
 * :any:`AStructType` - Standard Struct
-* :any:`ASharedStructType` - A public struct which fills up through all instances.
+* :any:`AGlobalStructType` - A public struct which fills up through all instances.
 * :any:`DynamicStructType` - A public struct which fills up per instance.
 """
 from typing import Callable, Optional
 
 from ..attrs import NOTHING, ReusedFrozen, field, frozen
 from ..doc import Doc
-from ..util import AutoNum, check_name
+from ..nameutil import validate_identifier
+from ..util import AutoNum
 from .base import ACompositeType, AType
 from .orientation import BWD, FWD, Orientation
 
@@ -66,9 +67,9 @@ class StructItem(ReusedFrozen):
     ifdef: Optional[str] = field(default=None)
 
     @name.validator
-    def _check_name(self, attribute, value):
+    def _validate_name(self, attribute, value):
         # pylint: disable=unused-argument
-        check_name(value)
+        validate_identifier(value)
 
     @property
     def title(self):
@@ -257,13 +258,13 @@ class AStructType(BaseStructType, ReusedFrozen):
 
 
 @frozen
-class ASharedStructType(BaseStructType, ReusedFrozen):
+class AGlobalStructType(BaseStructType, ReusedFrozen):
 
     """
     A singleton struct which can be filled outside `_build` and is **shared** between instances.
 
     >>> import ucdp
-    >>> class BusType(ucdp.ASharedStructType):
+    >>> class BusType(ucdp.AGlobalStructType):
     ...     pass
     >>> bus = BusType()
     >>> bus.add('data', ucdp.UintType(8))

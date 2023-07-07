@@ -24,7 +24,7 @@
 """Name Utilities."""
 import functools
 import re
-from typing import Tuple
+from typing import Any, Tuple
 
 from caseconverter import snakecase
 from fuzzywuzzy import process
@@ -32,6 +32,29 @@ from humanfriendly.text import concatenate
 
 _RE_SPLIT_PREFIX = re.compile(r"(?i)(?P<prefix>([a-z]|inst)_)(?P<basename>([a-z][a-z0-9\._]*)?)\Z")
 _RE_SPLIT_SUFFIX = re.compile(r"(?i)(?P<basename>([a-z][a-z0-9\._]*)?)(?P<suffix>_([a-z]|io))\Z")
+_RE_IDENTIFIER = re.compile(r"([a-zA-Z][a-zA-Z_0-9]*)?")
+
+
+def validate_identifier(value: Any):
+    """
+    Ensure `value` is an identifier.
+
+    >>> validate_identifier('abc')
+    'abc'
+    >>> validate_identifier('_abc')
+    Traceback (most recent call last):
+        ...
+    ValueError: Invalid identifier '_abc'
+    >>> validate_identifier('aB9_a')
+    'aB9_a'
+    >>> validate_identifier('9ab')
+    Traceback (most recent call last):
+        ...
+    ValueError: Invalid identifier '9ab'
+    """
+    if not _RE_IDENTIFIER.fullmatch(str(value)):
+        raise ValueError(f"Invalid identifier '{value}'")
+    return value
 
 
 @functools.lru_cache()
@@ -121,9 +144,19 @@ def join_names(*names, concat="_") -> str:
     return concat.join(name for name in names if name)
 
 
-def didyoumean(name, names, known=False, nonewline=False) -> str:
-    """Propose matching names."""
-    sep = " " if nonewline else "\n"
+def didyoumean(name, names, known=False, multiline=False) -> str:
+    """
+    Propose matching names.
+
+    >>> didyoumean('abb', ('abba', 'ac/dc', 'beatles'))
+    " Did you mean 'abba'?"
+    >>> didyoumean('abb', ('abba', 'ac/dc', 'beatles'), known=True)
+    " Known are 'abba', 'ac/dc' and 'beatles'. Did you mean 'abba'?"
+    >>> print(didyoumean('zz-top', ('abba', 'ac/dc', 'beatles'), known=True, multiline=True))
+    <BLANKLINE>
+    Known are 'abba', 'ac/dc' and 'beatles'.
+    """
+    sep = "\n" if multiline else " "
     if known:
         knowns = concatenate(repr(name) for name in names)
         msg = f"{sep}Known are {knowns}."
@@ -139,5 +172,12 @@ def didyoumean(name, names, known=False, nonewline=False) -> str:
 
 
 def get_snakecasename(cls):
-    """Get snakecase name of `cls`."""
-    return snakecase(cls.__name__, short=True).removeprefix("_")
+    """
+    Get snakecase name of `cls`.
+
+    >>> class MyClass:
+    ...     pass
+    >>> get_snakecasename(MyClass)
+    'my_class'
+    """
+    return snakecase(cls.__name__).removeprefix("_")

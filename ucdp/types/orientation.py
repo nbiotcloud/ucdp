@@ -25,7 +25,7 @@
 """
 Type Orientation and Port Directions.
 
-Types can have an orientation (:any:`Orient`) and ports have a :any:`Direction`.
+Types can have an orientation (:any:`Orientation`) and ports have a :any:`Direction`.
 
 
 Orient
@@ -69,7 +69,7 @@ INOUT              0  _io
 Common Features
 ===============
 
-You can calculate with :any:`Orient` ...
+You can calculate with :any:`Orientation` ...
 
 >>> FWD * FWD
 FWD
@@ -101,14 +101,14 @@ BWD
 >>> FWD * INOUT
 BIDIR
 
-:any:`Orient` and :any:`Direction` are singletons. There is just one instance of each.
+:any:`Orientation` and :any:`Direction` are singletons. There is just one instance of each.
 
 >>> IN is IN
 True
 >>> IN is (IN * BWD * BWD)
 True
 
-:any:`Orient` and :any:`Direction` can be compared:
+:any:`Orientation` and :any:`Direction` can be compared:
 
 >>> IN == IN
 True
@@ -136,6 +136,10 @@ class AOrientation(ReusedFrozen):
     _NAMEMAP: Dict[int, str] = {}
 
     mode = field()
+    """
+    Integer representation.
+    """
+
     # pylint: disable=protected-access
     __name = field(init=False)
 
@@ -223,14 +227,14 @@ OUT = Direction(-1)
 INOUT = Direction(0)
 
 
-def convert_aorient(value) -> AOrientation:
+def convert_aorientation(value) -> AOrientation:
     """Convert Direction."""
     if value in (FWD, BWD, BIDIR, IN, OUT, INOUT):
         return value
     raise ValueError(f"Invalid orientation {value!r}. Valid are hw.FWD, hw.BWD, hw.BIDIR, hw.IN, hw.OUT and hw.INOUT")
 
 
-def convert_orient(value) -> Orientation:
+def convert_orientation(value) -> Orientation:
     """Convert Direction."""
     if value in (FWD, BWD, BIDIR):
         return value

@@ -27,7 +27,43 @@ Unified Chip Design Platform.
 
 from .attrs import NOTHING, Factory, field, frozen
 from .doc import Doc
+from .expr import (
+    TODO,
+    BoolOp,
+    Clog2,
+    Comment,
+    Concat,
+    Const,
+    Expr,
+    InvalidExpression,
+    Maximum,
+    Minimum,
+    Op,
+    Range,
+    Signed,
+    SliceOp,
+    SOp,
+    Ternary,
+    Unsigned,
+    cast,
+    cast_booltype,
+    clog2,
+    concat,
+    const,
+    create,
+    get_idents,
+    maximum,
+    minimum,
+    parse,
+    signed,
+    ternary,
+    unsigned,
+)
+from .ident import Idents
+from .namespace import DuplicateError, LockError, Namespace
 from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix
+from .param import AParam, LocalParam, Param
+from .signal import ASignal, Port, Signal
 from .types.array import ArrayType
 from .types.base import ACompositeType, AScalarType, AType, AVecType
 from .types.clkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType
@@ -36,7 +72,7 @@ from .types.iter import typeiter
 from .types.orientation import BIDIR, BWD, FWD, IN, INOUT, OUT, AOrientation, Direction, Orientation
 from .types.scalar import BitType, BoolType, IntegerType, RailType, SintType, StringType, UintType
 from .types.struct import (
-    ASharedStructType,
+    AGlobalStructType,
     AStructType,
     BaseStructType,
     DynamicStructType,
