@@ -31,7 +31,7 @@ import math
 import operator
 import re
 from collections import deque
-from typing import Callable, Optional
+from typing import Callable, Optional, Tuple
 
 from icdutil.num import unsigned_to_signed
 from icdutil.slices import Slice
@@ -651,7 +651,7 @@ class Concat(Expr):
     Concat((Const(UintType(2)),))
     """
 
-    items: tuple[Expr] = field()
+    items: Tuple[Expr, ...] = field()
 
     @items.validator
     def _items_validator(self, attribute, value):
