@@ -49,7 +49,7 @@ def parse(
     expr, namespace: Optional[Namespace] = None, only=None, types=None, strict: bool = True, context=None
 ) -> "Expr":
     """
-    Parse Constant, Concat or Expressions **WITHOUT** constants.
+    Parse Constant, ConcatExpr or Expressions **WITHOUT** constants.
 
     Args:
         expr: Expression
@@ -64,7 +64,7 @@ def parse(
     >>> ucdp.parse('10')
     10
     >>> ucdp.parse((10, '10'))
-    Concat((10, 10))
+    ConcatExpr((10, 10))
     >>> namespace = ucdp.Idents([
     ...     ucdp.Signal(ucdp.UintType(16, default=15), 'uint_s'),
     ...     ucdp.Signal(ucdp.SintType(16, default=-15), 'sint_s'),
@@ -92,26 +92,26 @@ def parse(
     ... ])
     >>> expr = ucdp.parse("ternary(b_s, 2 * a_s + c_s, c_s)", namespace=namespace)
     >>> expr
-    Ternary(Signal(UintType(4), 'b_s'), Op(Op(2, '*', ... Signal(SintType(8), 'c_s'))
+    TernaryExpr(Signal(UintType(4), 'b_s'), Op(Op(2, '*', ... Signal(SintType(8), 'c_s'))
 
     Syntax Errors:
 
     >>> parse("sig_s[2")  # doctest: +SKIP
     Traceback (most recent call last):
       ...
-    ucdp.expr.InvalidExpression: 'sig_s[2': '[' was never closed (<string>, line 1)
+    ucdp.expr.InvalidExpr: 'sig_s[2': '[' was never closed (<string>, line 1)
     """
     # pylint: disable=too-many-arguments
     if isinstance(expr, Expr):
         return expr
     if isinstance(expr, AType):
-        return Const(expr)
+        return ConstExpr(expr)
     try:
         if isinstance(expr, (list, tuple)):
             return concat(expr, namespace=None)
         try:
             return const(expr)
-        except InvalidExpression:
+        except InvalidExpr:
             pass
         expr = _parse(expr, namespace, strict)
     except NameError as exc:
@@ -135,28 +135,28 @@ def const(value):
     >>> const(10)
     10
     """
-    return Const.parse(value)
+    return ConstExpr.parse(value)
 
 
 def concat(value, namespace=None):
     """
-    Parse Concat.
+    Parse ConcatExpr.
 
     >>> concat((10, "20"))
-    Concat((10, 20))
+    ConcatExpr((10, 20))
 
-    >>> concat(Concat((10, 20)))
-    Concat((10, 20))
+    >>> concat(ConcatExpr((10, 20)))
+    ConcatExpr((10, 20))
 
     >>> bool(concat((10, "20")))
     True
     """
-    return Concat.parse(value, namespace=namespace)
+    return ConcatExpr.parse(value, namespace=namespace)
 
 
 def ternary(cond, one, other, namespace=None):
     """
-    Ternary Statement.
+    TernaryExpr Statement.
 
     >>> import ucdp
     >>> cond = ucdp.Signal(ucdp.BitType(), 'if_s')
@@ -164,7 +164,7 @@ def ternary(cond, one, other, namespace=None):
     >>> other = ucdp.Signal(ucdp.UintType(16, default=20), 'other_s')
     >>> expr = ternary(cond, one, other)
     >>> expr
-    Ternary(Signal(BitType(), 'if_s'), Signal(UintType(16, default=10), 'one_s'), ... default=20), 'other_s'))
+    TernaryExpr(Signal(BitType(), 'if_s'), Signal(UintType(16, default=10), 'one_s'), ... default=20), 'other_s'))
     >>> str(expr)
     'if_s ? one_s : other_s'
     >>> int(expr)
@@ -175,7 +175,7 @@ def ternary(cond, one, other, namespace=None):
     cond = parse(cond, namespace=namespace)
     one = parse(one, namespace=namespace)
     other = parse(other, namespace=namespace)
-    expr = Ternary(cond, one, other)
+    expr = TernaryExpr(cond, one, other)
     # check_booltype(str(expr), cond.type_, BoolType)
     return expr
 
@@ -186,12 +186,12 @@ def clog2(expr, namespace=None):
 
     >>> log = clog2("8'h8")
     >>> log
-    Clog2(Const(UintType(8, default=8)))
+    Clog2Func(ConstExpr(UintType(8, default=8)))
     >>> int(log)
     3
     """
     expr = parse(expr, namespace=namespace)
-    return Clog2(expr)
+    return Clog2Func(expr)
 
 
 def signed(expr, namespace=None):
@@ -202,10 +202,10 @@ def signed(expr, namespace=None):
     >>> expr = ucdp.Signal(ucdp.UintType(16), 'one_s')
     >>> expr = ucdp.signed(expr)
     >>> expr
-    Signed(Signal(UintType(16), 'one_s'))
+    SignedFunc(Signal(UintType(16), 'one_s'))
     """
     expr = parse(expr, namespace=namespace)
-    return Signed(expr)
+    return SignedFunc(expr)
 
 
 def unsigned(expr, namespace=None):
@@ -216,10 +216,10 @@ def unsigned(expr, namespace=None):
     >>> expr = ucdp.Signal(ucdp.SintType(16), 'one_s')
     >>> expr = ucdp.unsigned(expr)
     >>> expr
-    Unsigned(Signal(SintType(16), 'one_s'))
+    UnsignedFunc(Signal(SintType(16), 'one_s'))
     """
     expr = parse(expr, namespace=namespace)
-    return Unsigned(expr)
+    return UnsignedFunc(expr)
 
 
 def minimum(one, other, namespace=None):
@@ -228,13 +228,13 @@ def minimum(one, other, namespace=None):
 
     >>> val = minimum("8'h8", "8'h3")
     >>> val
-    Minimum(Const(UintType(8, default=8)), Const(UintType(8, default=3)))
+    MinimumFunc(ConstExpr(UintType(8, default=8)), ConstExpr(UintType(8, default=3)))
     >>> int(val)
     3
     """
     one = parse(one, namespace=namespace)
     other = parse(other, namespace=namespace)
-    return Minimum(one, other)
+    return MinimumFunc(one, other)
 
 
 def maximum(one, other, namespace=None):
@@ -243,13 +243,13 @@ def maximum(one, other, namespace=None):
 
     >>> val = maximum("8'h8", "8'h3")
     >>> val
-    Maximum(Const(UintType(8, default=8)), Const(UintType(8, default=3)))
+    MaximumFunc(ConstExpr(UintType(8, default=8)), ConstExpr(UintType(8, default=3)))
     >>> int(val)
     8
     """
     one = parse(one, namespace=namespace)
     other = parse(other, namespace=namespace)
-    return Maximum(one, other)
+    return MaximumFunc(one, other)
 
 
 def cast(expr):
@@ -261,9 +261,9 @@ def cast(expr):
     >>> cast('port_i')
     Traceback (most recent call last):
       ...
-    ucdp.expr.InvalidExpression: cast() is just allowed once within routing.
+    ucdp.expr.InvalidExpr: cast() is just allowed once within routing.
     """
-    raise InvalidExpression("cast() is just allowed once within routing.")
+    raise InvalidExpr("cast() is just allowed once within routing.")
 
 
 def create(expr):
@@ -275,12 +275,12 @@ def create(expr):
     >>> create('port_i')
     Traceback (most recent call last):
       ...
-    ucdp.expr.InvalidExpression: create() is just allowed once within routing.
+    ucdp.expr.InvalidExpr: create() is just allowed once within routing.
     """
-    raise InvalidExpression("create() is just allowed once within routing.")
+    raise InvalidExpr("create() is just allowed once within routing.")
 
 
-class InvalidExpression(ValueError):
+class InvalidExpr(ValueError):
     """Invalid Expression."""
 
 
@@ -493,7 +493,7 @@ class SOp(Expr):
 
     def __str__(self):
         one = self.one
-        if isinstance(one, (Op, SOp, Ternary)):
+        if isinstance(one, (Op, SOp, TernaryExpr)):
             one = f"({one})"
         return f"{self.sign}{one}{self.postsign}"
 
@@ -516,7 +516,7 @@ class SliceOp(Expr):
 
     def __str__(self):
         one = self.one
-        if isinstance(one, (Op, SOp, Ternary)):
+        if isinstance(one, (Op, SOp, TernaryExpr)):
             one = f"({one})"
         return f"{one}[{self.slice_}]"
 
@@ -530,14 +530,14 @@ class SliceOp(Expr):
 
 
 @frozen(hash=True)
-class Const(Expr):
+class ConstExpr(Expr):
     """
     Constant.
 
     >>> import ucdp
-    >>> const = Const(ucdp.UintType(5, default=5))
+    >>> const = ConstExpr(ucdp.UintType(5, default=5))
     >>> const
-    Const(UintType(5, default=5))
+    ConstExpr(UintType(5, default=5))
     >>> int(const)
     5
     >>> bool(const)
@@ -552,7 +552,7 @@ class Const(Expr):
 
     def __getitem__(self, slice_):
         # pylint: disable=unsubscriptable-object
-        return Const(self.type_[slice_])
+        return ConstExpr(self.type_[slice_])
 
     _RE = re.compile(
         r"(?P<sign>[-+])?"
@@ -571,33 +571,33 @@ class Const(Expr):
         """
         Parse Constant.
 
-        >>> Const.parse('10')
+        >>> ConstExpr.parse('10')
         10
-        >>> Const.parse("10'd20")
-        Const(UintType(10, default=20))
-        >>> Const.parse(Const(UintType(10, default=20)))
-        Const(UintType(10, default=20))
+        >>> ConstExpr.parse("10'd20")
+        ConstExpr(UintType(10, default=20))
+        >>> ConstExpr.parse(ConstExpr(UintType(10, default=20)))
+        ConstExpr(UintType(10, default=20))
 
-        >>> Const.parse("4'h4")
-        Const(UintType(4, default=4))
-        >>> Const.parse("4'sh4")
-        Const(SintType(4, default=4))
-        >>> Const.parse("4'shC")
-        Const(SintType(4, default=-4))
+        >>> ConstExpr.parse("4'h4")
+        ConstExpr(UintType(4, default=4))
+        >>> ConstExpr.parse("4'sh4")
+        ConstExpr(SintType(4, default=4))
+        >>> ConstExpr.parse("4'shC")
+        ConstExpr(SintType(4, default=-4))
         """
-        if isinstance(value, Const):
+        if isinstance(value, ConstExpr):
             return value
         strippedvalue = str(value).strip()
-        matnum = Const._RE.fullmatch(strippedvalue)
+        matnum = ConstExpr._RE.fullmatch(strippedvalue)
         if matnum:
-            return Const._parse(**matnum.groupdict())
-        raise InvalidExpression(repr(value))
+            return ConstExpr._parse(**matnum.groupdict())
+        raise InvalidExpr(repr(value))
 
     @staticmethod
     def _parse(sign, width, is_signed, bnum, num):
         if num is None:
             base, num = bnum[0], bnum[1:]
-            value = int(num, Const._NUM_BASEMAP[base])
+            value = int(num, ConstExpr._NUM_BASEMAP[base])
             if sign == "-":
                 value = -value
             width = int(width)
@@ -610,7 +610,7 @@ class Const(Expr):
                     type_ = SintType(width, default=value)
                 else:
                     type_ = UintType(width, default=value)
-            return Const(type_)
+            return ConstExpr(type_)
         return int(num)
 
     @staticmethod
@@ -618,22 +618,22 @@ class Const(Expr):
         """
         Replace constants in `value`.
 
-        >>> Const.replace("(foo_s == 2'b0) && (bla_s > 16'd0)")
-        '(foo_s == Const(UintType(2))) && (bla_s > Const(UintType(16)))'
-        >>> Const.replace(1)
+        >>> ConstExpr.replace("(foo_s == 2'b0) && (bla_s > 16'd0)")
+        '(foo_s == ConstExpr(UintType(2))) && (bla_s > ConstExpr(UintType(16)))'
+        >>> ConstExpr.replace(1)
         1
         """
         if isinstance(value, str):
-            return Const._RE.sub(Const._replace, value)
+            return ConstExpr._RE.sub(ConstExpr._replace, value)
         return value
 
     @staticmethod
     def _replace(mat):
-        return repr(Const._parse(**mat.groupdict()))
+        return repr(ConstExpr._parse(**mat.groupdict()))
 
 
 @frozen(hash=True)
-class Concat(Expr):
+class ConcatExpr(Expr):
 
     """
     Concatenation.
@@ -642,13 +642,13 @@ class Concat(Expr):
     >>> sig = ucdp.Signal(ucdp.UintType(16, default=10), 'val_s')
     >>> expr = concat(("2'd0", sig, "2'b00"))
     >>> expr
-    Concat((Const(UintType(2)), Signal(UintType(16, default=10), 'val_s'), Const(UintType(2))))
+    ConcatExpr((ConstExpr(UintType(2)), Signal(UintType(16, default=10), 'val_s'), ConstExpr(UintType(2))))
     >>> int(expr)
     40
     >>> expr.type_
     UintType(20, default=40)
     >>> concat(("2'd0",))
-    Concat((Const(UintType(2)),))
+    ConcatExpr((ConstExpr(UintType(2)),))
     """
 
     items: Tuple[Expr, ...] = field()
@@ -684,29 +684,29 @@ class Concat(Expr):
     @staticmethod
     def parse(value, namespace=None):
         """
-        Parse Concat.
+        Parse ConcatExpr.
 
-        >>> Concat.parse((10, 20))
-        Concat((10, 20))
+        >>> ConcatExpr.parse((10, 20))
+        ConcatExpr((10, 20))
         """
-        if isinstance(value, Concat):
+        if isinstance(value, ConcatExpr):
             return value
-        return Concat(tuple(parse(item, namespace=namespace) for item in value))
+        return ConcatExpr(tuple(parse(item, namespace=namespace) for item in value))
 
 
 @frozen(hash=True)
-class Ternary(Expr):
+class TernaryExpr(Expr):
 
     """
-    Ternary Expression
+    TernaryExpr Expression
 
     >>> import ucdp
     >>> cond = ucdp.Signal(ucdp.BitType(), 'if_s')
     >>> one = ucdp.Signal(ucdp.UintType(16, default=10), 'one_s')
     >>> other = ucdp.Signal(ucdp.UintType(16, default=20), 'other_s')
-    >>> expr = Ternary(cond, one, other)
+    >>> expr = TernaryExpr(cond, one, other)
     >>> expr
-    Ternary(Signal(BitType(), 'if_s'), Signal(UintType(16, default=10), 'one_s'), ... default=20), 'other_s'))
+    TernaryExpr(Signal(BitType(), 'if_s'), Signal(UintType(16, default=10), 'one_s'), ... default=20), 'other_s'))
     >>> str(expr)
     'if_s ? one_s : other_s'
     >>> int(expr)
@@ -743,7 +743,7 @@ class Ternary(Expr):
 
 
 @frozen(hash=True)
-class Clog2(Expr):
+class Clog2Func(Expr):
 
     """
     Ceiling Logarithm to base of 2.
@@ -765,7 +765,7 @@ class Clog2(Expr):
 
 
 @frozen(hash=True)
-class Signed(Expr):
+class SignedFunc(Expr):
 
     """
     Signed Conversion
@@ -783,7 +783,7 @@ class Signed(Expr):
 
 
 @frozen(hash=True)
-class Unsigned(Expr):
+class UnsignedFunc(Expr):
 
     """
     Unsigned Conversion
@@ -801,7 +801,7 @@ class Unsigned(Expr):
 
 
 @frozen(hash=True)
-class Minimum(Expr):
+class MinimumFunc(Expr):
 
     """
     Smaller value of two.
@@ -824,7 +824,7 @@ class Minimum(Expr):
 
 
 @frozen(hash=True)
-class Maximum(Expr):
+class MaximumFunc(Expr):
 
     """
     Larger value of two.
@@ -850,7 +850,7 @@ class Maximum(Expr):
 class Range(Expr):
 
     """
-    Range.
+    Value Range.
 
     >>> import ucdp
     >>> range_ = ucdp.Range(ucdp.UintType(4), range(2, 9))
@@ -884,7 +884,7 @@ class Range(Expr):
 
 
 @frozen(hash=True)
-class Comment(Expr):
+class CommentExpr(Expr):
 
     """
     Comment.
@@ -901,7 +901,7 @@ class Comment(Expr):
         return None
 
 
-TODO = Comment("TODO")
+TODO = CommentExpr("TODO")
 
 EXPRGBLS = {
     # Expressions
@@ -909,12 +909,12 @@ EXPRGBLS = {
     "SOp": SOp,
     "BoolOp": BoolOp,
     "SliceOp": SliceOp,
-    "Const": Const,
-    "Concat": Concat,
-    "Ternary": Ternary,
-    "Clog2": Clog2,
-    "Minimum": Minimum,
-    "Maximum": Maximum,
+    "ConstExpr": ConstExpr,
+    "ConcatExpr": ConcatExpr,
+    "TernaryExpr": TernaryExpr,
+    "Clog2Func": Clog2Func,
+    "MinimumFunc": MinimumFunc,
+    "MaximumFunc": MaximumFunc,
     # Helper
     "const": const,
     "concat": concat,
@@ -974,9 +974,9 @@ def _parse(expr, namespace, strict) -> Expr:
     try:
         return eval(expr, _ExprGlobals(namespace, strict))
     except TypeError:
-        raise InvalidExpression(expr) from None
+        raise InvalidExpr(expr) from None
     except SyntaxError as exc:
-        raise InvalidExpression(f"{expr!r}: {exc!s}") from None
+        raise InvalidExpr(f"{expr!r}: {exc!s}") from None
 
 
 def get_idents(expr: Expr):
@@ -987,16 +987,16 @@ def get_idents(expr: Expr):
     heap = deque((expr,))
     while heap:
         item = heap.popleft()
-        if isinstance(item, (Const, int, float)):
+        if isinstance(item, (ConstExpr, int, float)):
             pass
         elif isinstance(item, Op):
             heap.append(item.left)
             heap.append(item.right)
         elif isinstance(item, (SOp, SliceOp)):
             heap.append(item.one)
-        elif isinstance(item, Concat):
+        elif isinstance(item, ConcatExpr):
             heap.extend(item.items)
-        elif isinstance(item, Ternary):
+        elif isinstance(item, TernaryExpr):
             heap.append(item.cond)
             heap.append(item.one)
             heap.append(item.other)
@@ -1012,5 +1012,5 @@ def cast_booltype(expr):
     if isinstance(type_, BoolType):
         return expr
     if isinstance(type_, (BitType, UintType, BaseEnumType)) and int(type_.width) == 1:
-        return expr == Const(BitType(default=1))
+        return expr == ConstExpr(BitType(default=1))
     return expr

@@ -32,7 +32,28 @@ from humanfriendly.text import concatenate
 
 _RE_SPLIT_PREFIX = re.compile(r"(?i)(?P<prefix>([a-z]|inst)_)(?P<basename>([a-z][a-z0-9\._]*)?)\Z")
 _RE_SPLIT_SUFFIX = re.compile(r"(?i)(?P<basename>([a-z][a-z0-9\._]*)?)(?P<suffix>_([a-z]|io))\Z")
+_RE_NAME = re.compile(r"([a-zA-Z0-9][a-zA-Z_0-9\-]*)?")
 _RE_IDENTIFIER = re.compile(r"([a-zA-Z][a-zA-Z_0-9]*)?")
+
+
+def validate_name(value: Any):
+    """
+    Ensure `value` is a name.
+
+    >>> validate_name('abc')
+    'abc'
+    >>> validate_name('_abc')
+    Traceback (most recent call last):
+        ...
+    ValueError: Invalid name '_abc'
+    >>> validate_name('aB9_a')
+    'aB9_a'
+    >>> validate_name('9ab')
+    '9ab'
+    """
+    if not _RE_NAME.fullmatch(str(value)):
+        raise ValueError(f"Invalid name '{value}'")
+    return value
 
 
 def validate_identifier(value: Any):

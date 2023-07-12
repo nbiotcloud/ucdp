@@ -40,7 +40,7 @@ from humanfriendly.text import concatenate
 
 from ..attrs import NOTHING, ReusedFrozen, field, frozen
 from ..doc import Doc
-from ..nameutil import validate_identifier
+from ..nameutil import validate_name
 from ..util import AutoNum
 from .scalar import AType, BitType, IntegerType
 
@@ -135,7 +135,7 @@ class BaseEnumType(AType, dict):
         if valuetype:
             valuetype.check(value)
         else:
-            validate_identifier(value)
+            validate_name(value)
         if key in self.keys():
             raise ValueError(f"key {key!r} already exists in {self}")
         doc = Doc(title, descr, comment)

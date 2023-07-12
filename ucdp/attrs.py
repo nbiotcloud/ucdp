@@ -43,6 +43,8 @@ NOTHING = attrs.NOTHING
 Factory = attrs.Factory
 evolve = attrs.evolve
 ReusedFrozen = mementos.mementos
+asdict = attrs.asdict
+astuple = attrs.astuple
 
 
 def _iter_signature(inst):

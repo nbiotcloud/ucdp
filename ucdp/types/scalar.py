@@ -605,7 +605,7 @@ class UintType(AVecType):
     @property
     def max_(self):
         """Maximum Value."""
-        return 2 ** int(self.width) - 1
+        return (2**self.width) - 1
 
     def check(self, value, what="Value") -> int:
         """

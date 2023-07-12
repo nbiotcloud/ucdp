@@ -36,7 +36,7 @@ from typing import Callable, Optional
 
 from ..attrs import NOTHING, ReusedFrozen, field, frozen
 from ..doc import Doc
-from ..nameutil import validate_identifier
+from ..nameutil import validate_name
 from ..util import AutoNum
 from .base import ACompositeType, AType
 from .orientation import BWD, FWD, Orientation
@@ -69,7 +69,7 @@ class StructItem(ReusedFrozen):
     @name.validator
     def _validate_name(self, attribute, value):
         # pylint: disable=unused-argument
-        validate_identifier(value)
+        validate_name(value)
 
     @property
     def title(self):

@@ -25,26 +25,28 @@
 Unified Chip Design Platform.
 """
 
+from .assigns import Assigns
 from .attrs import NOTHING, Factory, field, frozen
+from .const import Const
 from .doc import Doc
 from .expr import (
     TODO,
     BoolOp,
-    Clog2,
-    Comment,
-    Concat,
-    Const,
+    Clog2Func,
+    CommentExpr,
+    ConcatExpr,
+    ConstExpr,
     Expr,
-    InvalidExpression,
-    Maximum,
-    Minimum,
+    InvalidExpr,
+    MaximumFunc,
+    MinimumFunc,
     Op,
     Range,
-    Signed,
+    SignedFunc,
     SliceOp,
     SOp,
-    Ternary,
-    Unsigned,
+    TernaryExpr,
+    UnsignedFunc,
     cast,
     cast_booltype,
     clog2,
@@ -60,13 +62,17 @@ from .expr import (
     unsigned,
 )
 from .ident import Idents
+from .mod.base import BaseMod, get_modbasecls, get_modname, mod
+from .mod.config import AConfig, AUniqueConfig, AVersionConfig, config
+from .mod.mods import AConfigurableMod, AGenericTbMod, AImportedMod, AMod, ATailoredMod, ATbMod, _ATopMod
 from .namespace import DuplicateError, LockError, Namespace
 from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix
-from .param import AParam, LocalParam, Param
+from .param import Param
 from .signal import ASignal, Port, Signal
 from .types.array import ArrayType
 from .types.base import ACompositeType, AScalarType, AType, AVecType
 from .types.clkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType
+from .types.descriptivestruct import DescriptiveStructType
 from .types.enum import AEnumType, ASharedEnumType, BaseEnumType, BusyType, DisType, DynamicEnumType, EnaType, EnumItem
 from .types.iter import typeiter
 from .types.orientation import BIDIR, BWD, FWD, IN, INOUT, OUT, AOrientation, Direction, Orientation
@@ -80,3 +86,4 @@ from .types.struct import (
     bwdfilter,
     fwdfilter,
 )
+from .util import namefilter

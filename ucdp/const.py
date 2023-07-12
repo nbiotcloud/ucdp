@@ -22,14 +22,14 @@
 # SOFTWARE.
 #
 """
-Module Parameter .
+Module Constant.
 
 Usage:
 
 >>> from tabulate import tabulate
 >>> import ucdp
->>> ucdp.Param(ucdp.UintType(6), "param_p")
-Param(UintType(6), 'param_p')
+>>> ucdp.Const(ucdp.UintType(6), "const_c")
+Const(UintType(6), 'const_c')
 
 Also complex types can simply be used:
 
@@ -50,23 +50,21 @@ Also complex types can simply be used:
 ...         self._add("mode", MType())
 ...         self._add("bar", ucdp.ArrayType(AType(), 3), ucdp.BWD)
 
-These types are automatically resolved by iterating over the parameter:
-
->>> param = ucdp.Param(BType(), "param_p")
->>> for item in param:
+>>> const = ucdp.Const(BType(), "const_c")
+>>> for item in const:
 ...     print(repr(item))
-Param(BType(), 'param_p')
-Param(AType(), 'param_foo_p', level=1)
-Param(BitType(), 'param_foo_req_p', level=2)
-Param(UintType(16), 'param_foo_data_p', level=2, dims=(Slice('0:4'),))
-Param(BitType(), 'param_foo_ack_p', level=2)
-Param(BitType(), 'param_foo_error_p', level=2)
-Param(MType(), 'param_mode_p', level=1)
-Param(AType(), 'param_bar_p', level=1, dims=(Slice('0:2'),))
-Param(BitType(), 'param_bar_req_p', level=2, dims=(Slice('0:2'),))
-Param(UintType(16), 'param_bar_data_p', level=2, dims=(Slice('0:2'), Slice('0:4')))
-Param(BitType(), 'param_bar_ack_p', level=2, dims=(Slice('0:2'),))
-Param(BitType(), 'param_bar_error_p', level=2, dims=(Slice('0:2'),))
+Const(BType(), 'const_c')
+Const(AType(), 'const_foo_c', level=1)
+Const(BitType(), 'const_foo_req_c', level=2)
+Const(UintType(16), 'const_foo_data_c', level=2, dims=(Slice('0:4'),))
+Const(BitType(), 'const_foo_ack_c', level=2)
+Const(BitType(), 'const_foo_error_c', level=2)
+Const(MType(), 'const_mode_c', level=1)
+Const(AType(), 'const_bar_c', level=1, dims=(Slice('0:2'),))
+Const(BitType(), 'const_bar_req_c', level=2, dims=(Slice('0:2'),))
+Const(UintType(16), 'const_bar_data_c', level=2, dims=(Slice('0:2'), Slice('0:4')))
+Const(BitType(), 'const_bar_ack_c', level=2, dims=(Slice('0:2'),))
+Const(BitType(), 'const_bar_error_c', level=2, dims=(Slice('0:2'),))
 """
 
 from typing import Iterator, Tuple
@@ -76,9 +74,9 @@ from .ident import Ident
 
 
 @frozen(cmp=False, hash=True)
-class Param(Ident):
+class Const(Ident):
     """
-    Module Parameter.
+    Module Constant.
 
     Args:
         type_ (AType): Type.
@@ -88,40 +86,40 @@ class Param(Ident):
         doc (Doc): Documentation Container
         value: Value.
 
-    Parameter names should end with '_p', but must not.
+    Constant names should end with '_c', but must not.
 
     >>> import ucdp
-    >>> cnt = ucdp.Param(ucdp.UintType(6), "cnt_p")
+    >>> cnt = ucdp.Const(ucdp.UintType(6), "cnt_c")
     >>> cnt
-    Param(UintType(6), 'cnt_p')
+    Const(UintType(6), 'cnt_c')
     >>> cnt.type_
     UintType(6)
     >>> cnt.name
-    'cnt_p'
+    'cnt_c'
     >>> cnt.basename
     'cnt'
     >>> cnt.suffix
-    '_p'
+    '_c'
     >>> cnt.doc
     Doc()
     >>> cnt.value
 
-    If the parameter is casted via `int()` it returns `value` if set, other `type_.default`.
+    If the constant is casted via `int()` it returns `value` if set, other `type_.default`.
 
-    >>> int(ucdp.Param(ucdp.UintType(6, default=2), "cnt_p"))
+    >>> int(ucdp.Const(ucdp.UintType(6, default=2), "cnt_c"))
     2
-    >>> int(ucdp.Param(ucdp.UintType(6, default=2), "cnt_p", value=4))
+    >>> int(ucdp.Const(ucdp.UintType(6, default=2), "cnt_c", value=4))
     4
 
-    Parameter are Singleton:
+    Constants are Singleton:
 
-    >>> ucdp.Param(ucdp.UintType(6), "cnt_p") is ucdp.Param(ucdp.UintType(6), "cnt_p")
+    >>> ucdp.Const(ucdp.UintType(6), "cnt_c") is ucdp.Const(ucdp.UintType(6), "cnt_c")
     True
     """
 
-    _suffixes: Tuple[str, ...] = ("_p",)
-
     value = field(default=None, kw_only=True)
+
+    _suffixes: Tuple[str, ...] = ("_c",)
 
     @value.validator
     def _value_validator(self, attribute, value):
@@ -137,12 +135,12 @@ class Param(Ident):
 
     def iter(self, filter_=None, stop=None, maxlevel=None, value=None) -> Iterator:
         """Iterate over Parameter Hierarchy."""
-        # if value is None:
-        #     value = self.value
+        if value is None:
+            value = self.value
         return super().iter(filter_=filter_, stop=stop, maxlevel=maxlevel, value=value)
 
     def get(self, name, value=None) -> Iterator:
         """Get a specific member in the Parameter Hierarchy."""
-        # if value is None:
-        #     value = self.value
+        if value is None:
+            value = self.value
         return super().get(name, value=value)
