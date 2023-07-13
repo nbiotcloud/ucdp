@@ -114,6 +114,19 @@ class Doc(ReusedFrozen):
         Types may define `title`, `descr` or `comment`. They are taken as default, if no other value is given:
 
         Please note, that the default comment is title!
+
+        >>> import ucdp
+        >>> class MyType(ucdp.BitType):
+        ...     title = "My Bit Title"
+        ...     comment = "My Bit Comment"
+        >>> ucdp.Doc.from_type(MyType())
+        Doc(title='My Bit Title', comment='My Bit Comment')
+        >>> ucdp.Doc.from_type(MyType(), title="My Title", comment=ucdp.NOTHING)
+        Doc(title='My Title', comment='My Bit Comment')
+        >>> ucdp.Doc.from_type(MyType(), title="My Title", comment=None)
+        Doc(title='My Title', comment=None)
+        >>> ucdp.Doc.from_type(MyType(), comment="My Bit Comment")
+        Doc(title='My Bit Title', comment='My Bit Comment')
         """
         # Some kind of optimized default routine
         if title is NOTHING:
@@ -125,16 +138,3 @@ class Doc(ReusedFrozen):
         if descr is NOTHING:
             descr = type_.descr
         return Doc(title, descr, comment)
-
-    #     >>> import ucdp
-    #     >>> class MyType(ucdp.BitType):
-    #     ...     title = "My Bit Title"
-    #     ...     comment = "My Bit Comment"
-    #     >>> ucdp.Doc.from_type(MyType())
-    #     Doc(title='My Bit Title', comment='My Bit Comment')
-    #     >>> ucdp.Doc.from_type(MyType(), title="My Title", comment=ucdp.NOTHING)
-    #     Doc(title='My Title', comment='My Bit Comment')
-    #     >>> ucdp.Doc.from_type(MyType(), title="My Title", comment=None)
-    #     Doc(title='My Title', comment=None)
-    #     >>> ucdp.Doc.from_type(MyType(), comment="My Bit Comment")
-    #     Doc(title='My Bit Title', comment='My Bit Comment')

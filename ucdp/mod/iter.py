@@ -30,11 +30,17 @@ Module Iteration Strategies:
 * :any:`ModPreIter` - yield top module **before** the child-modules.
 * :any:`ModPostIter` - yield top module **after** the child-modules.
 """
+from typing import Any, Callable, Generator, Iterable, Optional, Tuple
 
 from uniquer import uniquetuple
 
 from ..attrs import field, frozen
-from ..util import split
+from ..mod.base import BaseMod
+from ..util import Items, split
+
+FilterFunc = Callable[[Any], bool]
+StopFunc = Callable[[Any], bool]
+MaxLevel = Optional[int]
 
 
 @frozen
@@ -106,11 +112,11 @@ class ModPreIter:
     ['f', 'b', 'a', 'd', 'c', 'e', 'g', 'i', 'h']
     """
 
-    mod = field()
-    filter_ = field(default=None, kw_only=True)
-    stop = field(default=None, kw_only=True)
-    maxlevel = field(default=None, kw_only=True)
-    unique = field(default=False, kw_only=True)
+    mod: BaseMod = field()
+    filter_: FilterFunc = field(default=None, kw_only=True)
+    stop: StopFunc = field(default=None, kw_only=True)
+    maxlevel: MaxLevel = field(default=None, kw_only=True)
+    unique: bool = field(default=False, kw_only=True)
 
     __iter = field(init=False, repr=False)
 
@@ -296,11 +302,11 @@ class ModPostIter:
     ['a', 'c', 'e', 'd', 'b', 'h', 'i', 'g', 'f']
     """
 
-    mod = field()
-    filter_ = field(default=None, kw_only=True)
-    stop = field(default=None, kw_only=True)
-    maxlevel = field(default=None, kw_only=True)
-    unique = field(default=False, kw_only=True)
+    mod: BaseMod = field()
+    filter_: FilterFunc = field(default=None, kw_only=True)
+    stop: StopFunc = field(default=None, kw_only=True)
+    maxlevel: MaxLevel = field(default=None, kw_only=True)
+    unique: bool = field(default=False, kw_only=True)
 
     __iter = field(init=False, repr=False)
 
@@ -408,7 +414,7 @@ class ModPostIter:
             yield mod
 
 
-def get_mod(topmod, namepats):
+def get_mod(topmod: BaseMod, namepats: Items) -> BaseMod:
     """
     Return the one and just the one hardware module matching `namepats`.
 
@@ -432,7 +438,7 @@ def get_mod(topmod, namepats):
     raise ValueError("\n  ".join(lines))
 
 
-def get_mods(topmod, namepats=None, unique=False):
+def get_mods(topmod: BaseMod, namepats: Items = None, unique: bool = False) -> Tuple[BaseMod, ...]:
     """
     Return all modules matching `namepats` from hierarchy of `topmod`.
 
@@ -468,7 +474,7 @@ def _unique_modnames(mods):
     return uniquetuple(sorted(_iter_modnames(mods)))
 
 
-def iter_uniquemods(mods):
+def iter_uniquemods(mods: Iterable[BaseMod]) -> Generator[BaseMod, None, None]:
     """Iterate over unique modules."""
     modnames = set()
     for mod in mods:

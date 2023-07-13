@@ -28,7 +28,7 @@ An enumeration is a normal base type with a specific mapping of values to a anot
 
 * :any:`EnumItem` - Enumeration item
 * :any:`AEnumType` - Standard Enumeration
-* :any:`ASharedEnumType` - A public enumeration which fills up through all instances.
+* :any:`AGlobalEnumType` - A public enumeration which fills up through all instances.
 * :any:`DynamicEnumType` - A public enumeration which fills up per instance.
 * :any:`EnaType` - Native single bit with `ena` and `dis` enumeration, active-high
 * :any:`DisType` - Native single bit with `ena` and `dis` enumeration, low-high
@@ -519,13 +519,13 @@ class AEnumType(BaseEnumType, ReusedFrozen):
 
 
 @frozen
-class ASharedEnumType(BaseEnumType, ReusedFrozen):
+class AGlobalEnumType(BaseEnumType, ReusedFrozen):
 
     """
     A singleton enumeration which can be filled outside `_build` and is **shared** between instances.
 
     >>> import ucdp
-    >>> class CtrlType(ucdp.ASharedEnumType):
+    >>> class CtrlType(ucdp.AGlobalEnumType):
     ...     keytype = ucdp.UintType(3)
     >>> ctrl = CtrlType()
     >>> ctrl.add(0, 'zero')

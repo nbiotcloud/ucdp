@@ -97,225 +97,17 @@ class BaseMod:
 
     """
     Hardware Module.
+
+    Args:
+        parent (BaseMod): Parent Module. `None` by default for top module.
+        name (str): Instance name. Required if parent is provided.
+
+    Keyword Args:
+        title (str): Title
+        descr (str): Description
+        comment (str): Comment
+        paramdict (dict): Parameter values for this instance.
     """
-
-    # Args:
-    #     parent (BaseMod): Parent Module. `None` by default for top module.
-    #     name (str): Instance name. Required if parent is provided.
-
-    # Keyword Args:
-    #     title (str): Title
-    #     descr (str): Description
-    #     comment (str): Comment
-    #     maninst (bool): Manual instantiation, track module as submodule, but module has to be instantiated manually
-    #                     within source code.
-    #     is_hull (bool): Just implement an empty shell with tied outputs.
-    #     paramdict (dict): Parameter values for this instance.
-    #     modname (str): Module name, derived from classname by default and ends with `_hull` in case of `is_hull=True`.
-    #                    Use default whenever possible!
-    #     libname (str): Library name, derived from path of python file.
-    #                    Use default whenever possible!
-    #     addrmap_name (str): Address map Name
-    #                         Use default whenever possible!
-    #     addrmap_hiername (str): Hierarchical address map name, derived from module hierarchy.
-    #                             Use default whenever possible!
-
-    # Define a module:
-
-    # >>> import ucdp
-    # >>> class SelType(ucdp.AEnumType):
-    # ...     keytype = ucdp.UintType(2, default=2)
-    # ...
-    # ...     def _build(self):
-    # ...         self._add(0, "my_a")
-    # ...         self._add(1, "my_b")
-    # ...         self._add(2, "my_c")
-    # >>> class AdderMod(ucdp.AMod):
-    # ...
-    # ...     copyright_start_year = 2020
-    # ...     copyright_end_year = 2022
-    # ...
-    # ...     def _build(self):
-    # ...         width_p = self.add_param(ucdp.IntegerType(default=16), 'width_p')
-    # ...         datatype = ucdp.UintType(width_p)
-    # ...         self.add_port(datatype, "a_i")
-    # ...         self.add_port(datatype, "b_i")
-    # ...         self.add_port(datatype, "y_o")
-    # >>> class AluMod(ucdp.AMod):
-    # ...
-    # ...     copyright_start_year = 2020
-    # ...     copyright_end_year = 2022
-    # ...
-    # ...     def _build(self):
-    # ...         width_p = self.add_param(ucdp.IntegerType(default=16), 'width_p')
-    # ...         datatype = ucdp.UintType(width_p)
-    # ...         self.add_localparam(datatype.new(default=(2**int(width_p)-1)), 'max_p')
-    # ...         self.add_port(ucdp.ClkRstAnType())
-    # ...         self.add_port(datatype, "a_i")
-    # ...         self.add_port(datatype, "b_i")
-    # ...         self.add_port(datatype, "c_i")
-    # ...         self.add_port(datatype, "y_o")
-    # ...         self.add_port(SelType(), "sel_i")
-    # ...         self.add_signal(ucdp.BitType(), "max_s")
-    # ...         self.add_signal(datatype, "my_s")
-    # ...         self.add_flipflop(datatype, "data_r", nxt="my_s")
-    # ...         self.add_signal(datatype, "mux_s")
-    # ...         mainmux = self.add_mux("main")
-    # ...         mainmux.set("sel_i", "my_a", "y_o", "a_i")
-    # ...         mainmux.set("sel_i", "my_b", "y_o", "b_i")
-    # ...         mainmux.set("sel_i", "my_c", "y_o", "c_i")
-    # ...         adder = AdderMod(self, "u_adder0")
-    # ...         adder.con("a_i", "a_i")
-    # ...         adder.con("b_i", "b_i")
-
-    # Instantiate a module:
-
-    # >>> class TopMod(ucdp.AMod):
-    # ...
-    # ...     copyright_start_year = 2020
-    # ...     copyright_end_year = 2022
-    # ...
-    # ...     def _build(self):
-    # ...         AluMod(self, 'u_alu')
-
-    # The top module
-
-    # >>> top = TopMod.build_top()
-    # >>> top
-    # TopMod('top')
-    # >>> alu = top.get_inst('u_alu')
-    # >>> alu
-    # AluMod('top/u_alu')
-    # >>> adder = top.get_inst('u_alu/u_adder0')
-    # >>> adder
-    # AdderMod('top/u_alu/u_adder0')
-
-    # Class attributes which **might** be set by child classes (see example above)
-
-    # * `copyright_start_year` - First year of edit.
-    # * `copyright_end_year` - Latest year of edit
-    # * `module_id` - 0 by default.
-    # * `no_codecov` - Disable code coverage
-    # * `hdl` - HDL implementation enable **OR** list of targets
-    # * `hdl_gen` - Code Generation Mode - FULL by default.
-    # * `hdl_incfilenames` - List of HDL include files to be listed at the top of the file.
-    # * `hdl_incdirs` - List of HDL include search paths.
-    # * `is_model` - module is just a model, not synthesizeable
-    # * `is_tb` - module is for testbench only, not synthesizeable
-    # * `data_suffix` - Suffix for data files
-    # * `has_liberty` - Module has liberty file
-    # * `has_lef` - Module has LEF file
-    # * `has_upf` - Module has UPF file
-
-    # >>> for name in ('copyright_start_year', 'copyright_end_year', 'module_id', 'no_codecov',
-    # ...              'hdl', 'hdl_gen', 'hdl_incfilenames', 'hdl_incdirs',
-    # ...              'is_model', 'is_tb', 'data_suffix', 'has_liberty'):
-    # ...     print(f'{name:<20s}: {getattr(top, name)}')
-    # copyright_start_year: 2020
-    # copyright_end_year  : 2022
-    # module_id           : 0
-    # no_codecov          : False
-    # hdl                 : True
-    # hdl_gen             : Gen.FULL
-    # hdl_incfilenames    : ['ucdp.svh']
-    # hdl_incdirs         : ['${SIDEHWHOME}/inc']
-    # is_model            : False
-    # is_tb               : False
-    # data_suffix         : None
-    # has_liberty         : False
-
-    # Every hardware module has these attributes:
-
-    # * **modbasenames** - :any:`tuple` module basenames derived from python class hierarchy.
-    #   simple modules just contain one name:
-
-    #     >>> top.modbasenames
-    #     ('top',)
-    #     >>> alu.modbasenames
-    #     ('alu',)
-
-    # * **path** - :any:`tuple` with hierarchial path members from top down to module itself
-
-    #     >>> top.path
-    #     ('top',)
-    #     >>> alu.path
-    #     ('top', 'u_alu')
-
-    # * **pathstr** - :any:`str` with hierarchial path
-
-    #     >>> top.pathstr
-    #     'top'
-    #     >>> alu.pathstr
-    #     'top/u_alu'
-
-    # * **drivers** - :any:`dict` with signal and port drivers
-
-    #     >>> top.drivers
-    #     {}
-    #     >>> alu.drivers
-    #     {}
-
-    # * **namespace** - :any:`Idents` with all parameters, local parameters, ports and signals
-
-    #     >>> for item in top.namespace:
-    #     ...     item
-    #     >>> for item in alu.namespace:
-    #     ...     item
-    #     Param(IntegerType(default=16), 'width_p')
-    #     LocalParam(UintType(Param(IntegerType(default=16), 'width_p'), default=65535), 'max_p')
-    #     Port(ClkRstAnType(), doc=Doc(title='Clock and Reset'))
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='a_i')
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='b_i')
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='c_i')
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='y_o')
-    #     Port(SelType(), name='sel_i')
-    #     Signal(BitType(), 'max_s')
-    #     Signal(UintType(Param(IntegerType(default=16), 'width_p')), 'my_s')
-    #     Signal(UintType(Param(IntegerType(default=16), 'width_p')), 'data_r')
-    #     Signal(UintType(Param(IntegerType(default=16), 'width_p')), 'mux_s')
-    #     LocalParam(DescriptiveStructType(SelType()), 'sel')
-
-    # * **ports** - :any:`Idents` with all ports
-
-    #     >>> for item in top.ports:
-    #     ...     item
-    #     >>> for item in alu.ports:
-    #     ...     item
-    #     Port(ClkRstAnType(), doc=Doc(title='Clock and Reset'))
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='a_i')
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='b_i')
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='c_i')
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='y_o')
-    #     Port(SelType(), name='sel_i')
-
-    # * **portssignals** - :any:`Idents` with all **signals and ports**
-
-    #     >>> for item in top.portssignals:
-    #     ...     item
-    #     >>> for item in alu.portssignals:
-    #     ...     item
-    #     Port(ClkRstAnType(), doc=Doc(title='Clock and Reset'))
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='a_i')
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='b_i')
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='c_i')
-    #     Port(UintType(Param(IntegerType(default=16), 'width_p')), name='y_o')
-    #     Port(SelType(), name='sel_i')
-    #     Signal(BitType(), 'max_s')
-    #     Signal(UintType(Param(IntegerType(default=16), 'width_p')), 'my_s')
-    #     Signal(UintType(Param(IntegerType(default=16), 'width_p')), 'data_r')
-    #     Signal(UintType(Param(IntegerType(default=16), 'width_p')), 'mux_s')
-
-    # * **insts** - :any:`Namespace` with all submodule instances
-
-    #     >>> for item in top.insts:
-    #     ...     item
-    #     AluMod('top/u_alu')
-    #     >>> for item in alu.insts:
-    #     ...     item
-    #     AdderMod('top/u_alu/u_adder0')
-
-    # TODO: Optional Rule Attributes
-    # """
 
     # pylint: disable=too-many-arguments,too-many-public-methods
 
@@ -380,6 +172,11 @@ class BaseMod:
         return get_modname(self.__class__)
 
     @property
+    def qualname(self):
+        """Qualified Name (Library Name + Module Name)."""
+        return f"{self.libname}.{self.modname}"
+
+    @property
     def hiername(self):
         """Hierarchical name"""
         basename = self.name.removeprefix("u_") if self.has_hiername else ""
@@ -393,7 +190,7 @@ class BaseMod:
 
     @modbasenames.default
     def _modbasenames_default(self) -> Tuple[str, ...]:
-        return tuple(get_modname(cls) for cls in get_mro(self.__class__))
+        return tuple(get_modname(cls) for cls in _get_mro(self.__class__))
 
     @libname.default
     def _libname_default(self):
@@ -925,7 +722,7 @@ def _rstanfilter(ident):
     return isinstance(ident.type_, RstAnType) and isinstance(ident, (Port, Signal))
 
 
-def get_mro(modcls):
+def _get_mro(modcls):
     """Get Module Resolve Order for `modcls`."""
     classes = []
     for cls in getmro(modcls):  # pragma: no cover

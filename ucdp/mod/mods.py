@@ -475,7 +475,7 @@ class ATbMod(BaseMod):  # type: ignore
 
     Create testbench for `dut`.
 
-    The :any:`IcTopSpec` and :any:`load` function allow to wrap any design module with a testbench.
+    The :any:`TopSpec` and :any:`load` function allow to wrap any design module with a testbench.
 
     Example:
 
@@ -513,7 +513,7 @@ class ATbMod(BaseMod):  # type: ignore
     >>> tb.dut
     OtherMod('other')
 
-    :any:`IcTopSpec` and :any:`load` handle that gracefully and allow pairing of testbench and dut on
+    :any:`TopSpec` and :any:`load` handle that gracefully and allow pairing of testbench and dut on
     command line and in configuration files.
     """
 

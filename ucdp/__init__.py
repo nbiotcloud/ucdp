@@ -24,8 +24,7 @@
 """
 Unified Chip Design Platform.
 """
-
-from .assigns import Assigns
+from .assigns import Assign, Assigns
 from .attrs import NOTHING, Factory, field, frozen
 from .const import Const
 from .doc import Doc
@@ -62,18 +61,25 @@ from .expr import (
     unsigned,
 )
 from .ident import Idents
+from .loader import load
 from .mod.base import BaseMod, get_modbasecls, get_modname, mod
 from .mod.config import AConfig, AUniqueConfig, AVersionConfig, config
 from .mod.mods import AConfigurableMod, AGenericTbMod, AImportedMod, AMod, ATailoredMod, ATbMod, _ATopMod
+from .modspec import ModSpec
+from .mux import Mux
 from .namespace import DuplicateError, LockError, Namespace
 from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix
 from .param import Param
+from .router import Router, RouterError
 from .signal import ASignal, Port, Signal
+from .test import Test
+from .top import Top
+from .topspec import TopSpec
 from .types.array import ArrayType
 from .types.base import ACompositeType, AScalarType, AType, AVecType
 from .types.clkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType
 from .types.descriptivestruct import DescriptiveStructType
-from .types.enum import AEnumType, ASharedEnumType, BaseEnumType, BusyType, DisType, DynamicEnumType, EnaType, EnumItem
+from .types.enum import AEnumType, AGlobalEnumType, BaseEnumType, BusyType, DisType, DynamicEnumType, EnaType, EnumItem
 from .types.iter import typeiter
 from .types.orientation import BIDIR, BWD, FWD, IN, INOUT, OUT, AOrientation, Direction, Orientation
 from .types.scalar import BitType, BoolType, IntegerType, RailType, SintType, StringType, UintType

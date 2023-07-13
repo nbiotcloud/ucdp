@@ -27,6 +27,9 @@ Utilities
 """
 import functools
 import re
+from typing import Any, Iterable, Tuple, Union
+
+from matchor import matchs
 
 
 class AutoNum:
@@ -58,7 +61,10 @@ def _translate(seps):
     return re.compile(rf"[{seps}]\s*")
 
 
-def split(items, seps=";"):
+Items = Union[Iterable[Any], str, None]
+
+
+def split(items, seps=";") -> Tuple[str, ...]:
     """
     Split items into tuple.
 
@@ -96,54 +102,55 @@ def split(items, seps=";"):
 def namefilter(names):
     """
     Create filter for names.
-    """
-    # >>> import ucdp
-    # >>> from collections import namedtuple
-    # >>> def myfunc(items, filter_=None):
-    # ...     for item in items:
-    # ...         if not filter_ or filter_(item):
-    # ...             print(item)
-    # >>> Item = namedtuple('Item', "name value")
 
-    # >>> items = (Item('abc', 0), Item('cde', 1), Item('efg', 7))
-    # >>> myfunc(items)
-    # Item(name='abc', value=0)
-    # Item(name='cde', value=1)
-    # Item(name='efg', value=7)
-    # >>> myfunc(items, filter_=ucdp.namefilter(''))
-    # Item(name='abc', value=0)
-    # Item(name='cde', value=1)
-    # Item(name='efg', value=7)
-    # >>> myfunc(items, filter_=ucdp.namefilter('cde; tuv'))
-    # Item(name='cde', value=1)
-    # >>> myfunc(items, filter_=ucdp.namefilter('*c*'))
-    # Item(name='abc', value=0)
-    # Item(name='cde', value=1)
-    # >>> myfunc(items, filter_=ucdp.namefilter('!*c*'))
-    # Item(name='efg', value=7)
-    # >>> myfunc(items, filter_=ucdp.namefilter('*c*; !*e'))
-    # Item(name='abc', value=0)
+    >>> import ucdp
+    >>> from collections import namedtuple
+    >>> def myfunc(items, filter_=None):
+    ...     for item in items:
+    ...         if not filter_ or filter_(item):
+    ...             print(item)
+    >>> Item = namedtuple('Item', "name value")
+
+    >>> items = (Item('abc', 0), Item('cde', 1), Item('efg', 7))
+    >>> myfunc(items)
+    Item(name='abc', value=0)
+    Item(name='cde', value=1)
+    Item(name='efg', value=7)
+    >>> myfunc(items, filter_=ucdp.namefilter(''))
+    Item(name='abc', value=0)
+    Item(name='cde', value=1)
+    Item(name='efg', value=7)
+    >>> myfunc(items, filter_=ucdp.namefilter('cde; tuv'))
+    Item(name='cde', value=1)
+    >>> myfunc(items, filter_=ucdp.namefilter('*c*'))
+    Item(name='abc', value=0)
+    Item(name='cde', value=1)
+    >>> myfunc(items, filter_=ucdp.namefilter('!*c*'))
+    Item(name='efg', value=7)
+    >>> myfunc(items, filter_=ucdp.namefilter('*c*; !*e'))
+    Item(name='abc', value=0)
+    """
 
     names = split(names)
 
-    # if names:
-    #     inclist = [x for x in names if not x.startswith("!")]
-    #     exclist = [x[1:] for x in names if x.startswith("!")]
+    if names:
+        inclist = [name for name in names if not name.startswith("!")]
+        exclist = [name[1:] for name in names if name.startswith("!")]
 
-    #     def filter_(item):
-    #         if not isinstance(item, str):
-    #             item = item.name
-    #         if inclist:
-    #             if exclist:
-    #                 return matchs(item, inclist) and not matchs(item, exclist)
-    #             return matchs(item, inclist)
-    #         return not matchs(item, exclist)
+        def filter_(item):
+            if not isinstance(item, str):
+                item = item.name
+            if inclist:
+                if exclist:
+                    return matchs(item, inclist) and not matchs(item, exclist)
+                return matchs(item, inclist)
+            return not matchs(item, exclist)
 
-    # else:
+    else:
 
-    def filter_(item):
-        # pylint: disable=unused-argument
-        return True
+        def filter_(item):
+            # pylint: disable=unused-argument
+            return True
 
     return filter_
 
