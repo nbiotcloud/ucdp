@@ -228,21 +228,48 @@ INOUT = Direction(0)
 
 
 def convert_aorientation(value) -> AOrientation:
-    """Convert Direction."""
+    """
+    Convert Direction.
+
+    >>> convert_aorientation(FWD)
+    FWD
+    >>> convert_aorientation("test")
+    Traceback (most recent call last):
+      ...
+    ValueError: Invalid orientation 'test'. Valid are FWD, BWD, BIDIR, IN, OUT and INOUT
+    """
     if value in (FWD, BWD, BIDIR, IN, OUT, INOUT):
         return value
-    raise ValueError(f"Invalid orientation {value!r}. Valid are hw.FWD, hw.BWD, hw.BIDIR, hw.IN, hw.OUT and hw.INOUT")
+    raise ValueError(f"Invalid orientation {value!r}. Valid are FWD, BWD, BIDIR, IN, OUT and INOUT")
 
 
 def convert_orientation(value) -> Orientation:
-    """Convert Direction."""
+    """
+    Convert Direction.
+
+    >>> convert_orientation(FWD)
+    FWD
+    >>> convert_orientation("test")
+    Traceback (most recent call last):
+      ...
+    ValueError: Invalid orientation 'test'. Valid are FWD, BWD and BIDIR
+    """
     if value in (FWD, BWD, BIDIR):
         return value
-    raise ValueError(f"Invalid orientation {value!r}. Valid are hw.FWD, hw.BWD and hw.BIDIR")
+    raise ValueError(f"Invalid orientation {value!r}. Valid are FWD, BWD and BIDIR")
 
 
 def convert_direction(value) -> Direction:
-    """Convert Direction."""
+    """
+    Convert Direction.
+
+    >>> convert_direction(IN)
+    IN
+    >>> convert_direction("test")
+    Traceback (most recent call last):
+      ...
+    ValueError: Invalid direction 'test'. Valid are IN, OUT and INOUT
+    """
     if value in (IN, OUT, INOUT):
         return value
-    raise ValueError(f"Invalid direction {value!r}. Valid are hw.IN, hw.OUT and hw.INOUT")
+    raise ValueError(f"Invalid direction {value!r}. Valid are IN, OUT and INOUT")

@@ -32,6 +32,8 @@ from icdutil.slices import DOWN, Slice
 
 from ..attrs import ReusedFrozen, evolve, field, frozen
 
+tailoredtype = frozen
+
 
 @frozen
 class AType:

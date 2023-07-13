@@ -32,6 +32,7 @@ Module Iteration Strategies:
 """
 from typing import Any, Callable, Generator, Iterable, Optional, Tuple
 
+from matchor import matchs
 from uniquer import uniquetuple
 
 from ..attrs import field, frozen
@@ -456,9 +457,8 @@ def get_mods(topmod: BaseMod, namepats: Items = None, unique: bool = False) -> T
 
         def filter_(mod):
             # pylint: disable=unused-argument
-            # modnames = unique((mod.modname,) + mod.modbasenames)
-            assert False
-            # return any(solib.match.matchs(modname, namepats) for modname in modnames)
+            modnames = uniquetuple((mod.modname,) + mod.modbasenames)
+            return any(matchs(modname, namepats) for modname in modnames)
 
         return tuple(ModPostIter(topmod, filter_=filter_, unique=unique))
     return tuple(ModPostIter(topmod, unique=unique))

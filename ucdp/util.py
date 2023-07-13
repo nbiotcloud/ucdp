@@ -129,6 +129,10 @@ def namefilter(names):
     Item(name='efg', value=7)
     >>> myfunc(items, filter_=ucdp.namefilter('*c*; !*e'))
     Item(name='abc', value=0)
+
+    >>> items = ['abc', 'cde', 'efg']
+    >>> myfunc(items, filter_=ucdp.namefilter('*c*; !*e'))
+    abc
     """
 
     names = split(names)
@@ -155,14 +159,29 @@ def namefilter(names):
     return filter_
 
 
-def opt(converter):
+def opt(checker):
     """
     Optional.
+
+    Call ``checker`` only on values different from ``None``.
+
+    Assume this checker:
+
+    >>> def checker(value):
+    ...     if "a" in value:
+    ...         raise ValueError()
+    ...     return value
+
+    >>> checker(None)
+    Traceback (most recent call last):
+      ...
+    TypeError: argument of type 'NoneType' is not iterable
+    >>> opt(checker)(None)
     """
 
     def check(value):
         if value is not None:
-            return converter(value)
+            return checker(value)
         return None
 
     return check

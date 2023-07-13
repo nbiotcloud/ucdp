@@ -76,10 +76,20 @@ from .test import Test
 from .top import Top
 from .topspec import TopSpec
 from .types.array import ArrayType
-from .types.base import ACompositeType, AScalarType, AType, AVecType
+from .types.base import ACompositeType, AScalarType, AType, AVecType, tailoredtype
 from .types.clkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType
 from .types.descriptivestruct import DescriptiveStructType
-from .types.enum import AEnumType, AGlobalEnumType, BaseEnumType, BusyType, DisType, DynamicEnumType, EnaType, EnumItem
+from .types.enum import (
+    AUTO,
+    AEnumType,
+    AGlobalEnumType,
+    BaseEnumType,
+    BusyType,
+    DisType,
+    DynamicEnumType,
+    EnaType,
+    EnumItem,
+)
 from .types.iter import typeiter
 from .types.orientation import BIDIR, BWD, FWD, IN, INOUT, OUT, AOrientation, Direction, Orientation
 from .types.scalar import BitType, BoolType, IntegerType, RailType, SintType, StringType, UintType
