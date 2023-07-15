@@ -26,7 +26,7 @@ from pytest import fixture, raises
 
 import ucdp
 
-# pylint: disable=unsupported-binary-operation
+
 
 
 @fixture
@@ -130,6 +130,7 @@ def test_const_str():
     _test_op(one < other, 0, ucdp.BoolType())
     _test_op(one << other, 320, ucdp.UintType(16, default=10))
     _test_op(one >> other, 0, ucdp.UintType(16, default=10))
+    # pylint: disable=unsupported-binary-operation
     _test_op(one & other, 0, ucdp.UintType(16, default=10))
     _test_op(one | other, 15, ucdp.UintType(16, default=10))
     _test_op(one ^ other, 15, ucdp.UintType(16, default=10))
@@ -183,6 +184,7 @@ def test_str_const():
     _test_op(one < other, 0, ucdp.BoolType())
     _test_op(one << other, 320, ucdp.UintType(16, default=10))
     _test_op(one >> other, 0, ucdp.UintType(16, default=10))
+    # pylint: disable=unsupported-binary-operation
     _test_op(one & other, 0, ucdp.UintType(16, default=10))
     _test_op(one | other, 15, ucdp.UintType(16, default=10))
     _test_op(one ^ other, 15, ucdp.UintType(16, default=10))
