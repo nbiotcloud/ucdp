@@ -272,6 +272,10 @@ class Ident(Expr):
         """Alias to `doc.comment`."""
         return self.doc.comment
 
+    def new(self, **kwargs) -> "Ident":
+        """Return A Copy With Updated Attributes."""
+        return evolve(self, **kwargs)
+
     def __int__(self):
         return int(self.type_.default)
 

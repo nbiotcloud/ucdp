@@ -956,6 +956,11 @@ def get_idents(expr: Expr):
             heap.append(item.cond)
             heap.append(item.one)
             heap.append(item.other)
+        elif isinstance(item, (MinimumFunc, MaximumFunc)):
+            heap.append(item.one)
+            heap.append(item.other)
+        elif isinstance(item, (SignedFunc, UnsignedFunc, Log2Func)):
+            heap.append(item.expr)
         else:
             if item.name not in idents:
                 idents[item.name] = item

@@ -76,10 +76,11 @@ def _test_sop(expr, intvalue, type_):
     assert expr.type_ is type_
 
 
-def _test_expr(expr, intvalue, type_, cls):
+def _test_expr(expr, intvalue, type_, cls, idents):
     assert isinstance(expr, cls)
     assert int(expr) == intvalue
     assert expr.type_ is type_
+    assert ucdp.get_idents(expr) == idents
 
 
 def test_const_const():
@@ -307,7 +308,7 @@ def test_ternary():
     one = ucdp.Signal(ucdp.UintType(16, default=10), "one_s")
     other = ucdp.Signal(ucdp.UintType(16, default=20), "other_s")
     expr = ucdp.ternary(cond, one, other)
-    _test_expr(expr, 20, ucdp.UintType(16, default=10), ucdp.TernaryExpr)
+    _test_expr(expr, 20, ucdp.UintType(16, default=10), ucdp.TernaryExpr, (cond, one, other))
     assert int(expr) == 20
 
 
@@ -317,7 +318,7 @@ def test_ternary_true():
     one = ucdp.Signal(ucdp.UintType(16, default=10), "one_s")
     other = ucdp.Signal(ucdp.UintType(16, default=20), "other_s")
     expr = ucdp.ternary(cond, one, other)
-    _test_expr(expr, 10, ucdp.UintType(16, default=10), ucdp.TernaryExpr)
+    _test_expr(expr, 10, ucdp.UintType(16, default=10), ucdp.TernaryExpr, (cond, one, other))
     assert int(expr) == 10
 
 
@@ -329,19 +330,19 @@ def test_ternary_expr():
     assert int(cond) == 0
     assert int(one) == 20
     assert int(other) == 40
-    _test_expr(ucdp.ternary(cond, one, other), 40, ucdp.UintType(16, default=10), ucdp.TernaryExpr)
+    _test_expr(ucdp.ternary(cond, one, other), 40, ucdp.UintType(16, default=10), ucdp.TernaryExpr, (cond, one, other))
 
 
 def test_slice_param():
     """Test Slicing of Param."""
     param_p = ucdp.Param(ucdp.UintType(8, default=5), "param_p")
-    _test_expr(param_p[2:1], 2, ucdp.UintType(2, default=2), ucdp.SliceOp)
+    _test_expr(param_p[2:1], 2, ucdp.UintType(2, default=2), ucdp.SliceOp, (param_p,))
 
 
 def test_slice_concat():
     """Test Slicing of Concat."""
     expr = ucdp.concat(("10'd2", 10))
-    _test_expr(expr[2:1], 1, ucdp.UintType(2, default=1), ucdp.SliceOp)
+    _test_expr(expr[2:1], 1, ucdp.UintType(2, default=1), ucdp.SliceOp, tuple())
 
 
 def test_min():
@@ -349,9 +350,9 @@ def test_min():
     param0_p = ucdp.Param(ucdp.UintType(8, default=5), "param0_p")
     param1_p = ucdp.Param(ucdp.UintType(8, default=8), "param1_p")
     expr = ucdp.minimum(param0_p, param1_p)
-    _test_expr(expr, 5, ucdp.UintType(8, default=5), ucdp.MinimumFunc)
+    _test_expr(expr, 5, ucdp.UintType(8, default=5), ucdp.MinimumFunc, (param0_p, param1_p))
     expr = ucdp.minimum(param1_p, param0_p)
-    _test_expr(expr, 5, ucdp.UintType(8, default=8), ucdp.MinimumFunc)
+    _test_expr(expr, 5, ucdp.UintType(8, default=8), ucdp.MinimumFunc, (param1_p, param0_p))
 
 
 def test_max():
@@ -359,16 +360,16 @@ def test_max():
     param0_p = ucdp.Param(ucdp.UintType(8, default=5), "param0_p")
     param1_p = ucdp.Param(ucdp.UintType(8, default=8), "param1_p")
     expr = ucdp.maximum(param0_p, param1_p)
-    _test_expr(expr, 8, ucdp.UintType(8, default=5), ucdp.MaximumFunc)
+    _test_expr(expr, 8, ucdp.UintType(8, default=5), ucdp.MaximumFunc, (param0_p, param1_p))
     expr = ucdp.maximum(param1_p, param0_p)
-    _test_expr(expr, 8, ucdp.UintType(8, default=8), ucdp.MaximumFunc)
+    _test_expr(expr, 8, ucdp.UintType(8, default=8), ucdp.MaximumFunc, (param1_p, param0_p))
 
 
 def test_log2():
     """Log to base 2."""
     param_p = ucdp.Param(ucdp.UintType(8, default=5), "param_p")
     expr = ucdp.log2(param_p)
-    _test_expr(expr, 2, ucdp.UintType(8, default=5), ucdp.Log2Func)
+    _test_expr(expr, 2, ucdp.UintType(8, default=5), ucdp.Log2Func, (param_p,))
 
 
 def test_comment():
@@ -376,3 +377,17 @@ def test_comment():
     comment = ucdp.CommentExpr("mycomment")
     assert str(comment) == "CommentExpr('mycomment')"
     assert comment.type_ is None
+
+
+def test_signed():
+    """Signed."""
+    param_p = ucdp.Param(ucdp.UintType(8, default=5), "param_p")
+    expr = ucdp.signed(param_p)
+    _test_expr(expr, 5, ucdp.SintType(8), ucdp.SignedFunc, (param_p,))
+
+
+def test_unsigned():
+    """Unsigned."""
+    param_p = ucdp.Param(ucdp.UintType(8, default=5), "param_p")
+    expr = ucdp.unsigned(param_p)
+    _test_expr(expr, 5, ucdp.UintType(8), ucdp.UnsignedFunc, (param_p,))

@@ -74,7 +74,7 @@ def mod(maybe_cls=None, mutable=None):  # type: ignore
             object.__setattr__(self, name, value)
 
         def wrap(cls):
-            wrapped = define(cls, repr=False, frozen=True, init=False)
+            wrapped = define(cls, repr=False, frozen=True, slots=False, init=False)
 
             wrapped.__setattr__ = _setattr
 
