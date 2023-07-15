@@ -21,40 +21,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""Test Utilities."""
-import contextlib
-import logging
-import os
-import shutil
-import subprocess
-from pathlib import Path
-
-LEARN = True
-
-TESTDATA = Path(__file__).parent / "testdata"
+"""Test Name Utilities."""
+import ucdp
 
 
-@contextlib.contextmanager
-def chdir(path):
-    """Change Working Directory to ``path``."""
-    curdir = os.getcwd()
-    try:
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(curdir)
+def test_split_prefix():
+    """Split Prefix."""
+    assert ucdp.split_prefix("a_name", prefixes=("a_", "b_")) == ("a_", "name")
+    assert ucdp.split_prefix("b_name", prefixes=("a_", "b_")) == ("b_", "name")
+    assert ucdp.split_prefix("c_name", prefixes=("a_", "b_")) == ("", "c_name")
 
 
-def assert_gen(genpath, refpath):
-    """Compare Generated Files Versus Reference."""
-    genpath.mkdir(parents=True, exist_ok=True)
-    refpath.mkdir(parents=True, exist_ok=True)
-    if LEARN:  # pragma: no cover
-        logging.getLogger(__name__).warning("LEARNING %s", refpath)
-        shutil.rmtree(refpath, ignore_errors=True)
-        shutil.copytree(genpath, refpath)
-    cmd = ["diff", "-r", "--exclude", "__pycache__", str(refpath), str(genpath)]
-    try:
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError as error:  # pragma: no cover
-        assert False, error.stdout.decode("utf-8")
+def test_split_suffix():
+    """Split Suffix."""
+    assert ucdp.split_suffix("name_a", suffixes=("_a", "_b")) == ("name", "_a")
+    assert ucdp.split_suffix("name_b", suffixes=("_a", "_b")) == ("name", "_b")
+    assert ucdp.split_suffix("name_c", suffixes=("_a", "_b")) == ("name_c", "")

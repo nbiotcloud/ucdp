@@ -32,7 +32,7 @@ Overview
   starting at one holy top module.
 * The class :any:`Top` **holds** this top module instance and all additional information
   required to handle it.
-* The class :any:`TopSpec` specifies the top module of a design.
+* The class :any:`TopRef` specifies the top module of a design.
 * Top modules can be specified by string via the following pattern:
 
     ``[[tbfilepath:]tbname#][topfilepath:]topname[-subname][@[configfilepath:]configname]``
@@ -55,7 +55,7 @@ from typing import Optional
 from .attrs import field, frozen
 from .mod.base import BaseMod
 from .mod.iter import ModPostIter, ModPreIter, get_mod, get_mods
-from .topspec import TopSpec
+from .topref import TopRef
 from .util import Items
 
 
@@ -69,13 +69,8 @@ class Top:
         mod (BaseMod): Top Module
     """
 
-    spec: TopSpec = field(repr=False)
+    spec: TopRef = field(repr=False)
     mod: BaseMod = field()
-
-    @property
-    def qualname(self):
-        """Qualified Name."""
-        return self.mod.qualname
 
     def iter(self, filter_=None, stop=None, maxlevel: Optional[int] = None, unique: bool = False, post: bool = False):
         """

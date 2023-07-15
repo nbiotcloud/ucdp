@@ -67,7 +67,7 @@ from ..attrs import field, frozen
 from ..nameutil import didyoumean, join_names
 from ..test import Test
 from ..types.enum import BaseEnumType
-from .base import BaseMod, get_modname
+from .base import BaseMod, get_libname, get_modname
 from .config import AVersionConfig, BaseConfig
 from .iter import ModPostIter, ModPreIter
 
@@ -137,7 +137,6 @@ class AImportedMod(_ATopMod):
     >>> import ucdp
     >>> @ucdp.mod
     ... class ExtIpMod(ucdp.AImportedMod):
-    ...     hdl_filepaths = ["-f extip.f // for reference"]
     ...
     ...     def _build(self):
     ...         # Optional, but not needed
@@ -234,20 +233,21 @@ class ATailoredMod(BaseMod):
     {'a': Slave('a'), 'b': Slave('b')}
     """
 
-    modname: str = field(kw_only=True)
+    modname: str = field(kw_only=False)
+    libname: str = field(init=False)
 
     @modname.default
     def _modname_default(self):
-        try:
-            return self.__class__.modname
-        except AttributeError:
-            pass
         modname = self.name.removeprefix("u_")
         if self.parent:
-            modname = join_names(self.parent.modname, modname, concat="_")
-        else:
-            _LOGGER.warning("Please either set 'modname' on %r or instantiate", self)
+            return join_names(self.parent.modname, modname, concat="_")
         return modname
+
+    @libname.default
+    def _libname_default(self):
+        if self.parent:
+            return self.parent.libname
+        return get_libname(self.__class__)
 
     def _build(self):
         """Build."""
@@ -297,19 +297,24 @@ class CoreMod(BaseMod):
     """
 
     _mroidx = -1
-    modname: str = field(init=False, repr=False)
-    libname: str = field(init=False, repr=False)
-
+    modname: str = field(kw_only=False)
+    libname: str = field(kw_only=False)
     modbasenames: tuple = field(init=False)
 
     @modname.default
     def _modname_default(self):
-        try:
-            modname = self.__class__.modname
-        except AttributeError:
-            assert self.parent, f"Please either set 'modname' on {self} or instantiate"
-            modname = join_names(self.parent.modname, self.name.removeprefix("u_"), concat="_")
-        return modname
+        if self.parent:
+            return join_names(self.parent.modname, self.name.removeprefix("u_"), concat="_")
+        modname = get_modname(self.__class__, nodefault=True)
+        if modname:
+            return modname
+        raise ValueError("Please either set 'modname' or 'parent'")
+
+    @libname.default
+    def _libname_default(self):
+        if self.parent:
+            return self.parent.libname
+        return get_libname(self.__class__)
 
     @modbasenames.default
     def _modbasenames_default(self) -> Tuple[str, ...]:
@@ -324,15 +329,6 @@ class CoreMod(BaseMod):
             stem = self.name.removeprefix("u_")
             return tuple(join_names(modbasename, stem, concat="_") for modbasename in self.parent.modbasenames)
         return (self.name.removeprefix("u_"),)
-
-    @libname.default
-    def _libname_default(self):
-        if self.parent:
-            return self.parent.libname
-        try:
-            return self.__class__.libname
-        except AttributeError:
-            assert False, f"Please either set libname on {self} or instantiate"
 
     def __attrs_post_init__(self):
         if self.parent:
@@ -475,7 +471,7 @@ class ATbMod(BaseMod):  # type: ignore
 
     Create testbench for `dut`.
 
-    The :any:`TopSpec` and :any:`load` function allow to wrap any design module with a testbench.
+    The :any:`TopRef` and :any:`load` function allow to wrap any design module with a testbench.
 
     Example:
 
@@ -513,21 +509,16 @@ class ATbMod(BaseMod):  # type: ignore
     >>> tb.dut
     OtherMod('other')
 
-    :any:`TopSpec` and :any:`load` handle that gracefully and allow pairing of testbench and dut on
+    :any:`TopRef` and :any:`load` handle that gracefully and allow pairing of testbench and dut on
     command line and in configuration files.
     """
 
     # pylint: disable=too-many-instance-attributes
 
-    hdl_incfilenames = ["ucdp.svh"]
-    hdl_incdirs = ["${SIDEHWHOME}/inc"]
-
     dut: "BaseMod" = field()
     parent: "BaseMod" = field(default=None, init=False)
     name: str = field()
     modname: str = field()
-    addrmap_name: str = field(default="", init=False)
-    addrmap_hiername: str = field(default="", init=False)
     path: tuple = field(init=False)
     is_tb = True
 
@@ -651,7 +642,7 @@ def _builder(mod):
             advice = didyoumean(name, inst.params.keys(), known=True)
             raise ValueError(f"{inst} has no param {name!r}{advice}")
         for mux in inst.muxes:
-            for sel in mux.iter_sels():
+            for sel in mux.sels:
                 if isinstance(sel.type_, BaseEnumType):
                     inst.add_type_consts(sel.type_, exist_ok=True)
         inst.lock()

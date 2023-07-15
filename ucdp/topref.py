@@ -22,21 +22,21 @@
 # SOFTWARE.
 #
 
-"""Top Module Specification."""
+"""Top Module Reference."""
 
 import re
 from typing import Optional
 
 from .attrs import field, frozen
-from .modspec import ModSpec
+from .modref import ModRef
 from .util import opt
 
 
 @frozen
-class TopSpec:
+class TopRef:
 
     """
-    Top Module Specification.
+    Top Module Reference.
 
     Args:
         top (str): Name of the top module.
@@ -46,9 +46,9 @@ class TopSpec:
         tb (str): Name of the testbench.
     """
 
-    top: ModSpec = field(converter=ModSpec.convert)
-    sub: Optional[ModSpec] = field(converter=opt(ModSpec.convert), default=None)
-    tb: Optional[ModSpec] = field(converter=opt(ModSpec.convert), default=None)
+    top: ModRef = field(converter=ModRef.convert)
+    sub: Optional[ModRef] = field(converter=opt(ModRef.convert), default=None)
+    tb: Optional[ModRef] = field(converter=opt(ModRef.convert), default=None)
 
     _re = re.compile(
         # [tb]#
@@ -61,54 +61,54 @@ class TopSpec:
     _pat = "[tb#]top[-sub]"
 
     @staticmethod
-    def convert(value) -> "TopSpec":
+    def convert(value) -> "TopRef":
         """
-        Create :any:`TopSpec` from string `value`.
+        Create :any:`TopRef` from string `value`.
 
         Just a top module:
 
-        >>> topspec = TopSpec.convert("chip")
-        >>> topspec
-        TopSpec(ModSpec('chip'))
-        >>> str(topspec)
+        >>> topref = TopRef.convert("chip")
+        >>> topref
+        TopRef(ModRef('chip'))
+        >>> str(topref)
         'chip'
 
         Top Module with Testbench:
 
-        >>> topspec = TopSpec.convert("tb#chip")
-        >>> topspec
-        TopSpec(ModSpec('chip'), tb=ModSpec('tb'))
-        >>> str(topspec)
+        >>> topref = TopRef.convert("tb#chip")
+        >>> topref
+        TopRef(ModRef('chip'), tb=ModRef('tb'))
+        >>> str(topref)
         'tb#chip'
 
         # Top Module with Testbench and Sub:
 
-        >>> topspec = TopSpec.convert("tb#chip-sub")
-        >>> topspec
-        TopSpec(ModSpec('chip'), sub=ModSpec('sub'), tb=ModSpec('tb'))
-        >>> str(topspec)
+        >>> topref = TopRef.convert("tb#chip-sub")
+        >>> topref
+        TopRef(ModRef('chip'), sub=ModRef('sub'), tb=ModRef('tb'))
+        >>> str(topref)
         'tb#chip-sub'
 
-        A :any:`ModSpec` is kept:
+        A :any:`ModRef` is kept:
 
-        >>> TopSpec.convert(TopSpec(ModSpec('chip')))
-        TopSpec(ModSpec('chip'))
+        >>> TopRef.convert(TopRef(ModRef('chip')))
+        TopRef(ModRef('chip'))
 
         Invalid Pattern:
 
-        >>> TopSpec.convert('mo#d#e')
+        >>> TopRef.convert('mo#d#e')
         Traceback (most recent call last):
         ..
         ValueError: 'mo#d#e' does not match pattern '[tb#]top[-sub]'
         """
-        if isinstance(value, TopSpec):
+        if isinstance(value, TopRef):
             return value
 
-        mat = TopSpec._re.fullmatch(value)
+        mat = TopRef._re.fullmatch(value)
         if mat:
-            return TopSpec(**mat.groupdict())
+            return TopRef(**mat.groupdict())
 
-        raise ValueError(f"{value!r} does not match pattern {TopSpec._pat!r}")
+        raise ValueError(f"{value!r} does not match pattern {TopRef._pat!r}")
 
     def __str__(self):
         result = str(self.top)

@@ -531,16 +531,16 @@ class RailType(AScalarType, ReusedFrozen):
         """
         return isinstance(other, RailType)
 
-    def cast(self, other):
-        """
-        How to cast an input of type `self` from a value of type `other`.
+    # def cast(self, other):
+    #     """
+    #     How to cast an input of type `self` from a value of type `other`.
 
-        `self = cast(other)`
-        """
-        # pylint: disable=arguments-differ
-        if isinstance(other, (BitType, UintType)) and other.width == 1:
-            yield "", ""
-        return NotImplemented
+    #     `self = cast(other)`
+    #     """
+    #     # pylint: disable=arguments-differ
+    #     if isinstance(other, (BitType, UintType)) and other.width == 1:
+    #         yield "", ""
+    #     return NotImplemented
 
     def __getitem__(self, slice_):
         slice_ = Slice.cast(slice_, direction=DOWN)
@@ -672,16 +672,16 @@ class UintType(AVecType):
         """
         return isinstance(other, (UintType, BitType)) and self.width == other.width
 
-    def cast(self, other):
-        """
-        How to cast an input of type `self` from a value of type `other`.
+    # def cast(self, other):
+    #     """
+    #     How to cast an input of type `self` from a value of type `other`.
 
-        `self = cast(other)`
-        """
-        # pylint: disable=arguments-differ
-        if isinstance(other, (SintType, IntegerType)) and self.width == other.width:
-            yield "", ""
-        return NotImplemented
+    #     `self = cast(other)`
+    #     """
+    #     # pylint: disable=arguments-differ
+    #     if isinstance(other, (SintType, IntegerType)) and self.width == other.width:
+    #         yield "", ""
+    #     return NotImplemented
 
     def __getitem__(self, slice_):
         slice_ = Slice.cast(slice_, direction=DOWN)
@@ -826,16 +826,16 @@ class SintType(AVecType):
         """
         return isinstance(other, (SintType, IntegerType)) and self.width == other.width
 
-    def cast(self, other):
-        """
-        How to cast an input of type `self` from a value of type `other`.
+    # def cast(self, other):
+    #     """
+    #     How to cast an input of type `self` from a value of type `other`.
 
-        `self = cast(other)`
-        """
-        # pylint: disable=arguments-differ
-        if isinstance(other, (UintType, BitType)) and self.width == other.width:
-            yield "", ""
-        return NotImplemented
+    #     `self = cast(other)`
+    #     """
+    #     # pylint: disable=arguments-differ
+    #     if isinstance(other, (UintType, BitType)) and self.width == other.width:
+    #         yield "", ""
+    #     return NotImplemented
 
     def __getitem__(self, slice_):
         slice_ = Slice.cast(slice_, direction=DOWN)
@@ -860,23 +860,22 @@ class StringType(AType, ReusedFrozen):
     >>> example = ucdp.StringType()
     >>> example
     StringType()
+    >>> example.bits
     """
 
     def is_connectable(self, other):
         """
         Check For Valid Connection To `other`.
 
-        Connections are only allowed to other :any:`BoolType`.
+        Connections are only allowed to other :any:`StringType`.
         The default and isolation value have no influence.
 
-        >>> BoolType().is_connectable(BoolType())
-        True
-        >>> BoolType(default=True).is_connectable(BoolType(default=0))
+        >>> StringType().is_connectable(StringType())
         True
 
-        A connection to an :any:`UintType()` is forbidden (requires a cast).
+        A connection to other types is forbidden.
 
-        >>> BoolType().is_connectable(UintType(1))
+        >>> StringType().is_connectable(UintType(1))
         False
         """
         return isinstance(other, StringType)

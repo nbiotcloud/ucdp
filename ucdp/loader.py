@@ -37,42 +37,42 @@ from caseconverter import pascalcase
 from .mod.base import BaseMod
 from .mod.iter import get_mod
 from .mod.mods import ATbMod
-from .modspec import ModSpec
+from .modref import ModRef
 from .top import Top
-from .topspec import TopSpec
+from .topref import TopRef
 
 _LOGGER = logging.getLogger("ucdp")
 
 
-def load(topspec: Union[TopSpec, str]) -> Top:
+def load(topref: Union[TopRef, str]) -> Top:
     """
-    Load Module from ``topspec`` and return :any:`Top`.
+    Load Module from ``topref`` and return :any:`Top`.
 
     Args:
-        topspec (TopSpec):
+        topref (TopRef):
 
-    Load ``topspec.top``.
+    Load ``topref.top``.
 
-    In case of a given ``topspec.sub`` search for a submodule named ``sub`` within the
+    In case of a given ``topref.sub`` search for a submodule named ``sub`` within the
     module hierarchy of ``topmod`` using :any:`Top.get_mod()`.
 
     In case of a given ``tb`` search for a testbench ``tb`` and pair it.
     """
-    topspec = TopSpec.convert(topspec)
-    topmod = _load_topmod(topspec)
-    return Top(topspec, topmod)
+    topref = TopRef.convert(topref)
+    topmod = _load_topmod(topref)
+    return Top(topref, topmod)
 
 
 @lru_cache
-def _load_topmod(topspec: TopSpec) -> BaseMod:
-    _LOGGER.info("Loading %s", topspec)
+def _load_topmod(topref: TopRef) -> BaseMod:
+    _LOGGER.info("Loading %s", topref)
 
-    modcls = _load_modcls(topspec.top)
+    modcls = _load_modcls(topref.top)
     mod = _build_top(modcls)
-    if topspec.sub:
-        mod = get_mod(mod, topspec.sub)
-    if topspec.tb:
-        tbcls = _load_modcls(topspec.tb)
+    if topref.sub:
+        mod = get_mod(mod, str(topref.sub))
+    if topref.tb:
+        tbcls = _load_modcls(topref.tb)
         if not issubclass(tbcls, ATbMod):
             raise ValueError(f"{tbcls} is not a testbench module")
         return tbcls.build_tb(mod)
@@ -85,9 +85,9 @@ def _build_top(modcls, **kwargs):
 
 
 @lru_cache
-def _load_modcls(modspec: ModSpec):
+def _load_modcls(modref: ModRef):
     """Load Module Class."""
-    pymodname = f"{modspec.pkg}.{modspec.mod}" if modspec.pkg else modspec.mod
+    pymodname = f"{modref.pkg}.{modref.mod}" if modref.pkg else modref.mod
     pymod = import_module(pymodname)
-    clsname = modspec.cls if modspec.cls else f"{pascalcase(modspec.mod)}Mod"
+    clsname = modref.cls if modref.cls else f"{pascalcase(modref.mod)}Mod"
     return getattr(pymod, clsname)

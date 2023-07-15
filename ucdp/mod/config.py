@@ -29,6 +29,7 @@ from pathlib import Path
 from humannum import Hex, hex_
 
 from ..attrs import asdict, define, evolve, field
+from ..nameutil import validate_identifier
 from ..util import opt
 
 
@@ -136,8 +137,7 @@ class AConfig(BaseConfig):
     @name.validator  # type: ignore
     def _name_validator(self, attribute, value):
         # pylint: disable=unused-argument
-        if not value:
-            raise ValueError("name must not be empty")
+        validate_identifier(value)
 
 
 @config

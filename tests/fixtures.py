@@ -21,40 +21,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""Test Utilities."""
-import contextlib
-import logging
-import os
-import shutil
-import subprocess
+
+"""Test Fixtures."""
+
+import sys
 from pathlib import Path
 
-LEARN = True
+from pytest import fixture
 
-TESTDATA = Path(__file__).parent / "testdata"
-
-
-@contextlib.contextmanager
-def chdir(path):
-    """Change Working Directory to ``path``."""
-    curdir = os.getcwd()
-    try:
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(curdir)
+EXAMPLES = Path(__file__).parent.parent
 
 
-def assert_gen(genpath, refpath):
-    """Compare Generated Files Versus Reference."""
-    genpath.mkdir(parents=True, exist_ok=True)
-    refpath.mkdir(parents=True, exist_ok=True)
-    if LEARN:  # pragma: no cover
-        logging.getLogger(__name__).warning("LEARNING %s", refpath)
-        shutil.rmtree(refpath, ignore_errors=True)
-        shutil.copytree(genpath, refpath)
-    cmd = ["diff", "-r", "--exclude", "__pycache__", str(refpath), str(genpath)]
-    try:
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError as error:  # pragma: no cover
-        assert False, error.stdout.decode("utf-8")
+@fixture
+def example_simple():
+    """Add access to ``examples/simple``"""
+    orig = sys.path
+    sys.path = sys.path + [str(EXAMPLES / "simple")]
+    yield
+    sys.path = orig

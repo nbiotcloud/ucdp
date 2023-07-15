@@ -90,20 +90,27 @@ class DescriptiveStructType(AStructType):
 
     Struct:
 
+    >>> class SubStructType(ucdp.AStructType):
+    ...     def _build(self):
+    ...         self._add('a', ucdp.UintType(2))
+    ...         self._add('b', ucdp.UintType(3), ucdp.BWD)
+    ...         self._add('c', ucdp.UintType(4), ucdp.BIDIR)
     >>> class MyStructType(ucdp.AStructType):
     ...     def _build(self):
     ...         self._add('ctrl', ucdp.UintType(4), title='Control')
     ...         self._add('data', ucdp.ArrayType(ucdp.SintType(16, default=5), 8), ucdp.FWD, descr='Data to be handled')
     ...         self._add('resp', ucdp.BitType(), ucdp.BWD, comment='Sink response')
     ...         self._add('mode', MyEnumType(), ucdp.BWD, comment='Enum')
+    ...         self._add('bi', ucdp.UintType(5), ucdp.BIDIR)
+    ...         self._add('sub', SubStructType(), ucdp.BWD)
     >>> for item in DescriptiveStructType(MyStructType()).values():
     ...     repr(item)
-    "StructItem('bits_p', IntegerType(default=135), doc=Doc(title='Size in Bits'))"
-    "StructItem('fwdbits_p', IntegerType(default=132), doc=Doc(title='Forward Size in Bits'))"
-    "StructItem('bwdbits_p', IntegerType(default=3), doc=Doc(title='Backward Size in Bits'))"
-    "StructItem('bibits_p', IntegerType(), doc=Doc(title='Bi-Directional Size in Bits'))"
+    "StructItem('bits_p', IntegerType(default=149), doc=Doc(title='Size in Bits'))"
+    "StructItem('fwdbits_p', IntegerType(default=135), doc=Doc(title='Forward Size in Bits'))"
+    "StructItem('bwdbits_p', IntegerType(default=5), doc=Doc(title='Backward Size in Bits'))"
+    "StructItem('bibits_p', IntegerType(default=9), doc=Doc(title='Bi-Directional Size in Bits'))"
 
-    This also works for parameterized types:
+    All this works for parameterized types too:
 
     >>> width_p = ucdp.Param(ucdp.IntegerType(default=16), 'width_p')
     >>> type_ = ucdp.UintType(width_p, default=4)

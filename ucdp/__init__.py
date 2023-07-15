@@ -24,6 +24,8 @@
 """
 Unified Chip Design Platform.
 """
+from icdutil.slices import Slice
+
 from .assigns import Assign, Assigns
 from .attrs import NOTHING, Factory, field, frozen
 from .const import Const
@@ -31,12 +33,12 @@ from .doc import Doc
 from .expr import (
     TODO,
     BoolOp,
-    Clog2Func,
     CommentExpr,
     ConcatExpr,
     ConstExpr,
     Expr,
     InvalidExpr,
+    Log2Func,
     MaximumFunc,
     MinimumFunc,
     Op,
@@ -48,11 +50,11 @@ from .expr import (
     UnsignedFunc,
     cast,
     cast_booltype,
-    clog2,
     concat,
     const,
     create,
     get_idents,
+    log2,
     maximum,
     minimum,
     parse,
@@ -60,12 +62,15 @@ from .expr import (
     ternary,
     unsigned,
 )
-from .ident import Idents
+from .flipflop import FlipFlop
+from .ident import Ident, Idents
 from .loader import load
 from .mod.base import BaseMod, get_modbasecls, get_modname, mod
 from .mod.config import AConfig, AUniqueConfig, AVersionConfig, config
-from .mod.mods import AConfigurableMod, AGenericTbMod, AImportedMod, AMod, ATailoredMod, ATbMod, _ATopMod
-from .modspec import ModSpec
+from .mod.iter import ModPostIter, ModPreIter
+from .mod.mods import AConfigurableMod, AGenericTbMod, AImportedMod, AMod, ATailoredMod, ATbMod, CoreMod, _ATopMod
+from .mod.util import get_relpath, get_topmod, walk
+from .modref import ModRef
 from .mux import Mux
 from .namespace import DuplicateError, LockError, Namespace
 from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix
@@ -74,7 +79,7 @@ from .router import Router, RouterError
 from .signal import ASignal, Port, Signal
 from .test import Test
 from .top import Top
-from .topspec import TopSpec
+from .topref import TopRef
 from .types.array import ArrayType
 from .types.base import ACompositeType, AScalarType, AType, AVecType, tailoredtype
 from .types.clkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType

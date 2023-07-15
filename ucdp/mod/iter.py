@@ -151,7 +151,7 @@ class ModPreIter:
                 else:
                     iter_ = ModPreIter._iter([mod])
         if self.unique:
-            iter_ = iter_uniquemods(iter_)
+            iter_ = uniquemods(iter_)
         return iter_
 
     def __iter__(self):
@@ -341,7 +341,7 @@ class ModPostIter:
                 else:
                     iter_ = ModPostIter._iter([mod])
         if self.unique:
-            iter_ = iter_uniquemods(iter_)
+            iter_ = uniquemods(iter_)
         return iter_
 
     def __iter__(self):
@@ -474,7 +474,7 @@ def _unique_modnames(mods):
     return uniquetuple(sorted(_iter_modnames(mods)))
 
 
-def iter_uniquemods(mods: Iterable[BaseMod]) -> Generator[BaseMod, None, None]:
+def uniquemods(mods: Iterable[BaseMod]) -> Generator[BaseMod, None, None]:
     """Iterate over unique modules."""
     modnames = set()
     for mod in mods:

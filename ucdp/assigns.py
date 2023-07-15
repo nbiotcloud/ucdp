@@ -58,22 +58,23 @@ but can also be used within own code.
 >>> assigns.set(ports['vec_a_o'], signals['vec_a_s'])
 >>> for assign in assigns:
 ...     assign.target.name, assign.expr
-('vec_a_o', 'vec_a_s')
-('vec_b_o', 'vec_b_i')
+('vec_a_o', Signal(UintType(8), 'vec_a_s'))
+('vec_b_o', Port(UintType(14), name='vec_b_i'))
 
 Multiple assignments are forbidden:
 
 >>> assigns.set(ports['vec_a_o'], signals['vec_a_s'])
 Traceback (most recent call last):
   ...
-ValueError: 'vec_a_o' already assigned to 'vec_a_s'
+ValueError: 'Port(UintType(8), name='vec_a_o')' already assigned to 'Signal(UintType(8), 'vec_a_s')'
 
 Defaults are managed separately:
 
 >>> for assign in assigns.defaults():
 ...     assign.target.name, assign.expr
-('vec_a_o', 'vec_a_i')
-('vec_b_o', 'vec_b_i')
+('vec_a_o', Port(UintType(8), name='vec_a_i'))
+('vec_b_o', Port(UintType(14), name='vec_b_i'))
+
 
 With `inst=True` the all target signals are mapped:
 
@@ -86,9 +87,9 @@ With `inst=True` the all target signals are mapped:
 ('', None)
 ('clk_i', None)
 ('rst_an_i', None)
-('vec_a_i', 'vec_a_s')
+('vec_a_i', Signal(UintType(8), 'vec_a_s'))
 ('vec_a_o', None)
-('vec_b_i', 'vec_b_i')
+('vec_b_i', Port(UintType(14), name='vec_b_i'))
 ('vec_b_o', None)
 ('vec_c_o', None)
 """
@@ -98,7 +99,7 @@ from icdutil.slices import Slice
 
 from .attrs import define, field, frozen
 from .const import Const
-from .expr import CommentExpr, ConstExpr, Expr, SliceOp, parse
+from .expr import CommentExpr, ConcatExpr, ConstExpr, Expr, SliceOp, parse
 from .ident import Ident, Idents, get_subname
 from .namespace import LockError
 from .nameutil import join_names, split_suffix
@@ -237,7 +238,7 @@ class Assigns:
         """
         targets = []
         for assign in self.iter():
-            if assign.expr == str(source):
+            if assign.expr == source:
                 targets.append(assign)
         return targets
 
@@ -322,7 +323,7 @@ class Assigns:
                     if drivers is not None and subtarget.name in drivers:
                         raise ValueError(f"'{subtarget}' already driven by '{drivers[subtarget.name]}'")
                     # assign
-                    assigns[subtarget.name] = str(subsource)  # just store string, not entire object (save memory)
+                    assigns[subtarget.name] = subsource
 
     @staticmethod
     def _cast(target, source, targetcasting):
@@ -359,8 +360,8 @@ class Assigns:
                 default = defaults.get(target.name, None)
                 if default is None:
                     default = ConstExpr(target.type_)
-                else:
-                    default = parse(default, self.sources)
+                # else:
+                #     default = parse(default, self.sources)
                 expr = _concat(expr, default)
             elif expr is None:
                 expr = defaults.get(target.name, None)
@@ -399,11 +400,10 @@ def _concat(items, default):
     values = []
     for slice_, item in sorted(items.items(), key=lambda pair: pair[0].right, reverse=True):
         if item is None:
-            item = str(default[slice_.slice])
+            item = default[slice_.slice]
         values.append(item)
     if len(values) > 1:
-        joined = ",\n ".join(values)
-        return f"{{{joined}}}"
+        return ConcatExpr(tuple(values))
     return f"{values[0]}"
 
 
@@ -428,7 +428,7 @@ def _setslice(assigns, drivers, target, source, overwrite, filter_):
         sslice = _searchpadding(targetconcat, targetslice, overwrite)
         targetconcat.pop(sslice)
         _addpadding(targetconcat, targetslice.right - 1, sslice.right)
-        targetconcat[targetslice] = str(source)
+        targetconcat[targetslice] = source
         _addpadding(targetconcat, sslice.left, targetslice.left + 1)
 
 

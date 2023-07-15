@@ -72,13 +72,9 @@ def parse(
     >>> expr = ucdp.parse('uint_s[2]', namespace)
     >>> expr
     SliceOp(Signal(UintType(16, default=15), 'uint_s'), Slice('2'))
-    >>> str(expr)
-    'uint_s[2]'
     >>> expr = ucdp.parse('uint_s * sint_s[2:1]', namespace)
     >>> expr
     Op(Signal(UintType(16, default=15), 'uint_s'), '*', SliceOp(Signal(SintType(16, ...), 'sint_s'), Slice('2:1')))
-    >>> str(expr)
-    'uint_s * sint_s[2:1]'
     >>> int(expr)
     0
 
@@ -165,8 +161,6 @@ def ternary(cond, one, other, namespace=None):
     >>> expr = ternary(cond, one, other)
     >>> expr
     TernaryExpr(Signal(BitType(), 'if_s'), Signal(UintType(16, default=10), 'one_s'), ... default=20), 'other_s'))
-    >>> str(expr)
-    'if_s ? one_s : other_s'
     >>> int(expr)
     20
     >>> expr.type_
@@ -180,18 +174,18 @@ def ternary(cond, one, other, namespace=None):
     return expr
 
 
-def clog2(expr, namespace=None):
+def log2(expr, namespace=None):
     """
     Ceiling Logarithm to base of 2.
 
-    >>> log = clog2("8'h8")
+    >>> log = log2("8'h8")
     >>> log
-    Clog2Func(ConstExpr(UintType(8, default=8)))
+    Log2Func(ConstExpr(UintType(8, default=8)))
     >>> int(log)
     3
     """
     expr = parse(expr, namespace=namespace)
-    return Clog2Func(expr)
+    return Log2Func(expr)
 
 
 def signed(expr, namespace=None):
@@ -284,7 +278,7 @@ class InvalidExpr(ValueError):
     """Invalid Expression."""
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class Expr(ReusedFrozen):
     """Base Class for all Expressions."""
 
@@ -440,7 +434,7 @@ class Expr(ReusedFrozen):
         return SliceOp(self, slice_)
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class Op(Expr):
     """Dual Operator Expression."""
 
@@ -448,15 +442,6 @@ class Op(Expr):
     oper: Callable = field(repr=False)
     sign = field()
     right = field()
-
-    def __str__(self):
-        left = self.left
-        if isinstance(left, Op):
-            left = f"({left})"
-        right = self.right
-        if isinstance(right, Op):
-            right = f"({right})"
-        return f"{left} {self.sign} {right}"
 
     def __int__(self):
         # pylint: disable=not-callable
@@ -470,7 +455,7 @@ class Op(Expr):
         return self.right.type_
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class BoolOp(Op):
     """Boolean Dual Operator Expression."""
 
@@ -482,7 +467,7 @@ class BoolOp(Op):
         return BoolType()
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class SOp(Expr):
     """Single Operator Expression."""
 
@@ -491,11 +476,7 @@ class SOp(Expr):
     one = field()
     postsign = field(default="")
 
-    def __str__(self):
-        one = self.one
-        if isinstance(one, (Op, SOp, TernaryExpr)):
-            one = f"({one})"
-        return f"{self.sign}{one}{self.postsign}"
+    # pylint: disable=too-few-public-methods
 
     def __int__(self):
         # pylint: disable=not-callable
@@ -507,18 +488,12 @@ class SOp(Expr):
         return self.one.type_
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class SliceOp(Expr):
     """Slice Expression."""
 
     one = field()
     slice_ = field()
-
-    def __str__(self):
-        one = self.one
-        if isinstance(one, (Op, SOp, TernaryExpr)):
-            one = f"({one})"
-        return f"{one}[{self.slice_}]"
 
     def __int__(self):
         return int(self.one.type_[self.slice_].default)
@@ -529,7 +504,7 @@ class SliceOp(Expr):
         return self.one.type_[self.slice_]
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class ConstExpr(Expr):
     """
     Constant.
@@ -632,7 +607,7 @@ class ConstExpr(Expr):
         return repr(ConstExpr._parse(**mat.groupdict()))
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class ConcatExpr(Expr):
 
     """
@@ -694,7 +669,7 @@ class ConcatExpr(Expr):
         return ConcatExpr(tuple(parse(item, namespace=namespace) for item in value))
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class TernaryExpr(Expr):
 
     """
@@ -707,8 +682,6 @@ class TernaryExpr(Expr):
     >>> expr = TernaryExpr(cond, one, other)
     >>> expr
     TernaryExpr(Signal(BitType(), 'if_s'), Signal(UintType(16, default=10), 'one_s'), ... default=20), 'other_s'))
-    >>> str(expr)
-    'if_s ? one_s : other_s'
     >>> int(expr)
     20
     >>> expr.type_
@@ -718,18 +691,6 @@ class TernaryExpr(Expr):
     cond: Expr = field()
     one: Expr = field()
     other: Expr = field()
-
-    def __str__(self):
-        cond = self.cond
-        if isinstance(cond, (Op, SOp)):
-            cond = f"({cond})"
-        one = self.one
-        if isinstance(one, (Op, SOp)):
-            one = f"({one})"
-        other = self.other
-        if isinstance(other, (Op, SOp)):
-            other = f"({other})"
-        return f"{cond} ? {one} : {other}"
 
     def __int__(self):
         if bool(int(self.cond)):
@@ -742,18 +703,14 @@ class TernaryExpr(Expr):
         return self.one.type_
 
 
-@frozen(hash=True)
-class Clog2Func(Expr):
+@frozen(cmp=False, hash=True)
+class Log2Func(Expr):
 
     """
     Ceiling Logarithm to base of 2.
     """
 
     expr: Expr = field()
-
-    def __str__(self):
-        expr = self.expr
-        return f"$clog2({expr})"
 
     def __int__(self):
         return int(math.log(int(self.expr), 2))
@@ -764,7 +721,7 @@ class Clog2Func(Expr):
         return self.expr.type_
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class SignedFunc(Expr):
 
     """
@@ -782,7 +739,7 @@ class SignedFunc(Expr):
         return SintType(self.expr.type_.width)  # TODO: default conversion
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class UnsignedFunc(Expr):
 
     """
@@ -800,7 +757,7 @@ class UnsignedFunc(Expr):
         return UintType(self.expr.type_.width)  # TODO: default conversion
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class MinimumFunc(Expr):
 
     """
@@ -823,7 +780,7 @@ class MinimumFunc(Expr):
         return self.one.type_
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class MaximumFunc(Expr):
 
     """
@@ -846,7 +803,7 @@ class MaximumFunc(Expr):
         return self.one.type_
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class Range(Expr):
 
     """
@@ -883,17 +840,16 @@ class Range(Expr):
         self.type_.check(values[-1], what="End Value")
 
 
-@frozen(hash=True)
+@frozen(cmp=False, hash=True)
 class CommentExpr(Expr):
 
     """
     Comment.
     """
 
-    comment: str = field()
+    # pylint: disable=too-few-public-methods
 
-    def __str__(self):
-        return f"/* {self.comment} */"
+    comment: str = field()
 
     @property
     def type_(self):
@@ -912,7 +868,7 @@ EXPRGBLS = {
     "ConstExpr": ConstExpr,
     "ConcatExpr": ConcatExpr,
     "TernaryExpr": TernaryExpr,
-    "Clog2Func": Clog2Func,
+    "Log2Func": Log2Func,
     "MinimumFunc": MinimumFunc,
     "MaximumFunc": MaximumFunc,
     # Helper
@@ -921,7 +877,7 @@ EXPRGBLS = {
     "ternary": ternary,
     "signed": signed,
     "unsigned": unsigned,
-    "clog2": clog2,
+    "log2": log2,
     "minimum": minimum,
     "maximum": maximum,
     # Types

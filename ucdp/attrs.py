@@ -75,7 +75,7 @@ def define(maybe_cls=None, frozen=True, repr=True, cmp=None, **kwargs):
     """Recommended attrs Decorator."""
 
     def wrap(cls):
-        cls = attrs.define(cls, frozen=frozen, repr=False, auto_attribs=False, **kwargs)
+        cls = attrs.define(cls, frozen=frozen, repr=False, auto_attribs=False, auto_detect=False, eq=cmp, **kwargs)
         if repr:
             cls.__repr__ = _repr
         return cls

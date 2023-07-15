@@ -32,8 +32,8 @@ from humanfriendly.text import concatenate
 
 _RE_SPLIT_PREFIX = re.compile(r"(?i)(?P<prefix>([a-z]|inst)_)(?P<basename>([a-z][a-z0-9\._]*)?)\Z")
 _RE_SPLIT_SUFFIX = re.compile(r"(?i)(?P<basename>([a-z][a-z0-9\._]*)?)(?P<suffix>_([a-z]|io))\Z")
-_RE_NAME = re.compile(r"([a-zA-Z0-9][a-zA-Z_0-9\-]*)?")
-_RE_IDENTIFIER = re.compile(r"([a-zA-Z][a-zA-Z_0-9]*)?")
+_RE_NAME = re.compile(r"[a-zA-Z0-9][a-zA-Z_0-9\-]*")
+_RE_IDENTIFIER = re.compile(r"[a-zA-Z][a-zA-Z_0-9]*")
 
 
 def validate_name(value: Any):
@@ -107,7 +107,6 @@ def split_prefix(name: str, prefixes=None) -> Tuple[str, str]:
                 return prefix, basename
         else:
             return mat.group("prefix", "basename")  # type: ignore
-        return mat.group("prefix", "basename")  # type: ignore
     return "", name
 
 
@@ -169,8 +168,8 @@ def didyoumean(name, names, known=False, multiline=False) -> str:
     """
     Propose matching names.
 
-    >>> didyoumean('abb', ('abba', 'ac/dc', 'beatles'))
-    " Did you mean 'abba'?"
+    >>> didyoumean('abb', tuple())
+    ''
     >>> didyoumean('abb', ('abba', 'ac/dc', 'beatles'), known=True)
     " Known are 'abba', 'ac/dc' and 'beatles'. Did you mean 'abba'?"
     >>> print(didyoumean('zz-top', ('abba', 'ac/dc', 'beatles'), known=True, multiline=True))

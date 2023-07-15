@@ -275,9 +275,6 @@ class Ident(Expr):
     def __int__(self):
         return int(self.type_.default)
 
-    def __str__(self):
-        return f"{self.name}"
-
     def __iter__(self):
         return self.iter()
 

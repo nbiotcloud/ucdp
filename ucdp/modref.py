@@ -31,7 +31,7 @@ from .attrs import field, frozen
 
 
 @frozen
-class ModSpec:
+class ModRef:
 
     """
     Module Specification.
@@ -59,55 +59,55 @@ class ModSpec:
     _pat = "lib.mod[:cls]"
 
     @staticmethod
-    def convert(value: Union["ModSpec", str]) -> "ModSpec":
+    def convert(value: Union["ModRef", str]) -> "ModRef":
         """
         Convert.
 
         Just a module:
 
-        >>> spec = ModSpec.convert('mod')
+        >>> spec = ModRef.convert('mod')
         >>> spec
-        ModSpec('mod')
+        ModRef('mod')
         >>> str(spec)
         'mod'
 
         Module from a package:
 
-        >>> spec = ModSpec.convert('lib.mod')
+        >>> spec = ModRef.convert('lib.mod')
         >>> spec
-        ModSpec('mod', pkg='lib')
+        ModRef('mod', pkg='lib')
         >>> str(spec)
         'lib.mod'
 
         Module from a package and explicit class:
 
-        >>> spec = ModSpec.convert('lib.mod:cls')
+        >>> spec = ModRef.convert('lib.mod:cls')
         >>> spec
-        ModSpec('mod', pkg='lib', cls='cls')
+        ModRef('mod', pkg='lib', cls='cls')
         >>> str(spec)
         'lib.mod:cls'
 
-        A :any:`ModSpec` is kept:
+        A :any:`ModRef` is kept:
 
-        >>> ModSpec.convert(ModSpec('mod'))
-        ModSpec('mod')
+        >>> ModRef.convert(ModRef('mod'))
+        ModRef('mod')
 
         Invalid Pattern:
 
-        >>> ModSpec.convert('mod:c-ls')
+        >>> ModRef.convert('mod:c-ls')
         Traceback (most recent call last):
         ..
         ValueError: 'mod:c-ls' does not match pattern 'lib.mod[:cls]'
         """
 
-        if isinstance(value, ModSpec):
+        if isinstance(value, ModRef):
             return value
 
-        mat = ModSpec._re.fullmatch(value)
+        mat = ModRef._re.fullmatch(value)
         if mat:
-            return ModSpec(**mat.groupdict())
+            return ModRef(**mat.groupdict())
 
-        raise ValueError(f"{value!r} does not match pattern {ModSpec._pat!r}")
+        raise ValueError(f"{value!r} does not match pattern {ModRef._pat!r}")
 
     def __str__(self):
         pkg = f"{self.pkg}." if self.pkg else ""

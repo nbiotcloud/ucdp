@@ -21,40 +21,56 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""Test Utilities."""
-import contextlib
-import logging
-import os
-import shutil
-import subprocess
-from pathlib import Path
-
-LEARN = True
-
-TESTDATA = Path(__file__).parent / "testdata"
+"""Test Module Utilities."""
+import ucdp
 
 
-@contextlib.contextmanager
-def chdir(path):
-    """Change Working Directory to ``path``."""
-    curdir = os.getcwd()
-    try:
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(curdir)
+class LeafMod(ucdp.AMod):
+    """Leaf Module."""
+
+    libname = "some"
+
+    def _build(self):
+        pass
 
 
-def assert_gen(genpath, refpath):
-    """Compare Generated Files Versus Reference."""
-    genpath.mkdir(parents=True, exist_ok=True)
-    refpath.mkdir(parents=True, exist_ok=True)
-    if LEARN:  # pragma: no cover
-        logging.getLogger(__name__).warning("LEARNING %s", refpath)
-        shutil.rmtree(refpath, ignore_errors=True)
-        shutil.copytree(genpath, refpath)
-    cmd = ["diff", "-r", "--exclude", "__pycache__", str(refpath), str(genpath)]
-    try:
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError as error:  # pragma: no cover
-        assert False, error.stdout.decode("utf-8")
+class Tailored0Mod(ucdp.ATailoredMod):
+    """Tailored0Mod."""
+
+    def _build(self):
+        LeafMod(self, "u_leaf")
+
+
+class Tailored1Mod(ucdp.ATailoredMod):
+    """Tailored1Mod."""
+
+    libname = "foo"
+    copyright_start_year = 2016
+    copyright_end_year = 2018
+
+    def _build(self):
+        Tailored0Mod(self, "u_tail0", is_hull=True)
+        ucdp.CoreMod(self, "u_core0")
+        LeafMod(self, "u_leaf")
+
+    def _builddep(self):
+        Tailored0Mod(self, "u_tail0dep")
+        ucdp.CoreMod(self, "u_core1", is_hull=True)
+
+
+class TopMod(ucdp.AMod):
+    """Top Module."""
+
+    libname = "mylib"
+
+    def _build(self):
+        Tailored0Mod(self, "u_tail0")
+        ucdp.CoreMod(self, "u_core0")
+        LeafMod(self, "u_leaf")
+
+
+def test_gettopmod():
+    """Test get_topmod."""
+    topmod = TopMod()
+    for mod in ucdp.ModPreIter(topmod):
+        assert ucdp.get_topmod(mod) is topmod

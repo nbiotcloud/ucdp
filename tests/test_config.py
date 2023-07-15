@@ -21,40 +21,32 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""Test Utilities."""
-import contextlib
-import logging
-import os
-import shutil
-import subprocess
-from pathlib import Path
 
-LEARN = True
+"""Type Testing."""
+from humannum import Bytes, bytes_, hex_
+from pytest import raises
 
-TESTDATA = Path(__file__).parent / "testdata"
+import ucdp
 
 
-@contextlib.contextmanager
-def chdir(path):
-    """Change Working Directory to ``path``."""
-    curdir = os.getcwd()
-    try:
-        os.chdir(path)
-        yield
-    finally:
-        os.chdir(curdir)
+def test_config():
+    """Test Configuration."""
 
+    @ucdp.config
+    class MyConfig(ucdp.AConfig):
+        """My Configuration."""
 
-def assert_gen(genpath, refpath):
-    """Compare Generated Files Versus Reference."""
-    genpath.mkdir(parents=True, exist_ok=True)
-    refpath.mkdir(parents=True, exist_ok=True)
-    if LEARN:  # pragma: no cover
-        logging.getLogger(__name__).warning("LEARNING %s", refpath)
-        shutil.rmtree(refpath, ignore_errors=True)
-        shutil.copytree(genpath, refpath)
-    cmd = ["diff", "-r", "--exclude", "__pycache__", str(refpath), str(genpath)]
-    try:
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError as error:  # pragma: no cover
-        assert False, error.stdout.decode("utf-8")
+        mem_baseaddr = ucdp.field(converter=hex_)  # required without default
+        ram_size = ucdp.field(converter=bytes_, default="256 KB")  # required with default
+        rom_size = ucdp.field(converter=ucdp.util.opt(bytes_), default=None)  # optional
+        feature: bool = ucdp.field(default=False)  # boolean
+
+    with raises(ValueError):
+        MyConfig("stupid name", mem_baseaddr="0xA000")
+
+    config = MyConfig("configname", mem_baseaddr="0xA000")
+    assert config.name == "configname"
+    assert config.mem_baseaddr == 0xA000
+    assert config.ram_size == Bytes("256 KB")
+    assert config.rom_size is None
+    assert not config.feature

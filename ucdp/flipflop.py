@@ -41,11 +41,11 @@ class FlipFlop(Assigns):
 
     clk: ASignal = field()
     rst_an: ASignal = field()
-    rst: Optional[BoolOp] = field()
-    ena: Optional[BoolOp] = field()
-    targets: Idents = field()
-    sources: Idents = field()
-    drivers: dict = field()
+    rst: Optional[BoolOp] = field(default=None)
+    ena: Optional[BoolOp] = field(default=None)
+    targets: Idents = field(factory=Idents, repr=False)
+    sources: Idents = field(factory=Idents, repr=False)
+    drivers: dict = field(factory=dict, repr=False)
 
     @staticmethod
     def create(
@@ -57,6 +57,14 @@ class FlipFlop(Assigns):
         try:
             flipflop = flipflops[key]
         except KeyError:
-            flipflop = FlipFlop(clk, rst_an, rst, ena, mod.portssignals, mod.namespace, mod.drivers)
+            flipflop = FlipFlop(
+                clk,
+                rst_an,
+                rst=rst,
+                ena=ena,
+                targets=mod.portssignals,
+                sources=mod.namespace,
+                drivers=mod.drivers,
+            )
             flipflops[key] = flipflop
         return flipflop

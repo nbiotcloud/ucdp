@@ -21,8 +21,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-
-
 """
 Hardware Module.
 
@@ -113,14 +111,14 @@ class BaseMod:
 
     # class attributes
 
-    copyright_years: Optional[int] = None  # current by default
     copyright_start_year: Optional[int] = None  # current by default
+    copyright_end_year: Optional[int] = None  # current by default
 
     title: Optional[str] = None
     descr: Optional[str] = None
     comment: Optional[str] = None
 
-    has_hiername: bool = False
+    has_hiername: bool = True
 
     # instance attributes
 
@@ -150,6 +148,7 @@ class BaseMod:
     __router = field(init=False, repr=False)
 
     _mroidx = -1
+    is_tb = False
 
     def __init__(self, *args, **kwargs):
         cls = self.__class__
@@ -194,11 +193,7 @@ class BaseMod:
 
     @libname.default
     def _libname_default(self):
-        try:
-            return self.__class__.libname
-        except AttributeError:
-            filepath = Path(getfile(self.__class__))
-            return filepath.parts[-2]
+        return get_libname(self.__class__)
 
     @path.default
     def _path_default(self):
@@ -399,7 +394,6 @@ class BaseMod:
         descr: str = NOTHING,  # type: ignore
         comment: str = NOTHING,  # type: ignore
         ifdef: str = NOTHING,  # type: ignore
-        no_codecov=None,
         route=None,
     ) -> Signal:
         """
@@ -412,13 +406,12 @@ class BaseMod:
         Keyword Args:
             direction: Direction (Just for bidir signals)
             ifdef (str): IFDEF
-            no_codecov: Disable Toggle Coverage.
             route: Routes (iterable or string separated by ';')
         """
         if direction is not NOTHING:
             direction = FWD * direction
         doc = Doc.from_type(type_, title, descr, comment)
-        signal = Signal(type_, name, doc=doc, ifdef=ifdef, direction=direction, no_codecov=no_codecov)
+        signal = Signal(type_, name, doc=doc, ifdef=ifdef, direction=direction)
         if self._locked:
             raise LockError(f"{self}: Cannot add port {name!r}. Module built was already completed and is froozen.")
         self.namespace[name] = signal
@@ -623,13 +616,12 @@ class BaseMod:
             raise ValueError(f"flipflop {name} requires {what}.")
         return expr
 
-    def flipflops(self) -> Generator[FlipFlop, None, None]:
+    @property
+    def flipflops(self):
         """
-        Iterate over all Flip Flops.
-
-        This method is only needed for the Systemverilog code generation.
+        Flip Flops.
         """
-        yield from self.__flipflops.values()
+        return self.__flipflops.values()
 
     def add_mux(
         self,
@@ -661,8 +653,6 @@ class BaseMod:
     def muxes(self) -> Generator[Mux, None, None]:
         """
         Iterate over all Multiplexer.
-
-        This method is only needed for the Systemverilog code generation.
         """
         return self.__muxes.values()
 
@@ -760,7 +750,7 @@ def get_modbasecls(cls_or_inst):
     """
     modcls = cls_or_inst.__class__ if isinstance(cls_or_inst, BaseMod) else cls_or_inst
     classes = []
-    for cls in getmro(modcls):  # pragma: no cover
+    for cls in getmro(modcls):
         if cls is BaseMod:
             break
         classes.append(cls)
@@ -768,12 +758,35 @@ def get_modbasecls(cls_or_inst):
     return classes[modcls._mroidx]
 
 
-def get_modname(cls):
+def get_modname(cls, nodefault: bool = False):
     """
     Get Module Name.
 
     The module name is derived from the class name if not explicitly set as class attribute.
     """
-    if isinstance(cls.modname, str):
-        return cls.modname
+    for subcls in cls.__mro__:
+        try:
+            modname = subcls.modname
+        except AttributeError:
+            break
+        if isinstance(modname, str):
+            return modname
+    if nodefault:
+        return None
     return snakecase(cls.__name__.removesuffix("Mod"))
+
+
+def get_libname(cls, nodefault: bool = False):
+    """
+    Get Library Name.
+    """
+    for subcls in cls.__mro__:
+        try:
+            libname = subcls.libname
+        except AttributeError:
+            break
+        if isinstance(libname, str):
+            return libname
+    if nodefault:
+        return None
+    return Path(getfile(cls)).parts[-2]

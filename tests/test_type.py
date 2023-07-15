@@ -24,6 +24,7 @@
 
 """Type Testing."""
 from attrs.exceptions import FrozenInstanceError
+from icdutil.num import calc_unsigned_width
 from pytest import raises
 
 import ucdp
@@ -137,9 +138,9 @@ def test_struct():
         """Struct."""
 
         def _build(self):
-            self._add("data", ucdp.UintType(8))
-            self._add("valid", ucdp.BitType())
-            self._add("accept", ucdp.BitType(), ucdp.BWD)
+            self._add("data", ucdp.UintType(8), title="title")
+            self._add("valid", ucdp.BitType(), descr="descr")
+            self._add("accept", ucdp.BitType(), ucdp.BWD, comment="comment")
             with raises(ValueError) as exception:
                 self._add("valid", ucdp.BitType())
                 assert str(exception.value) == "key 2 already exists in test_enum.<locals>.StructType()"
@@ -147,32 +148,38 @@ def test_struct():
     struct = StructType()
     assert tuple(struct) == tuple(struct.values())
     assert tuple(struct.keys()) == ("data", "valid", "accept")
+    assert [(item.title, item.descr, item.comment) for item in struct] == [
+        ("title", None, "title"),
+        (None, "descr", None),
+        (None, None, "comment"),
+    ]
 
 
-# def test_tailtype():
-#     """Test Tailoring."""
+def test_tailtype():
+    """Test Tailoring."""
 
-#     @ucdp.tailoredtype()
-#     class MonSelType(ucdp.DynamicEnumType):
+    @ucdp.tailoredtype
+    class MonSelType(ucdp.DynamicEnumType):
 
-#         """Monitoring."""
+        """Monitoring."""
 
-#         size = ucdp.field()
-#         keytype = ucdp.field(kw_only=True, init=False)
+        size = ucdp.field()
+        keytype = ucdp.field(init=False)
+        default = ucdp.field(default=0)
 
-#         @keytype.default
-#         def _keytype_default(self):
-#             width = calc_unsigned_width(self.size - 1)
-#             return ucdp.UintType(width)
+        @keytype.default
+        def _keytype_default(self):
+            width = calc_unsigned_width(self.size - 1)
+            return ucdp.UintType(width)
 
-#     type0 = MonSelType(6)
-#     assert type0.width == 3
-#     assert type0.default == 0
+    type0 = MonSelType(6)
+    assert type0.width == 3
+    assert type0.default == 0
 
-#     type1 = MonSelType(6)
+    type1 = MonSelType(6)
 
-#     assert type0 is not type1
-#     assert type0 != type1
+    assert type0 is not type1
+    assert type0 != type1
 
 
 def test_alias():

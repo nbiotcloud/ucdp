@@ -128,9 +128,10 @@ class Mux:
     def __iter__(self):
         yield from self.__mux.items()
 
+    @property
     def sels(self) -> Generator[Ident, None, None]:
-        """Iterate over Selects."""
-        yield from self.__mux.keys()
+        """Selects."""
+        return self.__mux.keys()
 
     def __bool__(self):
         return bool(self.__mux)

@@ -34,7 +34,7 @@ An enumeration is a normal base type with a specific mapping of values to a anot
 * :any:`DisType` - Native single bit with `ena` and `dis` enumeration, low-high
 """
 
-from typing import Optional
+from typing import Any, Callable, Optional
 
 from humanfriendly.text import concatenate
 
@@ -84,15 +84,18 @@ class EnumItem(ReusedFrozen):
         return self.doc.comment
 
 
+ItemFilter = Callable[[EnumItem], bool]
+
+
 @frozen
 class BaseEnumType(AType, dict):
 
     """Base Type for all Enums."""
 
-    keytype = IntegerType()
-    valuetype = None
-    default = field(kw_only=True)
-    filter_ = field(default=None, kw_only=True, repr=False)
+    keytype: Any = IntegerType()
+    valuetype: Any = None
+    default: Any = field(kw_only=True)
+    filter_: ItemFilter = field(default=None, kw_only=True, repr=False)
     _locked: bool = False
 
     @default.default
@@ -240,16 +243,16 @@ class BaseEnumType(AType, dict):
         """Size in Bits."""
         return self.keytype.bits
 
-    def cast(self, other):
-        """
-        How to cast an input of type `self` from a value of type `other`.
+    # def cast(self, other):
+    #     """
+    #     How to cast an input of type `self` from a value of type `other`.
 
-        `self = cast(other)`
-        """
-        # pylint: disable=arguments-differ
-        if isinstance(other, BaseEnumType) and self.keytype.is_connectable(other.keytype):
-            yield "", ""
-        return NotImplemented
+    #     `self = cast(other)`
+    #     """
+    #     # pylint: disable=arguments-differ
+    #     if isinstance(other, BaseEnumType) and self.keytype.is_connectable(other.keytype):
+    #         yield "", ""
+    #     return NotImplemented
 
 
 @frozen

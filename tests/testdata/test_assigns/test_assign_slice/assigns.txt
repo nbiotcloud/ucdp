@@ -1,0 +1,2 @@
+vec_a_o: ConcatExpr((SliceOp(Port(UintType(8), name='vec_a_i'), Slice('7:5')), SliceOp(Port(UintType(8), name='vec_d_i'), Slice('3:2')), SliceOp(Port(UintType(8), name='vec_a_i'), Slice('2:0'))))
+vec_b_o: ConcatExpr((ConstExpr(UintType(1)), Port(UintType(4), name='vec_c_i'), ConstExpr(UintType(2, default=1)), Port(UintType(4), name='vec_c_i'), ConstExpr(UintType(3, default=7))))
