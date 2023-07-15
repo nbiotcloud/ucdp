@@ -26,6 +26,8 @@ from pytest import fixture, raises
 
 import ucdp
 
+# pylint: disable=unsupported-binary-operation
+
 
 @fixture
 def names():
