@@ -21,4 +21,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""Tests."""
+
+"""Exceptions."""
+
+from typing import Any
+
+
+class LockError(ValueError):
+    """Lock."""
+
+    def __init__(self, inst: Any):
+        msg = f"{inst!r} is already locked for modification."
+        super().__init__(msg)
+
+
+class DuplicateError(ValueError):
+    """Duplicate Error."""
+
+
+class MissingInheritanceError(TypeError):
+    """:any:`cls` Was Not Derived."""
+
+    def __init__(self, cls):
+        msg = f"{cls} must be derived and cannot be used directly."
+        super().__init__(msg)

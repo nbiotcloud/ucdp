@@ -25,86 +25,91 @@
 Unified Chip Design Platform.
 """
 from icdutil.slices import Slice
+from pydantic import Field, ValidationError
 
-from .assigns import Assign, Assigns
-from .attrs import NOTHING, Factory, field, frozen
-from .const import Const
 from .doc import Doc
-from .expr import (
-    TODO,
-    BoolOp,
-    CommentExpr,
-    ConcatExpr,
-    ConstExpr,
-    Expr,
-    InvalidExpr,
-    Log2Func,
-    MaximumFunc,
-    MinimumFunc,
-    Op,
-    Range,
-    SignedFunc,
-    SliceOp,
-    SOp,
-    TernaryExpr,
-    UnsignedFunc,
-    cast,
-    cast_booltype,
-    concat,
-    const,
-    create,
-    get_idents,
-    log2,
-    maximum,
-    minimum,
-    parse,
-    signed,
-    ternary,
-    unsigned,
-)
-from .flipflop import FlipFlop
-from .ident import Ident, Idents
-from .loader import load
-from .mod.base import BaseMod, get_modbasecls, get_modname, mod
-from .mod.config import AConfig, AUniqueConfig, AVersionConfig, config
-from .mod.iter import ModPostIter, ModPreIter
-from .mod.mods import AConfigurableMod, AGenericTbMod, AImportedMod, AMod, ATailoredMod, ATbMod, CoreMod, _ATopMod
-from .mod.util import get_relpath, get_topmod, walk
-from .modref import ModRef
-from .mux import Mux
-from .namespace import DuplicateError, LockError, Namespace
-from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix
-from .param import Param
-from .router import Router, RouterError
-from .signal import ASignal, Port, Signal
-from .test import Test
-from .top import Top
-from .topref import TopRef
-from .types.array import ArrayType
-from .types.base import ACompositeType, AScalarType, AType, AVecType, tailoredtype
-from .types.clkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType
-from .types.descriptivestruct import DescriptiveStructType
-from .types.enum import (
+from .docutil import doc_from_type
+from .exceptions import LockError, MissingInheritanceError
+from .object import LightObject, Object
+from .orientation import BIDIR, BWD, FWD, IN, INOUT, OUT, AOrientation, Direction, Orientation
+from .typearray import ArrayType
+from .typebase import CompositeType, ScalarType, Type, VecType
+from .typeclkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType
+from .typedescriptivestruct import DescriptiveStructType
+from .typeenum import (
     AUTO,
-    AEnumType,
-    AGlobalEnumType,
     BaseEnumType,
     BusyType,
     DisType,
     DynamicEnumType,
     EnaType,
     EnumItem,
+    EnumType,
+    GlobalEnumType,
 )
-from .types.iter import typeiter
-from .types.orientation import BIDIR, BWD, FWD, IN, INOUT, OUT, AOrientation, Direction, Orientation
-from .types.scalar import BitType, BoolType, IntegerType, RailType, SintType, StringType, UintType
-from .types.struct import (
-    AGlobalStructType,
-    AStructType,
+from .typescalar import BitType, BoolType, IntegerType, RailType, SintType, UintType
+from .typestring import StringType
+from .typestruct import (
     BaseStructType,
     DynamicStructType,
+    GlobalStructType,
     StructItem,
+    StructType,
     bwdfilter,
     fwdfilter,
 )
-from .util import namefilter
+
+# from .types.iter import typeiter
+# from .util import namefilter
+# from .expr import (
+#     TODO,
+#     BoolOp,
+#     CommentExpr,
+#     ConcatExpr,
+#     ConstExpr,
+#     Expr,
+#     InvalidExpr,
+#     Log2Func,
+#     MaximumFunc,
+#     MinimumFunc,
+#     Op,
+#     Range,
+#     SignedFunc,
+#     SliceOp,
+#     SOp,
+#     TernaryExpr,
+#     UnsignedFunc,
+#     cast,
+#     cast_booltype,
+#     concat,
+#     const,
+#     create,
+#     get_idents,
+#     log2,
+#     maximum,
+#     minimum,
+#     parse,
+#     signed,
+#     ternary,
+#     unsigned,
+# )
+# from .flipflop import FlipFlop
+# from .ident import Ident, Idents
+# from .loader import load
+# from .mod.base import BaseMod, get_modbasecls, get_modname, mod
+# from .mod.config import AConfig, AUniqueConfig, AVersionConfig, config
+# from .mod.iter import ModPostIter, ModPreIter
+# from .mod.mods import AConfigurableMod, AGenericTbMod, AImportedMod, AMod, ATailoredMod, ATbMod, CoreMod, _ATopMod
+# from .mod.util import get_relpath, get_topmod, walk
+# from .modref import ModRef
+# from .mux import Mux
+# from .namespace import DuplicateError, LockError, Namespace
+# from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix
+# from .param import Param
+# from .router import Router, RouterError
+# from .signal import ASignal, Port, Signal
+# from .test import Test
+# from .top import Top
+# from .topref import TopRef
+# from .assigns import Assign, Assigns
+# from .const import Const

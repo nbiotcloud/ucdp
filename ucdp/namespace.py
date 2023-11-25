@@ -30,7 +30,7 @@ A namespace is nothing more than a dictionary with some benefits:
 * items use `item.name` as dictionary key. This is checked.
 * items **cannot** be overwritten
 * items **cannot** be deleted
-* the namespace can be locked for modications via `lock`.
+* the namespace can be locked for modifications via `lock`.
 * iteration over the namespaces yields the items and not their keys.
 
 >>> from collections import namedtuple
@@ -70,12 +70,13 @@ True
 >>> namespace['d'] = Item('d', 7, 8)
 Traceback (most recent call last):
   ...
-ucdp.namespace.LockError: Item(name='d', foo=7, bar=8)
+ValueError: Namespace is already locked
 
 >>> len(namespace)
 3
 """
 
+from .exceptions import DuplicateError
 from .nameutil import didyoumean
 
 
@@ -112,6 +113,7 @@ class Namespace(dict):
                 raise exc
 
     def get(self, name):
+        """Get Item."""
         try:
             item = super().__getitem__(name)
         except KeyError as exc:
@@ -127,7 +129,7 @@ class Namespace(dict):
 
     def __setitem__(self, name, item):
         if self.__locked:
-            raise LockError(str(item))
+            raise ValueError("Namespace is already locked")
         if item.name != name:
             raise ValueError(f"{item} with must be stored at name '{item.name}' not at '{name}'")
         if item.name in self.keys():
@@ -141,11 +143,3 @@ class Namespace(dict):
 
     def __iter__(self):
         yield from self.values()
-
-
-class LockError(ValueError):
-    """Lock Error."""
-
-
-class DuplicateError(ValueError):
-    """Duplicate Error."""

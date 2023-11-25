@@ -21,65 +21,70 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""Name Utilities."""
+
+"""
+Name Utilities.
+"""
 import functools
 import re
-from typing import Any, Tuple
 
 from caseconverter import snakecase
 from fuzzywuzzy import process
 from humanfriendly.text import concatenate
 
+_FUZZY_MINRATIO: int = 80
+_RE_STARTNUM = re.compile(r"^[0-9]")
+
 _RE_SPLIT_PREFIX = re.compile(r"(?i)(?P<prefix>([a-z]|inst)_)(?P<basename>([a-z][a-z0-9\._]*)?)\Z")
 _RE_SPLIT_SUFFIX = re.compile(r"(?i)(?P<basename>([a-z][a-z0-9\._]*)?)(?P<suffix>_([a-z]|io))\Z")
-_RE_NAME = re.compile(r"[a-zA-Z0-9][a-zA-Z_0-9\-]*")
-_RE_IDENTIFIER = re.compile(r"[a-zA-Z][a-zA-Z_0-9]*")
+# _RE_NAME = re.compile(r"[a-zA-Z0-9][a-zA-Z_0-9\-]*")
+# _RE_IDENTIFIER = re.compile(r"[a-zA-Z][a-zA-Z_0-9]*")
 
 
-def validate_name(value: Any):
-    """
-    Ensure `value` is a name.
+# def validate_name(value: Any):
+#     """
+#     Ensure `value` is a name.
 
-    >>> validate_name('abc')
-    'abc'
-    >>> validate_name('_abc')
-    Traceback (most recent call last):
-        ...
-    ValueError: Invalid name '_abc'
-    >>> validate_name('aB9_a')
-    'aB9_a'
-    >>> validate_name('9ab')
-    '9ab'
-    """
-    if not _RE_NAME.fullmatch(str(value)):
-        raise ValueError(f"Invalid name '{value}'")
-    return value
-
-
-def validate_identifier(value: Any):
-    """
-    Ensure `value` is an identifier.
-
-    >>> validate_identifier('abc')
-    'abc'
-    >>> validate_identifier('_abc')
-    Traceback (most recent call last):
-        ...
-    ValueError: Invalid identifier '_abc'
-    >>> validate_identifier('aB9_a')
-    'aB9_a'
-    >>> validate_identifier('9ab')
-    Traceback (most recent call last):
-        ...
-    ValueError: Invalid identifier '9ab'
-    """
-    if not _RE_IDENTIFIER.fullmatch(str(value)):
-        raise ValueError(f"Invalid identifier '{value}'")
-    return value
+#     >>> validate_name('abc')
+#     'abc'
+#     >>> validate_name('_abc')
+#     Traceback (most recent call last):
+#         ...
+#     ValueError: Invalid name '_abc'
+#     >>> validate_name('aB9_a')
+#     'aB9_a'
+#     >>> validate_name('9ab')
+#     '9ab'
+#     """
+#     if not _RE_NAME.fullmatch(str(value)):
+#         raise ValueError(f"Invalid name '{value}'")
+#     return value
 
 
-@functools.lru_cache()
-def split_prefix(name: str, prefixes=None) -> Tuple[str, str]:
+# def validate_identifier(value: Any):
+#     """
+#     Ensure `value` is an identifier.
+
+#     >>> validate_identifier('abc')
+#     'abc'
+#     >>> validate_identifier('_abc')
+#     Traceback (most recent call last):
+#         ...
+#     ValueError: Invalid identifier '_abc'
+#     >>> validate_identifier('aB9_a')
+#     'aB9_a'
+#     >>> validate_identifier('9ab')
+#     Traceback (most recent call last):
+#         ...
+#     ValueError: Invalid identifier '9ab'
+#     """
+#     if not _RE_IDENTIFIER.fullmatch(str(value)):
+#         raise ValueError(f"Invalid identifier '{value}'")
+#     return value
+
+
+@functools.lru_cache
+def split_prefix(name: str, prefixes=None) -> tuple[str, str]:
     """
     Split Name Into Prefix and Basename.
 
@@ -98,7 +103,6 @@ def split_prefix(name: str, prefixes=None) -> Tuple[str, str]:
 
     The counterpart to this function is `join_names`.
     """
-
     mat = _RE_SPLIT_PREFIX.match(name)
     if mat:
         if prefixes is not None:
@@ -110,8 +114,8 @@ def split_prefix(name: str, prefixes=None) -> Tuple[str, str]:
     return "", name
 
 
-@functools.lru_cache()
-def split_suffix(name: str, suffixes=None) -> Tuple[str, str]:
+@functools.lru_cache
+def split_suffix(name: str, suffixes=None) -> tuple[str, str]:
     """
     Split Name Into Basename And Suffix.
 
@@ -136,7 +140,6 @@ def split_suffix(name: str, suffixes=None) -> Tuple[str, str]:
 
     The counterpart to this function is `join_names`.
     """
-
     mat = _RE_SPLIT_SUFFIX.match(name)
     if mat:
         if suffixes is not None:
@@ -184,7 +187,7 @@ def didyoumean(name, names, known=False, multiline=False) -> str:
         msg = ""
     # fuzzy
     if names:
-        fuzzyitems = (repr(item) for item, ratio in process.extract(name, names, limit=5) if ratio >= 80)
+        fuzzyitems = (repr(item) for item, ratio in process.extract(name, names, limit=5) if ratio >= _FUZZY_MINRATIO)
         fuzzy = concatenate(fuzzyitems, conjunction="or")
         if fuzzy:
             msg = f"{msg}{sep}Did you mean {fuzzy}?"
@@ -201,3 +204,21 @@ def get_snakecasename(cls):
     'my_class'
     """
     return snakecase(cls.__name__).removeprefix("_")
+
+
+def str2identifier(value: str) -> str:
+    """
+    Convert Any String To Identifier.
+
+    >>> str2identifier('A B C')
+    'a_b_c'
+    >>> str2identifier('1 2 3')
+    'v1_2_3'
+    >>> str2identifier('12.3')
+    'v123'
+    """
+    value = snakecase(value)
+    mat = _RE_STARTNUM.match(value)
+    if mat:
+        value = f"v{value}"
+    return value

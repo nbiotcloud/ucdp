@@ -1,3 +1,4 @@
+"""Documentation Build Configuration."""
 #
 # MIT License
 #
@@ -60,7 +61,7 @@ html_theme = "sphinx_rtd_theme"
 
 intersphinx_mapping = {
     "aligntext": ("https://aligntext.readthedocs.io/en/latest/", None),
-    "attr": ("https://www.attrs.org/en/stable/", None),
+    "pydantic": ("https://docs.pydantic.dev/latest/", None),
     "humannum": ("https://humannum.readthedocs.io/en/latest/", None),
     "icdutil": ("https://icdutil.readthedocs.io/en/latest/", None),
     "mako": ("https://docs.makotemplates.org/en/latest/", None),

@@ -21,4 +21,39 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""Tests."""
+
+"""Scalar Types aka native Types."""
+
+
+from .object import Light
+from .typebase import Type
+
+
+class StringType(Type, Light):
+    """
+    Native String.
+
+    Example:
+    >>> import ucdp
+    >>> example = ucdp.StringType()
+    >>> example
+    StringType()
+    """
+
+    def is_connectable(self, other):
+        """
+        Check For Valid Connection To `other`.
+
+        Connections are only allowed to other :any:`StringType`.
+        The default and isolation value have no influence.
+
+        >>> import ucdp
+        >>> ucdp.StringType().is_connectable(ucdp.StringType())
+        True
+
+        A connection to other types is forbidden.
+
+        >>> ucdp.StringType().is_connectable(ucdp.UintType(1))
+        False
+        """
+        return isinstance(other, StringType)

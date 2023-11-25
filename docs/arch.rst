@@ -57,8 +57,8 @@ Loader
 ~~~~~~
 
 
-Utilties
-~~~~~~~~
+Utilities
+~~~~~~~~~
 
 This section lists all external libraries and their usage
 
@@ -107,7 +107,7 @@ This section lists all external libraries and their usage
        | Convert names between different name schemes:
        | ``PascalCase``, ``camelCase``, ``snake_case``,
    * - :any:`icdutil`
-     - | **IC Design Utilties.**
+     - | **IC Design Utilities.**
        | Helper for binary related chip infrastructure.
    * - :any:`matchor`
      - | **String Pattern Matching.**

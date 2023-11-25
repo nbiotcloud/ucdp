@@ -21,4 +21,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""Tests."""
+
+"""
+Doc Utilities.
+"""
+from .doc import Doc
+
+
+def doc_from_type(type_, **kwargs):
+    """
+    Create :any:`Doc` with defaults from `type_`.
+
+    Types may define `title`, `descr` or `comment`. They are taken as default, if no other value is given:
+
+    Please note, that the default comment is title!
+
+    >>> import ucdp
+    >>> class MyType(ucdp.BitType):
+    ...     title:str = "My Bit Title"
+    ...     comment:str = "My Bit Comment"
+    >>> ucdp.doc_from_type(MyType())
+    Doc(title='My Bit Title', comment='My Bit Comment')
+    >>> ucdp.doc_from_type(MyType(), title="My Title")
+    Doc(title='My Title', comment='My Bit Comment')
+    >>> ucdp.doc_from_type(MyType(), title="My Title", comment="")
+    Doc(title='My Title', comment='')
+    >>> ucdp.doc_from_type(MyType(), comment="My Comment")
+    Doc(title='My Bit Title', comment='My Comment')
+    """
+    # Some kind of optimized default routine
+    dump = type_.model_dump()
+    for name in ("title", "descr", "comment"):
+        if kwargs.get(name, None) is None:
+            kwargs[name] = dump.get(name, None)
+    return Doc(**kwargs)

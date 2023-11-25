@@ -22,95 +22,102 @@
 # SOFTWARE.
 #
 
-"""Module Specification."""
+"""Module Reference."""
 
 import re
 from typing import Optional, Union
 
-from .attrs import field, frozen
+from .const import RE_IDENTIFIER
+from .object import Field, LightObject
+
+_re_modref = re.compile(
+    # pkg
+    r"((?P<pkg>[a-zA-Z][a-zA-Z_0-9]*)\.)?"
+    # mod
+    r"(?P<mod>[a-zA-Z][a-zA-Z_0-9]*)"
+    # cls
+    r"(\:(?P<modcls>[a-zA-Z][a-zA-Z_0-9]*))?"
+)
+_pat = "lib.mod[:cls]"
 
 
-@frozen
-class ModRef:
-
+class ModRef(LightObject):
     """
-    Module Specification.
+    Module Reference.
 
     Args:
-        mod: Module Name
+        value: Module Name or pattern
 
     Keyword Args:
         pkg: Package Name
-        cls: Class Name
+        modcls: Class Name
+
+    >>> ModRef('mod', pkg='lib', modcls='Mod')
+    ModRef('mod', pkg='lib', modcls='Mod')
+
+    Just a module:
+
+    >>> spec = ModRef('mod')
+    >>> spec
+    ModRef('mod')
+    >>> str(spec)
+    'mod'
+
+    Module from a package:
+
+    >>> spec = ModRef('lib.mod')
+    >>> spec
+    ModRef('mod', pkg='lib')
+    >>> str(spec)
+    'lib.mod'
+
+    Module from a package and explicit class:
+
+    >>> spec = ModRef('lib.mod:cls')
+    >>> spec
+    ModRef('mod', pkg='lib', modcls='cls')
+    >>> str(spec)
+    'lib.mod:cls'
+
+    A :any:`ModRef` is kept:
+
+    >>> ModRef(ModRef('mod'))
+    ModRef('mod')
+
+    Invalid Pattern:
+
+    >>> ModRef('mod:c-ls')
+    Traceback (most recent call last):
+    ..
+    ValueError: 'mod:c-ls' does not match pattern 'lib.mod[:cls]'
     """
 
-    mod: str = field()
-    pkg: str = field(default=None)
-    cls: Optional[str] = field(default=None)
+    mod: str = Field(pattern=RE_IDENTIFIER)
+    pkg: Optional[str] = Field(pattern=RE_IDENTIFIER, default=None)
+    modcls: Optional[str] = Field(pattern=RE_IDENTIFIER, default=None)
 
-    _re = re.compile(
-        # pkg
-        r"((?P<pkg>[a-zA-Z][a-zA-Z_0-9]*)\.)?"
-        # mod
-        r"(?P<mod>[a-zA-Z][a-zA-Z_0-9]*)"
-        # cls
-        r"(\:(?P<cls>[a-zA-Z][a-zA-Z_0-9]*))?"
-    )
-    _pat = "lib.mod[:cls]"
+    _posargs = ("mod",)
 
-    @staticmethod
-    def convert(value: Union["ModRef", str]) -> "ModRef":
-        """
-        Convert.
-
-        Just a module:
-
-        >>> spec = ModRef.convert('mod')
-        >>> spec
-        ModRef('mod')
-        >>> str(spec)
-        'mod'
-
-        Module from a package:
-
-        >>> spec = ModRef.convert('lib.mod')
-        >>> spec
-        ModRef('mod', pkg='lib')
-        >>> str(spec)
-        'lib.mod'
-
-        Module from a package and explicit class:
-
-        >>> spec = ModRef.convert('lib.mod:cls')
-        >>> spec
-        ModRef('mod', pkg='lib', cls='cls')
-        >>> str(spec)
-        'lib.mod:cls'
-
-        A :any:`ModRef` is kept:
-
-        >>> ModRef.convert(ModRef('mod'))
-        ModRef('mod')
-
-        Invalid Pattern:
-
-        >>> ModRef.convert('mod:c-ls')
-        Traceback (most recent call last):
-        ..
-        ValueError: 'mod:c-ls' does not match pattern 'lib.mod[:cls]'
-        """
-
+    def __init__(self, value: Union["ModRef", str], *, pkg: Optional[str] = None, modcls: Optional[str] = None):
         if isinstance(value, ModRef):
-            return value
+            mod = value.mod
+            pkg = value.pkg
+            modcls = value.modcls
+        elif pkg is None and modcls is None:
+            mat = _re_modref.fullmatch(value)
+            if mat:
+                mod = mat.group("mod")
+                pkg = mat.group("pkg")
+                modcls = mat.group("modcls")
+            else:
+                raise ValueError(f"{value!r} does not match pattern {_pat!r}")
+        else:
+            mod = value
 
-        mat = ModRef._re.fullmatch(value)
-        if mat:
-            return ModRef(**mat.groupdict())
-
-        raise ValueError(f"{value!r} does not match pattern {ModRef._pat!r}")
+        super().__init__(mod=mod, pkg=pkg, modcls=modcls)
 
     def __str__(self):
         pkg = f"{self.pkg}." if self.pkg else ""
         mod = self.mod
-        cls = f":{self.cls}" if self.cls else ""
-        return f"{pkg}{mod}{cls}"
+        modcls = f":{self.modcls}" if self.modcls else ""
+        return f"{pkg}{mod}{modcls}"

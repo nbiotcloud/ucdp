@@ -23,13 +23,10 @@
 #
 """Test Utilities."""
 import contextlib
-import logging
 import os
-import shutil
-import subprocess
 from pathlib import Path
 
-LEARN = True
+# LEARN = True
 
 TESTDATA = Path(__file__).parent / "testdata"
 
@@ -45,16 +42,16 @@ def chdir(path):
         os.chdir(curdir)
 
 
-def assert_gen(genpath, refpath):
-    """Compare Generated Files Versus Reference."""
-    genpath.mkdir(parents=True, exist_ok=True)
-    refpath.mkdir(parents=True, exist_ok=True)
-    if LEARN:  # pragma: no cover
-        logging.getLogger(__name__).warning("LEARNING %s", refpath)
-        shutil.rmtree(refpath, ignore_errors=True)
-        shutil.copytree(genpath, refpath)
-    cmd = ["diff", "-r", "--exclude", "__pycache__", str(refpath), str(genpath)]
-    try:
-        subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    except subprocess.CalledProcessError as error:  # pragma: no cover
-        assert False, error.stdout.decode("utf-8")
+# def assert_gen(genpath, refpath):
+#     """Compare Generated Files Versus Reference."""
+#     genpath.mkdir(parents=True, exist_ok=True)
+#     refpath.mkdir(parents=True, exist_ok=True)
+#     if LEARN:  # pragma: no cover
+#         logging.getLogger(__name__).warning("LEARNING %s", refpath)
+#         shutil.rmtree(refpath, ignore_errors=True)
+#         shutil.copytree(genpath, refpath)
+#     cmd = ["diff", "-r", "--exclude", "__pycache__", str(refpath), str(genpath)]
+#     try:
+#         subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+#     except subprocess.CalledProcessError as error:  # pragma: no cover
+#         assert False, error.stdout.decode("utf-8")
