@@ -1,4 +1,5 @@
-# Contribute
+* DOCME: refer github contribution guide
+* DOCME: our requirements
 
 ## Testing
 

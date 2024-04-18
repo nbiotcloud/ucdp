@@ -1,0 +1,62 @@
+#
+# MIT License
+#
+# Copyright (c) 2024 nbiotcloud
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+"""
+Base Class Information Tool.
+"""
+
+import re
+from collections.abc import Iterator
+from inspect import getmro, isclass
+from typing import Any
+
+from .object import LightObject
+
+_RE_INFO = re.compile(r"^<class '(?P<libname>.+)\.(?P<modname>.+)\.(?P<clsname>.+)'>$")
+
+
+class BaseClassInfo(LightObject):
+    """Base Class Information."""
+
+    cls: Any
+    """Class."""
+
+    libname: str
+    """Python Library Name."""
+
+    modname: str
+    """Python Module Name."""
+
+    clsname: str
+    """Python Class Name."""
+
+
+def get_baseclassinfos(cls_or_inst) -> Iterator[BaseClassInfo]:
+    """Base Class Info."""
+    if not isclass(cls_or_inst):
+        cls_or_inst = cls_or_inst.__class__
+    for mro in getmro(cls_or_inst):
+        mat = _RE_INFO.match(str(mro))
+        if not mat:
+            break
+        yield BaseClassInfo(cls=mro, **mat.groupdict())

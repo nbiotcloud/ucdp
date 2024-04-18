@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2023 nbiotcloud
+# Copyright (c) 2024 nbiotcloud
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -57,7 +57,7 @@ def test(session: nox.Session) -> None:
     _init(session)
     session.run_always("pdm", "install", "-G", "test")
     session.run("pytest", "-vv", *session.posargs)
-    htmlcovfile = pathlib.Path(".").resolve() / "htmlcov" / "index.html"
+    htmlcovfile = pathlib.Path().resolve() / "htmlcov" / "index.html"
     print(f"Coverage report:\n\n    file://{htmlcovfile!s}\n")
 
 
@@ -84,12 +84,12 @@ def doc(session: nox.Session) -> None:
     session.run_always("pdm", "install", "-G", "doc")
     session.run("mkdocs", "build")
     shutil.make_archive("docs", "zip", "site")
-    docindexfile = pathlib.Path(".").resolve() / "site" / "index.html"
+    docindexfile = pathlib.Path().resolve() / "site" / "index.html"
     print(f"Documentation is available at:\n\n    file://{docindexfile!s}\n")
 
 
-@nox.session()
-def docserve(session: nox.Session) -> None:
+@nox.session(name="doc-serve")
+def doc_serve(session: nox.Session) -> None:
     """Build Documentation and serve via HTTP."""
     _init(session)
     session.run_always("pdm", "install", "-G", "doc")
@@ -108,11 +108,7 @@ def dev(session: nox.Session) -> None:
 
 def _init(session: nox.Session):
     session.install("pdm")
-    pyprojectfile = pathlib.Path("pyproject.toml")
     lockfile = pathlib.Path("pdm.lock")
 
     if not lockfile.exists():
-        session.run("pdm", "lock")
-    elif pyprojectfile.stat().st_mtime > lockfile.stat().st_mtime:
-        lockfile.unlink(missing_ok=True)
         session.run("pdm", "lock")

@@ -2,8 +2,8 @@ site_name: UCDP
 site_description: Unified Chip Design Platform
 site_url: https://ucdp.readthedocs.io/en
 repo_url: https://github.com/nbiotcloud/ucdp
-strict: true
-copyright: Copyright (c) 2023-2024 nbiotcloud
+#strict: true
+copyright: Copyright (c) 2024 nbiotcloud
 
 theme:
   name: material
@@ -22,11 +22,64 @@ theme:
     - navigation.footer
     - navigation.tabs
     - navigation.tabs.sticky
+    - content.code.copy
+    - content.code.select
+    - content.code.annotate
 
 nav:
-  - Home: index.md
-  - Contributing: contributing.md
+  - Get Started:
+    - Welcome to UCDP: index.md
+    - Why use UCDP: why.md
+    - Features: features.md
+    - Installation: install.md
+    - Contributing: contributing.md
+  - Concepts:
+    - Overview: concepts/overview.md
+  - Examples: examples/
+  - Errors: errors/
+  - Command Line Interface: cli.md
+  - API Documentation: api/
 
 plugins:
   - search
   - include-markdown
+  - literate-nav:
+      nav_file: README.md
+      implicit_index: true
+  - mkdocstrings:
+      default_handler: python
+      handlers:
+        python:
+          options:
+            docstring_options:
+              ignore_init_summary: true
+            summary: true
+            show_source: false
+            unwrap_annotated: true
+            members_order: source
+            show_docstring_parameters: true
+            show_docstring_other_parameters: true
+            separate_signature: true
+            signature_crossrefs: true
+            show_signature_annotations: false
+            show_symbol_type_heading: true
+            preload_modules: [pydantic]
+            inherited_members: false
+          import:
+            - https://docs.python.org/3/objects.inv
+
+markdown_extensions:
+  - attr_list
+  - mkdocs-click
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+watch:
+  - src
+  - CONTRIBUTING.md
