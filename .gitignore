@@ -1,0 +1,10 @@
+*.pyc
+/.*_cache/
+/.coverage
+/.nox/
+/.venv*
+/dist/
+/docs.zip
+/pdm.lock
+/report.xml
+/site/

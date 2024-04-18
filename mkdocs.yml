@@ -1,0 +1,32 @@
+site_name: UCDP
+site_description: Unified Chip Design Platform
+site_url: https://ucdp.readthedocs.io/en
+repo_url: https://github.com/nbiotcloud/ucdp
+strict: true
+copyright: Copyright (c) 2023-2024 nbiotcloud
+
+theme:
+  name: material
+  palette:
+    - media: "(prefes-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefes-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.footer
+    - navigation.tabs
+    - navigation.tabs.sticky
+
+nav:
+  - Home: index.md
+  - Contributing: contributing.md
+
+plugins:
+  - search
+  - include-markdown
