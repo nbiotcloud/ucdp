@@ -27,14 +27,12 @@ Base Top Module.
 """
 
 from abc import abstractmethod
-from inspect import getfile
-from pathlib import Path
 from typing import Any, ClassVar
 
 from ._modbuilder import build
 from .modbase import BaseMod
 from .modfilelist import ModFileLists
-from .modutil import is_tb_from_modname
+from .modutil import get_libname, is_tb_from_modname
 from .object import PrivateField
 
 
@@ -64,7 +62,7 @@ class BaseTopMod(BaseMod):
     @property
     def libname(self) -> str:
         """Library Name."""
-        return Path(getfile(self.__class__)).parts[-2]
+        return get_libname(self.__class__)
 
     @property
     def is_tb(self) -> bool:

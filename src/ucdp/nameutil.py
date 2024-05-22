@@ -35,8 +35,8 @@ from humanfriendly.text import concatenate
 
 _FUZZY_MINRATIO: int = 80
 _RE_STARTNUM = re.compile(r"^[0-9]")
-_RE_SPLIT_PREFIX = re.compile(r"(?i)(?P<prefix>([a-z][a-z]?)_)(?P<basename>([a-z][a-z0-9_]*)?)\Z")
-_RE_SPLIT_SUFFIX = re.compile(r"(?i)(?P<basename>([a-z][a-z0-9_]*)?)(?P<suffix>_([a-z][a-z]?))\Z")
+_RE_SPLIT_PREFIX = re.compile(r"(?i)(?P<prefix>([a-z])_)(?P<basename>([a-z][a-z0-9_]*)?)\Z")
+_RE_SPLIT_SUFFIX = re.compile(r"(?i)(?P<basename>([a-z][a-z0-9_]*)?)(?P<suffix>_([a-z][o]?))\Z")
 
 
 @functools.lru_cache
@@ -59,8 +59,6 @@ def split_prefix(name: str) -> tuple[str, str]:
             ('u_', 'count')
             >>> split_prefix("I_VERY_LONG_NAME")
             ('I_', 'VERY_LONG_NAME')
-            >>> split_prefix("BT_VERY_LONG_NAME")
-            ('BT_', 'VERY_LONG_NAME')
             >>> split_prefix("")
             ('', '')
 

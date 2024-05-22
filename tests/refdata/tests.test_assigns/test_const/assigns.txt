@@ -1,0 +1,6 @@
+SET-ONLY
+ASSIGN: port_o  <----  const_c
+ASSIGN: port_my0_o  <----  const_my0_c
+ASSIGN: port_my0_mode_o  <----  const_my0_mode_c
+ASSIGN: port_my0_send_o  <----  const_my0_send_c
+ASSIGN: data_o  <----  scal

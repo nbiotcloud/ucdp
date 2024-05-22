@@ -67,7 +67,7 @@ A namespace is nothing more than a dictionary with some benefits:
         >>> namespace.get_dym('d')
         Traceback (most recent call last):
         ...
-        ValueError: 'd' Known are 'a', 'b' and 'c'.
+        ValueError: 'd'. Known are 'a', 'b' and 'c'.
 
     Locking:
 
@@ -77,7 +77,7 @@ A namespace is nothing more than a dictionary with some benefits:
         >>> namespace['d'] = NamedObject('d', 7, 8)
         Traceback (most recent call last):
         ...
-        ValueError: Namespace is already locked
+        ucdp.exceptions.LockError: Namespace is already locked. Cannot add items anymore.
 
         >>> len(namespace)
         3
@@ -86,7 +86,7 @@ A namespace is nothing more than a dictionary with some benefits:
 from collections.abc import Iterable
 from typing import Any
 
-from .exceptions import DuplicateError
+from .exceptions import DuplicateError, LockError
 from .nameutil import didyoumean
 from .object import NamedObject
 
@@ -98,7 +98,7 @@ class Namespace(dict):
 
     def __init__(self, items: Iterable[NamedObject] | None = None):
         super().__init__()
-        self.__locked = False
+        self.__is_locked = False
         if items:
             for item in items:
                 self[item.name] = item
@@ -106,12 +106,13 @@ class Namespace(dict):
     @property
     def is_locked(self) -> bool:
         """Locked."""
-        return self.__locked
+        return self.__is_locked
 
     def lock(self) -> None:
         """Lock."""
-        assert not self.__locked, f"{self} is already locked"
-        self.__locked = True
+        if self.__is_locked:
+            raise LockError("Namespace is already locked. Cannot lock again.")
+        self.__is_locked = True
 
     def add(self, item: NamedObject, exist_ok: bool = False):
         """Add."""
@@ -127,15 +128,15 @@ class Namespace(dict):
             item = self[name]
         except KeyError as exc:
             dym = didyoumean(name, self.keys(), known=True)
-            raise ValueError(f"{exc!s}{dym}") from None
+            raise ValueError(f"{exc!s}.{dym}") from None
         return item
 
     def __setitem__(self, name, item):
         self._set_items(((name, item),))
 
     def _set_items(self, items: Iterable[tuple[str, NamedObject]]):
-        if self.__locked:
-            raise ValueError("Namespace is already locked")
+        if self.__is_locked:
+            raise LockError("Namespace is already locked. Cannot add items anymore.")
         for name, item in items:
             if item.name != name:
                 raise ValueError(f"{item} with must be stored at name '{item.name}' not at '{name}'")
@@ -180,8 +181,8 @@ class Namespace(dict):
         If key is in the dictionary, return its value.
         If not, insert key with a value of default and return default. ``default`` defaults to None.
         """
-        if self.__locked:
-            raise ValueError("Namespace is already locked")
+        if self.__is_locked:
+            raise LockError("Namespace is already locked. Cannot add items anymore.")
         if key in self.keys():
             return self[key]
         self[key] = value
@@ -200,8 +201,8 @@ class Namespace(dict):
     def __or__(self, other) -> "Namespace":
         if not isinstance(other, dict):
             return NotImplemented
-        if self.__locked:
-            raise ValueError("Namespace is already locked")
+        if self.__is_locked:
+            raise LockError("Namespace is already locked. Cannot add items anymore.")
         items = dict(self)
         items.update(other)
         namespace = Namespace()

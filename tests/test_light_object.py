@@ -23,6 +23,8 @@
 #
 """Test :any:`LightObject`."""
 
+import re
+
 import ucdp as u
 from hypothesis import assume, given
 from hypothesis import strategies as st
@@ -162,3 +164,23 @@ def test_not_hashable_kwarg():
     # TESTME
 
     #    NotHashableKwarg(["a", "b"])
+
+
+class NoHashLightObject(u.LightObject):
+    """Example LightObject."""
+
+    arg1: list[int]
+
+    def __init__(self, arg1):
+        super().__init__(arg1=arg1)
+
+
+def test_no_hash():
+    """Not Hashable."""
+    msg = "<class 'tests.test_light_object.NoHashLightObject'>: 0 argument [1, 2, 3] is not constant."
+    with raises(TypeError, match=re.escape(msg)):
+        NoHashLightObject([1, 2, 3])
+
+    msg = "<class 'tests.test_light_object.NoHashLightObject'>: 'arg1' argument [1, 2, 3] is not constant."
+    with raises(TypeError, match=re.escape(msg)):
+        NoHashLightObject(arg1=[1, 2, 3])

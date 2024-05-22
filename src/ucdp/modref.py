@@ -75,6 +75,8 @@ class ModRef(LightObject):
             ModRef('glbl_lib', 'clk_gate', modclsname='ClkGateMod')
             >>> str(spec)
             'glbl_lib.clk_gate.ClkGateMod'
+            >>> ModRef.cast(ModRef('glbl_lib', 'clk_gate', modclsname='ClkGateMod'))
+            ModRef('glbl_lib', 'clk_gate', modclsname='ClkGateMod')
 
             Invalid Pattern:
 

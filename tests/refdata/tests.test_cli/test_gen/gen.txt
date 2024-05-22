@@ -1,0 +1,2 @@
+'$GEN/uart_lib/uart/rtl/uart_regf.sv'... CREATED.
+'$GEN/uart_lib/uart/rtl/uart.sv'... CREATED.

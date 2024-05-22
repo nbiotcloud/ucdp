@@ -176,5 +176,5 @@ def _get_dirwith(type_, orientation=FWD):
         elif iorientation == BWD:
             bwd += itype_.bits
         else:
-            bid += itype_.bits
+            raise AssertionError
     return fwd, bwd, bid

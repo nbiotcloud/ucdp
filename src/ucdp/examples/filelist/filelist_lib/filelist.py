@@ -35,6 +35,7 @@ class FilelistMod(u.AMod):
         u.ModFileList(
             name="hdl",
             filepaths=("-f mod.f",),
+            inc_dirs=("inc",),
         ),
     )
 

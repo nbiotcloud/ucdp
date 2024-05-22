@@ -134,6 +134,11 @@ class AOrientation(LightObject):
     Integer representation.
     """
 
+    def __init__(self, mode):
+        if mode not in self._NAMEMAP:
+            raise ValueError(f"Invalid mode {mode}")
+        super().__init__(mode=mode)
+
     @property
     def name(self):
         """Name."""

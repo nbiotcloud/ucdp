@@ -65,6 +65,16 @@ def test_parsepath_cast():
     assert path.cast is True
 
 
+def test_parsepath_optcast():
+    """'Optional Casting."""
+    path = u.parse_routepath("optcast(u_sub/clk_i)")
+    assert str(path) == "optcast(u_sub/clk_i)"
+    assert path.path == "u_sub"
+    assert path.expr == "clk_i"
+    assert path.create is False
+    assert path.cast is None
+
+
 def test_parsepath_create():
     """Creating."""
     path = u.parse_routepath("create(u_sub/clk_i)")
@@ -101,3 +111,14 @@ def test_create_cast():
     """Create and Casting."""
     with raises(u.ValidationError, match=re.escape("[opt]cast() and create() are mutally exclusive")):
         u.RoutePath(expr="clk_i", create=True, cast=True)
+
+
+def test_expr():
+    """Expression."""
+    expr = u.Signal(u.UintType(8), "sig_s")
+    path = u.parse_routepath(expr)
+    assert str(path) == "sig_s"
+    assert path.path is None
+    assert path.expr is expr
+    assert path.create is False
+    assert path.cast is False

@@ -34,10 +34,11 @@ from icdutil.num import calc_signed_width, calc_unsigned_width, unsigned_to_sign
 from pydantic import ValidationError
 
 from .exceptions import InvalidExpr
-from .object import Field, LightObject, model_validator
+from .object import Field, Light, Object, model_validator
 from .slices import Slice
 from .typebase import BaseScalarType, BaseType
-from .typescalar import BitType, IntegerType, SintType, UintType
+from .typehelper import BaseScalarTypes
+from .typescalar import BitType, BoolType, IntegerType, SintType, UintType
 
 _RE_CONST = re.compile(
     r"(?P<sign>[-+])?"
@@ -69,9 +70,14 @@ _OPERMAP = {
     "&": operator.and_,
     "^": operator.xor,
 }
+_SOPERMAP = {
+    "abs(": operator.abs,
+    "~": operator.inv,
+    "-": operator.neg,
+}
 
 
-class Expr(LightObject):
+class Expr(Object):
     """Base Class for all Expressions.
 
     Attributes:
@@ -228,6 +234,10 @@ class Expr(LightObject):
         return Op(other, "//", self)
 
     def __rmod__(self, other) -> "Op":
+        if isinstance(other, int):
+            other = _parse_const(other, reftype=self.type_)
+        if not isinstance(other, Expr):
+            return NotImplemented
         return Op(other, "%", self)
 
     def __rpow__(self, other) -> "Op":
@@ -273,13 +283,13 @@ class Expr(LightObject):
         return Op(other, "^", self)
 
     def __abs__(self) -> "SOp":
-        return SOp(oper=operator.abs, sign="abs(", one=self, postsign=")")
+        return SOp(sign="abs(", one=self)
 
     def __invert__(self) -> "SOp":
-        return SOp(oper=operator.inv, sign="~", one=self)
+        return SOp(sign="~", one=self)
 
     def __neg__(self) -> "SOp":
-        return SOp(oper=operator.neg, sign="-", one=self)
+        return SOp(sign="-", one=self)
 
     def __getitem__(self, slice_):
         if isinstance(slice_, Expr):
@@ -289,7 +299,7 @@ class Expr(LightObject):
         return SliceOp(one=self, slice_=slice_)
 
 
-class Op(Expr):
+class Op(Expr, Light):
     """Dual Operator Expression.
 
     Args:
@@ -312,12 +322,17 @@ class Op(Expr):
 
     _posargs: tuple[str, ...] = ("left", "sign", "right")
 
-    def __init__(self, left: Expr, sign: str, right: Expr):
+    def __init__(self, left: Expr, sign: str, right: Expr, type_: BaseType | None = None):
         oper = _OPERMAP[sign]
-        super().__init__(left=left, oper=oper, sign=sign, right=right, type_=left.type_)  # type: ignore[call-arg]
+        if type_ is None:
+            type_ = left.type_
+        super().__init__(left=left, oper=oper, sign=sign, right=right, type_=type_)  # type: ignore[call-arg]
 
     def __int__(self):
         return int(self.oper(int(self.left), int(self.right)))
+
+    def __bool__(self):
+        return bool(self.oper(int(self.left), int(self.right)))
 
 
 class BoolOp(Op):
@@ -336,11 +351,11 @@ class BoolOp(Op):
         * fix inherited_members / Attributes Types
     """
 
-    def __bool__(self):
-        return bool(self.oper(int(self.left), int(self.right)))
+    def __init__(self, left: Expr, sign: str, right: Expr):
+        super().__init__(left=left, sign=sign, right=right, type_=BoolType())  # type: ignore[call-arg]
 
 
-class SOp(Expr):
+class SOp(Expr, Light):
     """Single Operator Expression.
 
     Args:
@@ -357,21 +372,23 @@ class SOp(Expr):
 
     """
 
-    oper: Callable
+    oper: Callable = Field(repr=False)
     sign: str
     one: Expr
     postsign: str = ""
 
-    _posargs: tuple[str, ...] = ("sign", "oper", "one")
+    _posargs: tuple[str, ...] = ("sign", "one")
 
-    def __init__(self, oper: Callable, sign: str, one: Expr, postsign: str = ""):
+    def __init__(self, sign: str, one: Expr):
+        oper = _SOPERMAP[sign]
+        postsign = ")" if "(" in sign else ""
         super().__init__(oper=oper, sign=sign, one=one, postsign=postsign, type_=one.type_)  # type: ignore[call-arg]
 
     def __int__(self):
         return self.oper(int(self.one))
 
 
-class SliceOp(Expr):
+class SliceOp(Expr, Light):
     """Slice Expression.
 
     Args:
@@ -397,7 +414,7 @@ class SliceOp(Expr):
         return int(self.one.type_[self.slice_].default)
 
 
-class ConstExpr(Expr):
+class ConstExpr(Expr, Light):
     """
     Constant.
 
@@ -428,10 +445,12 @@ class ConstExpr(Expr):
         return int(self.type_.default)
 
     def __getitem__(self, slice_):
+        if isinstance(slice_, Expr):
+            slice_ = Slice(left=slice_, right=slice_)
         return ConstExpr(self.type_[slice_])
 
 
-class ConcatExpr(Expr):
+class ConcatExpr(Expr, Light):
     """
     Concatenation.
 
@@ -457,8 +476,6 @@ class ConcatExpr(Expr):
             ConcatExpr((ConstExpr(UintType(5, default=5)), ... ConstExpr(UintType(16, default=3))))
             >>> int(expr)
             12325
-            >>> expr.type_
-            UintType(28, default=12325)
     """
 
     items: tuple[Expr, ...]
@@ -466,6 +483,10 @@ class ConcatExpr(Expr):
     _posargs: tuple[str, ...] = ("items",)
 
     def __init__(self, items: tuple[Expr, ...]):
+        for item in items:
+            if not isinstance(item.type_, BaseScalarType):
+                raise ValueError(f"Item {item} type is {item.type_}, but must be a Scalar Type")
+
         pairs = tuple(ConcatExpr.__iter_values(items))
         default = sum(value << shift for value, shift in pairs)
         width = pairs[-1][1] if pairs else 1
@@ -473,23 +494,18 @@ class ConcatExpr(Expr):
         super().__init__(items=items, type_=type_)  # type: ignore[call-arg]
 
     def __int__(self):
-        return sum(value << shift for value, shift in self.__iter_values(self.items))
+        return sum(int(value << shift) for value, shift in self.__iter_values(self.items))
 
     @staticmethod
     def __iter_values(items: tuple[Expr, ...]) -> Iterator[tuple[int, int]]:
         shift = 0
         for item in items:
-            if isinstance(item, int):
-                yield item, shift
-                shift += 32
-            else:
-                # TODO: fix type issue
-                yield int(item), shift  # type: ignore[call-overload]
-                shift += item.type_.width  # type: ignore[attr-defined]
+            yield item, shift
+            shift += item.type_.width  # type: ignore[attr-defined]
         yield 0, shift
 
 
-class TernaryExpr(Expr):
+class TernaryExpr(Expr, Light):
     """
     TernaryExpr Expression.
 
@@ -517,7 +533,7 @@ class TernaryExpr(Expr):
             UintType(16, default=10)
     """
 
-    type_: BaseScalarType = Field(repr=False)
+    type_: BaseScalarTypes = Field(repr=False)
     cond: BoolOp
     one: Expr
     other: Expr
@@ -533,7 +549,7 @@ class TernaryExpr(Expr):
         return int(self.other)
 
 
-class Log2Expr(Expr):
+class Log2Expr(Expr, Light):
     """
     Ceiling Logarithm to base of 2.
 
@@ -556,7 +572,7 @@ class Log2Expr(Expr):
             UintType(5, default=5)
     """
 
-    type_: BaseScalarType = Field(repr=False)
+    type_: BaseScalarTypes = Field(repr=False)
     expr: Expr
 
     _posargs: tuple[str, ...] = ("expr",)
@@ -568,7 +584,7 @@ class Log2Expr(Expr):
         return int(math.log(int(self.expr), 2))
 
 
-class MinimumExpr(Expr):
+class MinimumExpr(Expr, Light):
     """
     Smallest Value.
 
@@ -595,7 +611,7 @@ class MinimumExpr(Expr):
             UintType(5, default=5)
     """
 
-    type_: BaseScalarType = Field(repr=False)
+    type_: BaseScalarTypes = Field(repr=False)
     items: tuple[Expr, ...]
 
     _posargs: tuple[str, ...] = ("items",)
@@ -607,7 +623,7 @@ class MinimumExpr(Expr):
         return min(int(item) for item in self.items)
 
 
-class MaximumExpr(Expr):
+class MaximumExpr(Expr, Light):
     """
     Largest Value.
 
@@ -634,7 +650,7 @@ class MaximumExpr(Expr):
             UintType(5, default=5)
     """
 
-    type_: BaseScalarType = Field(repr=False)
+    type_: BaseScalarTypes = Field(repr=False)
     items: tuple[Expr, ...]
 
     _posargs: tuple[str, ...] = ("items",)
@@ -646,7 +662,7 @@ class MaximumExpr(Expr):
         return max(int(item) for item in self.items)
 
 
-class RangeExpr(Expr):
+class RangeExpr(Expr, Light):
     """
     Value Range.
 

@@ -27,6 +27,10 @@ Module Utilities.
 """
 
 from collections.abc import Iterator
+from inspect import getfile
+from pathlib import Path
+
+from caseconverter import snakecase
 
 from .baseclassinfo import BaseClassInfo, get_baseclassinfos
 
@@ -52,3 +56,20 @@ def is_tb_from_modname(modname: str) -> bool:
         modname: Module Name
     """
     return modname.endswith("_tb") or "_tb_" in modname
+
+
+def get_modname(cls):
+    """Module Name."""
+    return snakecase(cls.__name__.removesuffix("Mod"))
+
+
+def get_topmodname(cls):
+    """Top Module Name."""
+    modbaseinfos = tuple(get_modbaseinfos(cls))
+    clsname = modbaseinfos[-1].clsname
+    return snakecase(clsname.removesuffix("Mod"))
+
+
+def get_libname(cls):
+    """Module Library Name."""
+    return Path(getfile(cls)).parts[-2]

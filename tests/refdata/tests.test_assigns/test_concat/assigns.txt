@@ -1,0 +1,2 @@
+SET-ONLY
+ASSIGN: c_o  <----  ConcatExpr((Port(UintType(4), 'a_i', direction=IN), Port(UintType(4), 'b_i', direction=IN)))

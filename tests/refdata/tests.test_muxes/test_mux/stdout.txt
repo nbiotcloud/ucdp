@@ -1,0 +1,19 @@
+main (Signal(UintType(3), 'sel_s'),)
+q0_o  <----  ConstExpr(UintType(4, default=8))
+q1_o  <----  c1_i
+  sel_s==1:
+    q0_o  <----  a0_i
+    q1_o  <----  b1_i
+  sel_s==2:
+    q0_o  <----  b0_i
+  sel_s==4:
+    q0_o  <----  c0_i
+  sel_s==0:
+    q1_o  <----  a1_i
+  q0_o: c0_i
+  q1_o: b1_i
+slim (Signal(UintType(3), 'sel_s'),)
+q2_o  <----  None
+  sel_s==1:
+    q2_o  <----  a1_i
+  q2_o: a1_i

@@ -123,29 +123,77 @@ class Slice(LightObject):
 
     left: Any
     right: Any
+    width: Any
 
-    def __init__(self, left: Any | None = None, right: Any | None = None) -> None:
+    def __init__(  # noqa: C901, PLR0912
+        self,
+        left: Any | None = None,
+        right: Any | None = None,
+        width: Any | None = None,
+        direction: SliceDirection | None = None,
+    ) -> None:
         if isinstance(left, str):
-            assert right is None, right
+            if right is not None:
+                raise ValueError("'right' must be None")
+            if width is not None:
+                raise ValueError("'width' must be None")
             mat = _RE_STRING.match(left)
             if mat:
                 left = int(mat.group("left"))
                 right = int(mat.group("right")) if mat.group("right") else None
             else:
                 raise ValueError(f"Invalid Slice Specification {left!r}") from None
-        if left is None:
+
+        # this is quite complex here - but left, right and width may be u.Expr and we want to have them minimal
+        if width is not None:
+            if left is None:
+                # 'width' given
+                if direction in (None, SliceDirection.DOWN):
+                    # downwards
+                    if right is None:
+                        right = 0
+                    if isinstance(width, int) and width == 1:
+                        left = right
+                    elif isinstance(right, int) and right == 0:
+                        left = width - 1
+                    else:
+                        left = width - 1 + right
+                elif right is None:
+                    left = 0
+                    right = width - 1
+                else:
+                    left = right - (width - 1)
+
+            elif right is None:
+                # left and width given
+                if direction in (None, SliceDirection.DOWN):
+                    # downwards
+                    right = left - (width - 1)
+                else:
+                    # upwards
+                    right = left + (width - 1)
+            else:
+                # 'left', 'right' and 'width' given
+                raise ValueError("'left', 'right' AND 'width' given, this is one too much")
+
+        elif left is None:
             left = right
+            width = 1
         elif right is None:
             right = left
-        super().__init__(left=left, right=right)  # type: ignore[call-arg]
-
-    @property
-    def width(self) -> int:
-        """Slice Width."""
-        return abs(self.left - self.right) + 1
+            width = 1
+        else:
+            width = self._calc_width(left, right)
+        _check_direction(left, right, direction)
+        super().__init__(left=left, right=right, width=width)  # type: ignore[call-arg]
 
     @staticmethod
-    def cast(value, direction=None) -> "Slice":
+    def _calc_width(left: Any, right: Any) -> Any:
+        """Slice Width."""
+        return abs(left - right) + 1
+
+    @staticmethod
+    def cast(value, direction: SliceDirection | None = None) -> "Slice":
         """
         Create :any:`Slice` from `value`.
 
@@ -180,7 +228,7 @@ class Slice(LightObject):
         >>> Slice.cast("[4:15]", direction=DOWN)
         Traceback (most recent call last):
           ...
-        ValueError: Slice must be downwards but is 4:15
+        ValueError: Slice must be downwards but is upwards
         """
         slice_ = None
         if isinstance(value, Slice):
@@ -197,11 +245,9 @@ class Slice(LightObject):
             if mat:
                 left = int(mat.group("left"))
                 right = int(mat.group("right")) if mat.group("right") else None
-                slice_ = Slice(left=left, right=right)
+                slice_ = Slice(left=left, right=right, direction=direction)
         if slice_ is not None:
-            if direction:
-                if slice_.direction not in (None, direction):
-                    raise ValueError(f"Slice must be {direction.name.lower()}wards but is {slice_!s}")
+            _check_direction(slice_.left, slice_.right, direction)
             return slice_
         raise ValueError(f"Invalid Slice Specification {value!r}") from None
 
@@ -248,7 +294,7 @@ class Slice(LightObject):
         return ((2**self.width) - 1) << min(self.right, self.left)
 
     @property
-    def direction(self):
+    def direction(self) -> SliceDirection | None:
         """
         Direction.
 
@@ -259,11 +305,7 @@ class Slice(LightObject):
         >>> Slice(left=4).direction
         >>> Slice(right=4).direction
         """
-        if self.left > self.right:
-            return SliceDirection.DOWN
-        if self.left < self.right:
-            return SliceDirection.UP
-        return None
+        return _get_direction(self.left, self.right)
 
     def extract(self, word):
         """
@@ -298,3 +340,19 @@ class Slice(LightObject):
             yield from range(self.left, self.right - 1, -1)
         else:
             yield from range(self.left, self.right + 1, 1)
+
+
+def _get_direction(left: Any, right: Any) -> SliceDirection | None:
+    if left > right:
+        return SliceDirection.DOWN
+    if left < right:
+        return SliceDirection.UP
+    return None
+
+
+def _check_direction(left: Any, right: Any, direction: SliceDirection | None):
+    slicedirection = _get_direction(left, right)
+    if direction and slicedirection and direction != slicedirection:
+        req = direction.name.lower()
+        act = slicedirection.name.lower()
+        raise ValueError(f"Slice must be {req}wards but is {act}wards")

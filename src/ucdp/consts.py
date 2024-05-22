@@ -28,16 +28,20 @@ import re
 from typing import Literal
 
 AUTO: str = "auto"
-""" AUTO. """
+"""AUTO."""
 
 PAT_IDENTIFIER: str = r"^[a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?$"
-""" PAT_IDENTIFIER. """
+"""Pattern for Identifier."""
 
 RE_IDENTIFIER = re.compile(PAT_IDENTIFIER)
-""" PAT_IDENTIFIER. """
+"""Regular Expression for Identifier."""
+
+PAT_OPT_IDENTIFIER: str = r"^([a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?)?$"
+"""Pattern for Optional Identifier."""
+
 
 UPWARDS: str = ".."
-""" UPWARDS. """
+"""UPWARDS."""
 
 Gen = Literal["no", "inplace", "full"]
-""" Gen. """
+"""Gen."""

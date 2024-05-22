@@ -104,7 +104,7 @@ class CachedModelMetaclass(ModelMetaclass):
         except TypeError as exc:
             try:
                 hash(self)
-            except TypeError:
+            except TypeError:  # pragma: no cover
                 raise TypeError(f"{self} is not constant.") from None
             # Determine what caused TypeError
             for idx, arg in enumerate(args):

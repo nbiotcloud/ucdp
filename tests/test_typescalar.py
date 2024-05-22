@@ -201,3 +201,18 @@ def test_sint():
     assert var1.right == 4
     assert var1.slice_ == u.Slice("15:4")
     assert repr(var1) == "SintType(12, default=8, right=4)"
+
+
+def test_doc():
+    """Documentation."""
+    assert u.UintType(8).doc == u.Doc()
+
+    class MyUintType(u.UintType):
+        title: str = "mytitle"
+        descr: str = "mydescr"
+        comment: str = "mycomment"
+
+        def __init__(self):
+            super().__init__(8)
+
+    assert MyUintType().doc == u.Doc(title="mytitle", descr="mydescr", comment="mycomment")

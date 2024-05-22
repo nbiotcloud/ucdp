@@ -1,0 +1,21 @@
+Op(ConstExpr(UintType(16, default=10)), '+', ConstExpr(UintType(16, default=5))) 15 True UintType(16, default=10)
+Op(ConstExpr(UintType(16, default=10)), '-', ConstExpr(UintType(16, default=5))) 5 True UintType(16, default=10)
+Op(ConstExpr(UintType(16, default=10)), '*', ConstExpr(UintType(16, default=5))) 50 True UintType(16, default=10)
+Op(ConstExpr(UintType(16, default=10)), '//', ConstExpr(UintType(16, default=5))) 2 True UintType(16, default=10)
+Op(ConstExpr(UintType(16, default=10)), '%', ConstExpr(UintType(16, default=5))) 0 False UintType(16, default=10)
+Op(ConstExpr(UintType(16, default=10)), '**', ConstExpr(UintType(16, default=5))) 100000 True UintType(16, default=10)
+BoolOp(ConstExpr(UintType(16, default=5)), '<', ConstExpr(UintType(16, default=10))) 1 True BoolType()
+BoolOp(ConstExpr(UintType(16, default=5)), '<=', ConstExpr(UintType(16, default=10))) 1 True BoolType()
+Op(ConstExpr(UintType(16, default=10)), '>>', ConstExpr(UintType(16, default=5))) 0 False UintType(16, default=10)
+BoolOp(ConstExpr(UintType(16, default=5)), '>', ConstExpr(UintType(16, default=10))) 0 False BoolType()
+BoolOp(ConstExpr(UintType(16, default=5)), '>=', ConstExpr(UintType(16, default=10))) 0 False BoolType()
+Op(ConstExpr(UintType(16, default=10)), '<<', ConstExpr(UintType(16, default=5))) 320 True UintType(16, default=10)
+BoolOp(ConstExpr(UintType(16, default=5)), '==', ConstExpr(UintType(16, default=10))) 0 False BoolType()
+BoolOp(ConstExpr(UintType(16, default=5)), '!=', ConstExpr(UintType(16, default=10))) 1 True BoolType()
+Op(ConstExpr(UintType(16, default=10)), '&', ConstExpr(UintType(16, default=5))) 0 False UintType(16, default=10)
+Op(ConstExpr(UintType(16, default=10)), '|', ConstExpr(UintType(16, default=5))) 15 True UintType(16, default=10)
+Op(ConstExpr(UintType(16, default=10)), '^', ConstExpr(UintType(16, default=5))) 15 True UintType(16, default=10)
+-11 -11 True -
+-10 -10 True -
+10 10 True -
+10 10 True -

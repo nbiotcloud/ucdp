@@ -24,15 +24,9 @@
 
 """Exceptions."""
 
-from typing import Any
-
 
 class LockError(ValueError):
     """Lock."""
-
-    def __init__(self, inst: Any):
-        msg = f"{inst!r} is already locked for modification."
-        super().__init__(msg)
 
 
 class DuplicateError(ValueError):
@@ -49,3 +43,7 @@ class DirectionError(ValueError):
 
 class BuildError(RuntimeError):
     """Cannot Build Module."""
+
+
+class MultipleDriverError(ValueError):
+    """Multiple Driver Error."""

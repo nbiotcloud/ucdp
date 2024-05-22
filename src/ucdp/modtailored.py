@@ -30,12 +30,10 @@ Tailored Module.
 from abc import abstractmethod
 from typing import Any, ClassVar
 
-from caseconverter import snakecase
-
 from ._modbuilder import build
 from .modbase import BaseMod
 from .modfilelist import ModFileLists
-from .modutil import is_tb_from_modname
+from .modutil import get_libname, get_topmodname, is_tb_from_modname
 from .nameutil import join_names
 from .object import PrivateField
 
@@ -134,14 +132,14 @@ class ATailoredMod(BaseMod):
         """Top Module Name."""
         if self.parent:
             return self.parent.topmodname
-        return snakecase(self.__class__.__name__.removesuffix("Mod"))
+        return get_topmodname(self)
 
     @property
     def libname(self) -> str:
         """Library Name."""
         if self.parent:
             return self.parent.libname
-        return super().libname  # type: ignore[safe-super]
+        return get_libname(self.__class__)
 
     @property
     def is_tb(self) -> bool:

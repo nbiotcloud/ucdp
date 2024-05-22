@@ -93,6 +93,7 @@ A [Port][ucdp.signal.Port] is a module interface signal with a direction IN, OUT
 
 """
 
+from .casting import Casting
 from .ident import Ident
 from .orientation import FWD, AOrientation, Direction
 from .typebase import BaseType
@@ -113,6 +114,10 @@ class BaseSignal(Ident):
     """
 
     direction: AOrientation = FWD
+
+    def cast(self, other: Ident) -> Casting:
+        """Cast self=cast(other)."""
+        return self.type_.cast(other.type_)
 
 
 class Signal(BaseSignal):

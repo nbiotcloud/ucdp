@@ -104,19 +104,20 @@ from collections import deque
 from collections.abc import Callable, Iterable, Iterator
 from typing import Any
 
+from .casting import Casting
 from .consts import PAT_IDENTIFIER
 from .doc import Doc
 from .expr import ConcatExpr, ConstExpr, Expr, Log2Expr, MaximumExpr, MinimumExpr, Op, SliceOp, SOp, TernaryExpr
 from .namespace import Namespace
 from .nameutil import join_names, split_suffix
-from .object import Field, NamedObject
+from .object import Field, Light, NamedObject
 from .orientation import AOrientation
 from .typearray import ArrayType
 from .typebase import BaseType
 from .typestruct import BaseStructType
 
 
-class Ident(Expr, NamedObject):
+class Ident(Expr, NamedObject, Light):
     """Identifier.
 
     Args:
@@ -183,9 +184,13 @@ class Ident(Expr, NamedObject):
         """Iterate over Hierarchy."""
         return _iters([self], filter_=filter_, stop=stop, value=value)
 
+    def cast(self, other: "Ident") -> Casting:
+        """Cast self=cast(other)."""
+        return None
+
 
 #     def iterhier(self, filter_=None, stop=None, maxlevel=None, value=None) -> Iterator:
-#         """Iterate over Hierarchy."""
+#        """Iterate over Hierarchy."""
 #         hier: List[Ident] = []
 #         for ident in self.iter(stop=stop, maxlevel=maxlevel, value=value):
 #             hier = hier[: ident.level] + [ident]
@@ -193,7 +198,7 @@ class Ident(Expr, NamedObject):
 #                 yield tuple(hier)
 
 #     def get(self, name, value=None):
-#         """
+#        """
 #         Get Member of Hierarchy.
 
 #         Args:
@@ -202,7 +207,7 @@ class Ident(Expr, NamedObject):
 #         Keyword Args:
 #             value: value
 #             dym (bool): Enriched `ValueError` exception.
-#         """
+#        """
 #         if name.startswith("_"):
 #             name = f"{self.basename}{name}"
 #         return get_ident([self], name, value=value, dym=True)
@@ -224,12 +229,12 @@ class Idents(Namespace):
             yield from ident.iter(filter_=filter_, stop=stop)
 
     # def iterhier(self, filter_=None, stop=None, maxlevel=None) -> Iterator:
-    #     """Iterate over all Identifier and return hierarchy."""
+    #    """Iterate over all Identifier and return hierarchy."""
     #     for ident in self.values():
     #         yield from ident.iterhier(filter_=filter_, stop=stop, maxlevel=maxlevel)
 
     # def findfirst(self, filter_=None, stop=None, maxlevel=None) -> "Ident" | None:
-    #     """Iterate Over Identifier And Find First Match."""
+    #    """Iterate Over Identifier And Find First Match."""
     #     for ident in self.iter(filter_=filter_, stop=stop, maxlevel=maxlevel):
     #         return ident
     #     return None
@@ -247,7 +252,7 @@ class Idents(Namespace):
         return _get_ident(self.values(), name) is not None
 
 
-def _iters(idents: Iterable[Ident], filter_=None, stop=None, value=None) -> Iterator[Ident]:  # noqa: C901
+def _iters(idents: Iterable[Ident], filter_=None, stop=None, value=None) -> Iterator[Ident]:  # noqa: C901,PLR0912
     # highly optimized!
 
     for rootident in idents:
@@ -262,7 +267,11 @@ def _iters(idents: Iterable[Ident], filter_=None, stop=None, value=None) -> Iter
                 break
 
             type_ = ident.type_
-            # assert value is None, "TODO"
+            if value is not None:
+                if isinstance(type_, BaseStructType):
+                    raise ValueError(f"Cannot apply value {value} for {type_}")
+                type_ = type_.new(default=value)
+                ident = ident.new(type_=type_)
 
             if not filter_ or filter_(ident):
                 yield ident
@@ -309,18 +318,16 @@ def get_ident(idents: Iterable[Ident], name: str, value=None, dym=False) -> Iden
     raise ValueError(msg)
 
 
-# def get_subname(parent: Ident, ident: Ident):
-#     """Get name relative to parent."""
-#     if parent is ident:
-#         return ident.suffix
-#     parentbasename = parent.basename
-#     name = ident.name
-#     assert name.startswith(parentbasename)
-#     return name[len(parentbasename) + 1 :]
+def get_subname(parent: Ident, ident: Ident):
+    """Get name relative to parent."""
+    if parent is ident:
+        return ident.suffix
+    parentbasename = parent.basename
+    return ident.name.removeprefix(parentbasename)[1:]
 
 
 # def get_subnames(idents):
-#     """Return names of hierarchical idents."""
+#    """Return names of hierarchical idents."""
 #     names = []
 #     prefix = ""
 #     for ident in idents:
@@ -372,5 +379,5 @@ def get_expridents(expr: Expr) -> tuple[Ident, ...]:
             if item.name not in idents:
                 idents[item.name] = item
         else:
-            raise TypeError(f"Unknown expr {item}")
+            raise TypeError(f"Unknown expr {item}")  # pragma: no cover
     return tuple(idents.values())

@@ -25,6 +25,7 @@
 
 from collections import defaultdict
 from collections.abc import Iterator
+from functools import cached_property
 
 from .assigns import Assign, Assigns, Drivers
 from .doc import Doc
@@ -58,12 +59,12 @@ class Mux(NamedObject):
     doc: Doc = Doc()
 
     @computed_field(repr=False)
-    @property
+    @cached_property
     def __assigns(self) -> Assigns:
         return Assigns(targets=self.targets, sources=self.namespace, drivers=self.drivers)
 
     @computed_field(repr=False)
-    @property
+    @cached_property
     def __mux(self) -> dict[Expr, MuxBranch]:
         return defaultdict(dict)
 
@@ -97,8 +98,8 @@ class Mux(NamedObject):
         Set Multiplexer.
 
         Args:
-            out (Expr): Output to be assigned
-            value (Expr): Value.
+            out: Output to be assigned
+            value: Value.
         """
         parse = self.parser.parse
         outexpr: BaseSignal = parse(out, only=BaseSignal)  # type: ignore[assignment]

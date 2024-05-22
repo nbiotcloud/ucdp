@@ -26,9 +26,8 @@
 Hardware Module.
 """
 
-from caseconverter import snakecase
-
 from .modbasetop import BaseTopMod
+from .modutil import get_modname, get_topmodname
 
 
 class AMod(BaseTopMod):
@@ -61,9 +60,9 @@ class AMod(BaseTopMod):
     @property
     def modname(self) -> str:
         """Module Name."""
-        return snakecase(self.__class__.__name__.removesuffix("Mod"))
+        return get_modname(self.__class__)
 
     @property
     def topmodname(self) -> str:
         """Top Module Name."""
-        return self.modname
+        return get_topmodname(self.__class__)

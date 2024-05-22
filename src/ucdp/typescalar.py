@@ -37,8 +37,10 @@ from typing import Any, ClassVar
 
 from humannum import hex_
 
+from .casting import Casting
 from .slices import DOWN, Slice
-from .typebase import AScalarType, AVecType
+from .typebase import AScalarType, AVecType, BaseType
+from .typebaseenum import BaseEnumType
 
 INTEGER_WIDTH: int = 32
 
@@ -295,6 +297,20 @@ class BitType(AScalarType):
         """
         return isinstance(other, (BitType, UintType)) and int(other.width) == 1  # type: ignore[operator]
 
+    def cast(self, other: BaseType) -> Casting:
+        """
+        How to cast an input of type `self` from a value of type `other`.
+
+        `self = cast(other)`
+        """
+        if isinstance(other, (UintType, BitType, SintType, IntegerType)) and self.width == other.width:  # type: ignore[operator]
+            return [("", "")]
+
+        if isinstance(other, BaseEnumType) and self.width == other.keytype.width:  # type: ignore[operator]
+            return [("", "")]
+
+        return None
+
     def __getitem__(self, slice_):
         slice_ = Slice.cast(slice_, direction=DOWN)
         if slice_.width == 1 and slice_.right == 0:
@@ -341,7 +357,7 @@ class BoolType(AScalarType):
     ValueError: Cannot slice bit(s) 32:31 from BoolType()
     """
 
-    default: bool = False
+    default: Any = False
     width: ClassVar[int] = 1  # type: ignore[misc]
 
     @staticmethod
@@ -370,9 +386,10 @@ class BoolType(AScalarType):
         >>> example.check(True)
         1
         """
-        if value not in (False, True):
-            raise ValueError(f"{what} {value} is not a boolean")
-        return value
+        # Note: we need identity check here
+        if int(value) in (0, 1):
+            return value
+        raise ValueError(f"{what} {value} is not a boolean")
 
     def get_hex(self, value=None):
         """
@@ -528,15 +545,19 @@ class RailType(AScalarType):
         """
         return isinstance(other, RailType)
 
-    # def cast(self, other):
-    #     """
-    #     How to cast an input of type `self` from a value of type `other`.
+    def cast(self, other: BaseType) -> Casting:
+        """
+        How to cast an input of type `self` from a value of type `other`.
 
-    #     `self = cast(other)`
-    #     """
-    #     if isinstance(other, (BitType, UintType)) and other.width == 1:
-    #         yield "", ""
-    #     return NotImplemented
+        `self = cast(other)`
+        """
+        if isinstance(other, (BitType, UintType)) and other.width == 1:  # type: ignore[operator]
+            return [("", "")]
+
+        if isinstance(other, BaseEnumType) and self.width == other.keytype.width:  # type: ignore[operator]
+            return [("", "")]
+
+        return None
 
     def __getitem__(self, slice_):
         slice_ = Slice.cast(slice_, direction=DOWN)
@@ -670,15 +691,19 @@ class UintType(AVecType):
         """
         return isinstance(other, (UintType, BitType)) and self.width == other.width  # type: ignore[operator]
 
-    # def cast(self, other):
-    #     """
-    #     How to cast an input of type `self` from a value of type `other`.
+    def cast(self, other: BaseType) -> Casting:
+        """
+        How to cast an input of type `self` from a value of type `other`.
 
-    #     `self = cast(other)`
-    #     """
-    #     if isinstance(other, (SintType, IntegerType)) and self.width == other.width:
-    #         yield "", ""
-    #     return NotImplemented
+        `self = cast(other)`
+        """
+        if isinstance(other, (SintType, IntegerType)) and self.width == other.width:  # type: ignore[operator]
+            return [("", "")]
+
+        if isinstance(other, BaseEnumType) and self.width == other.keytype.width:
+            return [("", "")]
+
+        return None
 
     def __getitem__(self, slice_):
         slice_ = Slice.cast(slice_, direction=DOWN)
@@ -821,15 +846,19 @@ class SintType(AVecType):
         """
         return isinstance(other, (SintType, IntegerType)) and self.width == other.width  # type: ignore[operator]
 
-    # def cast(self, other):
-    #     """
-    #     How to cast an input of type `self` from a value of type `other`.
+    def cast(self, other: BaseType) -> Casting:
+        """
+        How to cast an input of type `self` from a value of type `other`.
 
-    #     `self = cast(other)`
-    #     """
-    #     if isinstance(other, (UintType, BitType)) and self.width == other.width:
-    #         yield "", ""
-    #     return NotImplemented
+        `self = cast(other)`
+        """
+        if isinstance(other, (UintType, BitType)) and self.width == other.width:  # type: ignore[operator]
+            return [("", "")]
+
+        if isinstance(other, BaseEnumType) and self.width == other.keytype.width:
+            return [("", "")]
+
+        return None
 
     def __getitem__(self, slice_):
         slice_ = Slice.cast(slice_, direction=DOWN)

@@ -23,6 +23,8 @@
 #
 """Test Module File Information."""
 
+from pathlib import Path
+
 import ucdp as u
 
 
@@ -32,8 +34,8 @@ def test_basic(example_simple):
     from uart_lib.uart import UartMod
 
     mod = UartMod()
-
-    filepath = example_simple / "src" / "uart_lib" / "uart" / "rtl" / "uart.sv"
+    prjroot = Path("$PRJROOT")
+    filepath = prjroot / "uart_lib" / "uart" / "rtl" / "uart.sv"
     modfilelist = u.resolve_modfilelist(mod, "hdl")
     assert modfilelist == HdlFileList(
         gen="full",

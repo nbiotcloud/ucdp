@@ -23,6 +23,8 @@
 #
 """Test Module File Information."""
 
+from pathlib import Path
+
 import ucdp as u
 
 
@@ -33,12 +35,13 @@ def test_basic(example_simple):
     mod = UartMod()
 
     info = u.FileSet.from_mod(mod, "hdl")
+    prjroot = Path("$PRJROOT")
     assert info.target is None
     assert info.filepaths == (
-        u.LibPath(libname="glbl_lib", path=example_simple / "src" / "glbl_lib" / "clk_gate" / "rtl" / "clk_gate.sv"),
-        u.LibPath(libname="uart_lib", path=example_simple / "src" / "uart_lib" / "uart" / "rtl" / "uart_regf.sv"),
-        u.LibPath(libname="uart_lib", path=example_simple / "src" / "uart_lib" / "uart" / "rtl" / "uart_core.sv"),
-        u.LibPath(libname="uart_lib", path=example_simple / "src" / "uart_lib" / "uart" / "rtl" / "uart.sv"),
+        u.LibPath(libname="glbl_lib", path=prjroot / "glbl_lib" / "clk_gate" / "rtl" / "clk_gate.sv"),
+        u.LibPath(libname="uart_lib", path=prjroot / "uart_lib" / "uart" / "rtl" / "uart_regf.sv"),
+        u.LibPath(libname="uart_lib", path=prjroot / "uart_lib" / "uart" / "rtl" / "uart_core.sv"),
+        u.LibPath(libname="uart_lib", path=prjroot / "uart_lib" / "uart" / "rtl" / "uart.sv"),
     )
     assert info.inc_dirs == ()
 

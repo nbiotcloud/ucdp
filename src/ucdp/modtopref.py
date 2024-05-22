@@ -63,6 +63,8 @@ class TopModRef(LightObject):
             TopModRef(ModRef('top_lib', 'top_mod'), sub='sub_lib.sub_mod')
             >>> u.TopModRef.cast('mod_tb_lib.mod_tb#top_lib.top_mod')
             TopModRef(ModRef('top_lib', 'top_mod'), tb=ModRef('mod_tb_lib', 'mod_tb'))
+            >>> u.TopModRef.cast(TopModRef(ModRef('top_lib', 'top_mod')))
+            TopModRef(ModRef('top_lib', 'top_mod'))
 
             Invalid Pattern:
 

@@ -34,7 +34,7 @@ class HdlFileList(u.ModFileList):
         # Path is relative to Module Python File
         # Environment variables are supported too
         # Wildcards are supported. Also in combination with environment variables!
-        "../src/{mod.libname}/{mod.topmodname}/{view}/{mod.modname}.sv",
+        "$PRJROOT/{mod.libname}/{mod.topmodname}/{view}/{mod.modname}.sv",
     )
 
     template_filepaths: u.ToPaths = ("main.mako",)

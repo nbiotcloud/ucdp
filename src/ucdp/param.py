@@ -65,6 +65,15 @@ Module Parameter .
         Param(ArrayType(BitType(), 3), 'param_bar_ack_p')
         Param(ArrayType(ArrayType(UintType(16), 5), 3), 'param_bar_data_p')
         Param(ArrayType(BitType(), 3), 'param_bar_req_p')
+
+    Value:
+
+        >>> for item in u.Param(u.UintType(6), "param_p").iter():
+        ...     print(repr(item))
+        Param(UintType(6), 'param_p')
+        >>> for item in u.Param(u.UintType(6), "param_p").iter(value=42):
+        ...     print(repr(item))
+        Param(UintType(6, default=42), 'param_p')
 """
 
 from collections.abc import Iterator

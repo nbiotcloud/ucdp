@@ -26,13 +26,9 @@
 Configurable Module.
 """
 
-from typing import ClassVar
-
-from caseconverter import snakecase
-
 from .config import BaseConfig
-from .modbase import BaseMod
 from .modbasetop import BaseTopMod
+from .modutil import get_topmodname
 from .nameutil import join_names
 
 
@@ -56,7 +52,6 @@ class AConfigurableMod(BaseTopMod):
     Configurable modules are located next to the python file and use the configuration name in the module name.
 
     Attributes:
-        default_config: Direction.
         config:
 
     ??? Example "AConfigurableMod Example"
@@ -69,7 +64,7 @@ class AConfigurableMod(BaseTopMod):
 
             >>> class ProcMod(u.AConfigurableMod):
             ...
-            ...     default_config = MyConfig('default')
+            ...     config: MyConfig = MyConfig('default')
             ...
             ...     def _build(self) -> None:
             ...         if self.config.feature:
@@ -91,25 +86,14 @@ class AConfigurableMod(BaseTopMod):
             Idents([Port(UintType(8), 'feature_i', direction=IN), Port(UintType(8), 'feature_o', direction=OUT)])
     """
 
-    default_config: ClassVar[BaseConfig | None] = None
     config: BaseConfig
-
-    def __init__(
-        self, parent: BaseMod | None = None, name: str | None = None, config: BaseConfig | None = None, **kwargs
-    ):
-        if config is None:
-            config = self.__class__.default_config
-        super().__init__(parent=parent, name=name, config=config, **kwargs)  # type: ignore[call-arg]
 
     @property
     def modname(self) -> str:
         """Module Name."""
-        modname = self.basename
-        if self.config:
-            return join_names(modname, self.config.name)
-        return modname
+        return join_names(self.basename, self.config.name)
 
     @property
     def topmodname(self) -> str:
         """Top Module Name."""
-        return snakecase(self.__class__.__name__.removesuffix("Mod"))
+        return get_topmodname(self.__class__)

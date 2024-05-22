@@ -26,16 +26,18 @@
 
 from pydantic import ValidationError
 
-from .assigns import Assign, Assigns, Drivers
+from .assigns import Assign, Assigns
 from .baseclassinfo import BaseClassInfo, get_baseclassinfos
 from .buildproduct import ABuildProduct
+from .casting import Casting
 from .config import AConfig, AUniqueConfig, AVersionConfig, BaseConfig
 from .const import Const
 from .consts import AUTO, PAT_IDENTIFIER
 from .dict import Dict
 from .doc import Doc
 from .docutil import doc_from_type
-from .exceptions import BuildError, DirectionError, DuplicateError, LockError
+from .drivers import Drivers, Source, Target
+from .exceptions import BuildError, DirectionError, DuplicateError, InvalidExpr, LockError, MultipleDriverError
 from .expr import (
     BoolOp,
     ConcatExpr,
@@ -48,15 +50,16 @@ from .expr import (
     RangeExpr,
     SliceOp,
     SOp,
+    TernaryExpr,
 )
-from .exprparser import ExprParser, const
+from .exprparser import ExprParser, cast_booltype, const
 from .exprresolver import ExprResolver
 from .filelistparser import FileListParser
 from .fileset import FileSet, LibPath
 from .flipflop import FlipFlop
 from .generate import generate
 from .humannum import Bin, Bytes, Hex
-from .ident import Ident, IdentFilter, Idents, IdentStop, get_ident
+from .ident import Ident, IdentFilter, Idents, IdentStop, get_expridents, get_ident
 from .iterutil import Names, namefilter, split
 from .loader import load
 from .mod import AMod
@@ -103,9 +106,10 @@ from .slices import DOWN, UP, Slice, SliceDirection
 from .test import Test
 from .typearray import ArrayType
 from .typebase import ACompositeType, AScalarType, AVecType, BaseScalarType, BaseType
+from .typebaseenum import BaseEnumType, EnumItem, EnumItemFilter
 from .typeclkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType
 from .typedescriptivestruct import DescriptiveStructType
-from .typeenum import AEnumType, AGlobalEnumType, BaseEnumType, BusyType, DisType, DynamicEnumType, EnaType, EnumItem
+from .typeenum import AEnumType, AGlobalEnumType, BusyType, DisType, DynamicEnumType, EnaType
 from .typescalar import BitType, BoolType, IntegerType, RailType, SintType, UintType
 from .typestring import StringType
 from .typestruct import (
@@ -123,13 +127,9 @@ from .util import extend_sys_path
 __all__ = [
     "ABuildProduct",
     "ACompositeType",
-    "parse_routepath",
-    "parse_routepaths",
-    "Routeable",
-    "Routeables",
-    "RoutePath",
     "AConfig",
     "AConfigurableMod",
+    "ACoreMod",
     "AEnumType",
     "AGenericTbMod",
     "AGlobalEnumType",
@@ -166,13 +166,14 @@ __all__ = [
     "bwdfilter",
     "BWDM",
     "Bytes",
+    "cast_booltype",
+    "Casting",
     "ClkRstAnType",
     "ClkType",
     "ConcatExpr",
     "const",
     "Const",
     "ConstExpr",
-    "ACoreMod",
     "DescriptiveStructType",
     "Dict",
     "didyoumean",
@@ -191,6 +192,7 @@ __all__ = [
     "DynamicStructType",
     "EnaType",
     "EnumItem",
+    "EnumItemFilter",
     "Expr",
     "ExprParser",
     "ExprResolver",
@@ -204,6 +206,7 @@ __all__ = [
     "FWDM",
     "generate",
     "get_baseclassinfos",
+    "get_expridents",
     "get_ident",
     "get_modbaseinfos",
     "get_repr",
@@ -219,6 +222,7 @@ __all__ = [
     "INM",
     "INOUT",
     "IntegerType",
+    "InvalidExpr",
     "is_tb_from_modname",
     "iter_modfilelists",
     "join_names",
@@ -235,6 +239,7 @@ __all__ = [
     "ModPostIter",
     "ModPreIter",
     "ModRef",
+    "MultipleDriverError",
     "Mux",
     "NamedLightObject",
     "NamedObject",
@@ -249,6 +254,8 @@ __all__ = [
     "OUT",
     "OUTM",
     "Param",
+    "parse_routepath",
+    "parse_routepaths",
     "parse",
     "PAT_IDENTIFIER",
     "Paths",
@@ -258,6 +265,9 @@ __all__ = [
     "RailType",
     "RangeExpr",
     "resolve_modfilelist",
+    "Routeable",
+    "Routeables",
+    "RoutePath",
     "RstAnType",
     "RstAType",
     "RstType",
@@ -268,6 +278,7 @@ __all__ = [
     "SliceDirection",
     "SliceOp",
     "SOp",
+    "Source",
     "split_prefix",
     "split_suffix",
     "split",
@@ -276,7 +287,9 @@ __all__ = [
     "StringType",
     "StructFilter",
     "StructItem",
+    "Target",
     "ternary",
+    "TernaryExpr",
     "Test",
     "TODO",
     "ToPaths",

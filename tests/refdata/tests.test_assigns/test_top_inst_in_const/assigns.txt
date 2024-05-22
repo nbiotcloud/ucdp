@@ -1,0 +1,3 @@
+SET-ONLY
+ASSIGN: data_i  ---->  ConstExpr(UintType(8, default=2))
+DRIVER: data_i: ConstExpr(UintType(8, default=2))

@@ -38,7 +38,7 @@ Hex = Annotated[
     PlainSerializer(lambda x: str(x), return_type=str),
     WithJsonSchema({"type": "string"}, mode="serialization"),
 ]
-"""Hex. """
+"""Hex."""
 
 Bytes = Annotated[
     humannum.Bytes,
@@ -46,7 +46,7 @@ Bytes = Annotated[
     PlainSerializer(lambda x: str(x), return_type=str),
     WithJsonSchema({"type": "string"}, mode="serialization"),
 ]
-"""Bytes. """
+"""Bytes."""
 
 Bin = Annotated[
     humannum.Bin,
@@ -54,4 +54,4 @@ Bin = Annotated[
     PlainSerializer(lambda x: str(x), return_type=str),
     WithJsonSchema({"type": "string"}, mode="serialization"),
 ]
-"""Bin. """
+"""Bin."""

@@ -57,7 +57,7 @@ class Top(Object):
             return ModPostIter(self.mod, filter_=filter_, stop=stop, maxlevel=maxlevel, unique=unique)
         return ModPreIter(self.mod, filter_=filter_, stop=stop, maxlevel=maxlevel, unique=unique)
 
-    def get_mods(self, namepats: Names | None = None, unique: bool = False):
+    def get_mods(self, namepats: Names | None = None, unique: bool = False, base: bool = False):
         """
         Return all modules matching `namepats`.
 
@@ -66,10 +66,11 @@ class Top(Object):
         Keyword Args:
             namepats: Iterable with name pattern (including `*` and `?`) or comma separated string
             unique (bool): Just return every module once.
+            base: namepats must match against module `basequalnames` instead of `qual_name`.
         """
-        return get_mods(self.mod, namepats=namepats, unique=unique)
+        return get_mods(self.mod, namepats=namepats, unique=unique, base=base)
 
-    def get_mod(self, namepats: Names):
+    def get_mod(self, namepats: Names, base: bool = False):
         """
         Return the one and just the one hardware module matching `namepats`.
 
@@ -77,8 +78,9 @@ class Top(Object):
 
         Keyword Args:
             namepats: Iterable with name pattern (including `*` and `?`) or comma separated string
+            base: namepats must match against module `basequalnames` instead of `qual_name`.
         """
-        return get_mod(self.mod, namepats)
+        return get_mod(self.mod, namepats, base=base)
 
     def get_stat(self) -> dict[str, int]:
         """Get Statistics."""

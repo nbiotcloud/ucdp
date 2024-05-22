@@ -28,6 +28,7 @@ Expression Parser.
 from functools import cached_property
 from typing import Any
 
+from ._castingnamespace import CastingNamespace
 from .consts import RE_IDENTIFIER
 from .exceptions import InvalidExpr
 from .expr import (
@@ -47,9 +48,8 @@ from .expr import (
 from .namespace import Namespace
 from .note import Note
 from .object import Object, computed_field
-from .typebase import BaseType
-from .typeenum import BaseEnumType
-from .typescalar import BitType, BoolType, UintType
+from .typebase import BaseScalarType, BaseType
+from .typescalar import BoolType
 
 Parseable = Expr | str | int | BaseType | list | tuple
 Constable = int | str | ConstExpr
@@ -57,26 +57,18 @@ Concatable = list | tuple | ConcatExpr
 
 
 class _Globals(dict):
-    def __init__(self, globals: dict, namespace: Namespace | None, strict: bool, context: str | None):
+    def __init__(self, globals: dict, namespace: Namespace | CastingNamespace | None, context: str | None):
         super().__init__(globals)
         self.namespace = namespace
-        self.strict = strict
         self.context = context
 
     def __missing__(self, key):
         if self.namespace:
-            if self.strict:
-                try:
-                    return self.namespace.get_dym(key)
-                except ValueError as err:
-                    raise NameError(f"{self.context}: {err}") from None
             try:
-                return self.namespace[key]
-            except ValueError:
-                pass
-        if self.strict:
-            raise KeyError(key)
-        return key
+                return self.namespace.get_dym(key)
+            except ValueError as err:
+                raise NameError(f"{self.context}: {err}") from None
+        return NameError(key)
 
 
 class ExprParser(Object):
@@ -85,12 +77,9 @@ class ExprParser(Object):
 
     Attributes:
         namespace (Namespace): Symbol namespace
-        strict: Do not ignore missing symbols.
-
     """
 
-    namespace: Namespace | None = None
-    strict: bool = True
+    namespace: Namespace | CastingNamespace | None = None
     context: str | None = None
 
     @computed_field
@@ -116,7 +105,22 @@ class ExprParser(Object):
             "minimum": self.minimum,
             "maximum": self.maximum,
         }
-        return _Globals(globals=globals_, namespace=self.namespace, strict=self.strict, context=self.context)
+        return _Globals(globals=globals_, namespace=self.namespace, context=self.context)
+
+    def __call__(self, expr: Parseable, only=None, types=None) -> Expr:
+        """
+        Parse Expression.
+
+        This is an alias to `parse`.
+
+        Args:
+            expr: Expression
+
+        Keyword Args:
+            only: Limit expression to these final element type.
+            types: Limit expression type to to these types.
+        """
+        return self.parse(expr, only=only, types=types)
 
     def parse_note(self, expr: Parseable | Note, only=None, types=None) -> Expr | Note:
         """
@@ -229,7 +233,7 @@ class ExprParser(Object):
                     pass
         try:
             globals: dict[str, Any] = self._globals  # type: ignore[assignment]
-            return eval(expr, globals)  #  # noqa: S307
+            return eval(expr, globals)  # noqa: S307
         except TypeError:
             raise InvalidExpr(expr) from None
         except SyntaxError as exc:
@@ -250,7 +254,7 @@ class ExprParser(Object):
                 ConstExpr(IntegerType(default=10))
                 >>> p.const("10'd20")
                 ConstExpr(UintType(10, default=20))
-                >>> p.const(ConstExpr(UintType(10, default=20)))
+                >>> p.const(u.ConstExpr(u.UintType(10, default=20)))
                 ConstExpr(UintType(10, default=20))
                 >>> p.const("4'h4")
                 ConstExpr(UintType(4, default=4))
@@ -290,7 +294,7 @@ class ExprParser(Object):
             Basics:
 
                 >>> import ucdp as u
-                >>> cond = u.Signal(u.UintType(2), 'if_s') == u.ConstExpr(UintType(2, default=1))
+                >>> cond = u.Signal(u.UintType(2), 'if_s') == u.ConstExpr(u.UintType(2, default=1))
                 >>> one = u.Signal(u.UintType(16, default=10), 'one_s')
                 >>> other = u.Signal(u.UintType(16, default=20), 'other_s')
                 >>> p = u.ExprParser()
@@ -372,9 +376,9 @@ def cast_booltype(expr):
     type_ = expr.type_
     if isinstance(type_, BoolType):
         return expr
-    if isinstance(type_, (BitType, UintType, BaseEnumType)) and int(type_.width) == 1:
-        return expr == ConstExpr(BitType(default=1))
-    raise ValueError("{expr} does not result in bool")
+    if isinstance(type_, BaseScalarType) and int(type_.width) == 1:
+        return expr == 1
+    raise ValueError(f"{expr} does not result in bool")
 
 
 _PARSER = ExprParser()

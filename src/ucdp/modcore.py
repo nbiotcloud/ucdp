@@ -30,7 +30,6 @@ from typing import ClassVar
 
 from .modbase import BaseMod
 from .modfilelist import ModFileLists
-from .modutil import is_tb_from_modname
 from .nameutil import join_names
 from .object import model_validator
 
@@ -78,9 +77,7 @@ class ACoreMod(BaseMod):
     @property
     def is_tb(self) -> bool:
         """Determine if module belongs to Testbench or Design."""
-        if self.parent:
-            return self.parent.is_tb
-        return is_tb_from_modname(self.modname)
+        return self.parent.is_tb
 
     @model_validator(mode="after")
     def __post_init(self) -> "ACoreMod":

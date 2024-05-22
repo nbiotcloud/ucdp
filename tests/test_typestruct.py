@@ -24,8 +24,9 @@
 
 """
 Struct Type Testing.
-
 """
+
+import re
 
 import ucdp as u
 from pytest import raises
@@ -41,14 +42,20 @@ def test_struct():
             self._add("data", u.UintType(8), title="title")
             self._add("valid", u.BitType(), descr="descr", ifdef="IFDEF")
             self._add("accept", u.BitType(), u.BWD, comment="comment")
-            with raises(ValueError) as exception:
+
+            msg = (
+                "name 'valid' already exists in test_struct.<locals>.MyStructType() "
+                "(StructItem('valid', BitType(), doc=Doc(descr='descr'), ifdef='IFDEF'))"
+            )
+            with raises(ValueError, match=re.escape(msg)):
                 self._add("valid", u.BitType())
-                assert str(exception.value) == "key 2 already exists in test_enum.<locals>.MyStructType()"
 
     struct = MyStructType()
-    with raises(u.LockError) as exception:
+
+    msg = "test_struct.<locals>.MyStructType(): Cannot add item 'lock'."
+    with raises(u.LockError, match=re.escape(msg)):
         struct._add("lock", u.BitType())
-        assert str(exception.value) == "key 2 already exists in test_enum.<locals>.MyStructType()"
+
     assert tuple(struct) == tuple(struct.keys())
     assert tuple(struct.keys()) == ("data", "valid", "accept")
     assert tuple(struct.values()) == (
@@ -127,3 +134,18 @@ def test_dynamicstruct():
     assert one != other
     assert tuple(one) == ("data", "valid")
     assert tuple(other) == ("accept",)
+
+
+def test_structitem():
+    """StructItem testing."""
+    doc = u.Doc(title="title", descr="descr", comment="comment")
+    item = u.StructItem(
+        "data",
+        u.UintType(8),
+        doc=doc,
+    )
+
+    assert item.doc is doc
+    assert item.title == "title"
+    assert item.descr == "descr"
+    assert item.comment == "comment"

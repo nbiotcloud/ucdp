@@ -83,7 +83,7 @@ class BaseModIter(Object):
     def _iter(
         mods: Iterable[BaseMod], filter_: FilterFunc, stop: StopFunc, stop_insts: StopFunc, maxlevel: MaxLevel
     ) -> Iterator[BaseMod]:
-        pass
+        pass  # pragma: no cover
 
 
 class ModPreIter(BaseModIter):
@@ -279,7 +279,7 @@ def get_mod(topmod: BaseMod, namepats: Names, base=False) -> BaseMod:
         return mods[0]
     listed_mods = mods or ModPostIter(topmod, unique=True)
     if base:
-        names = sorted(uniquer.unique(chain.from_iterable(mod.basequalnames) for mod in listed_mods))
+        names = sorted(uniquer.unique(chain.from_iterable(mod.basequalnames for mod in listed_mods)))
     else:
         names = sorted(uniquer.unique(mod.qualname for mod in listed_mods))
     if mods:
@@ -311,7 +311,7 @@ def get_mods(
         if base:
 
             def filter_(mod):
-                qualnames = uniquer.unique(*mod.basequalnames)
+                qualnames = uniquer.unique(mod.basequalnames)
                 return any(patfilter(qualname) for qualname in qualnames)
         else:
 

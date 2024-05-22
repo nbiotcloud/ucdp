@@ -28,8 +28,6 @@ Testbench Module.
 
 from abc import abstractmethod
 from collections.abc import Iterator
-from inspect import getfile
-from pathlib import Path
 from typing import Any, ClassVar
 
 from caseconverter import snakecase
@@ -38,6 +36,8 @@ from ._modbuilder import build
 from .modbase import BaseMod
 from .modfilelist import ModFileLists
 from .moditer import ModPreIter
+from .modtopref import TopModRef
+from .modutil import get_libname, get_modname, get_topmodname
 from .object import Field
 from .test import Test
 
@@ -119,25 +119,25 @@ class ATbMod(BaseMod):
             basename = snakecase(cls.__name__.removesuffix("Mod"))
             name = f"{basename}_{dut.modname}"
         if cls.dut_mods:
-            if isinstance(dut, cls.dut_mods):
+            if not isinstance(dut, cls.dut_mods):
                 raise TypeError(f"{cls} can only test {cls.dut_mods} modules, but not {dut.__class__} module")
         super().__init__(parent=None, name=name, dut=dut, **kwargs)  # type: ignore[call-arg]
 
     @property
     def modname(self) -> str:
         """Module Name."""
-        modbasename = snakecase(self.__class__.__name__.removesuffix("Mod"))
+        modbasename = get_modname(self.__class__)
         return f"{modbasename}_{self.dut.modname}"
 
     @property
     def topmodname(self) -> str:
         """Top Module Name."""
-        return snakecase(self.__class__.__name__.removesuffix("Mod"))
+        return get_topmodname(self.__class__)
 
     @property
     def libname(self) -> str:
         """Library Name."""
-        return Path(getfile(self.__class__)).parts[-2]
+        return get_libname(self.__class__)
 
     @property
     def is_tb(self) -> bool:
@@ -159,9 +159,24 @@ class ATbMod(BaseMod):
         """
         Iterate over `topmod` and return modules which can be tested by this testbench.
         """
-        yield from ModPreIter(mod, filter_=lambda mod: isinstance(mod, cls.dut_mods))
+        yield from ModPreIter(mod, filter_=lambda mod: isinstance(mod, cls.dut_mods), unique=True)
 
-    def tests(self) -> Iterator[Test]:
+    @classmethod
+    def search_dut_topmodrefs(cls, mod) -> Iterator[TopModRef]:
+        """
+        Iterate over `topmod` and return `TopModRef` for modules which can be tested by this testbench.
+        """
+        tbref = cls.get_modref()
+        topref = mod.get_modref()
+        topqualname = mod.qualname
+        for dut in cls.search_duts(mod):
+            dutqualname = dut.qualname
+            if dutqualname != topqualname:
+                yield TopModRef(top=topref, sub=dutqualname, tb=tbref)
+            else:
+                yield TopModRef(top=topref, tb=tbref)
+
+    def get_tests(self) -> Iterator[Test]:
         """
         Yield Tests to be run on design.
         """

@@ -1,0 +1,5 @@
+SET-ONLY
+ASSIGN: sub_my1_i  ---->  TODO
+ASSIGN: sub_my1_mode_i  ---->  TODO
+ASSIGN: sub_my1_send_i  ---->  TODO
+ASSIGN: sub_my1_return_o  <----  TODO

@@ -1,0 +1,21 @@
+SET-ONLY
+ASSIGN: sub_i  ---->  port_i
+ASSIGN: sub_my0_i  ---->  port_my0_i
+ASSIGN: sub_my0_mode_i  ---->  port_my0_mode_i
+ASSIGN: sub_my0_send_i  ---->  port_my0_send_i
+ASSIGN: sub_my0_return_o  <----  port_my0_return_o
+ASSIGN: sub_my1_o  <----  port_my1_o
+ASSIGN: sub_my1_mode_o  <----  port_my1_mode_o
+ASSIGN: sub_my1_send_o  <----  port_my1_send_o
+ASSIGN: sub_my1_return_i  ---->  port_my1_return_i
+ASSIGN: sub_uint_i  ---->  port_uint_i
+DRIVER: sub_i: port_i
+DRIVER: sub_my0_i: port_my0_i
+DRIVER: sub_my0_mode_i: port_my0_mode_i
+DRIVER: sub_my0_send_i: port_my0_send_i
+DRIVER: sub_my0_return_o: port_my0_return_o
+DRIVER: sub_my1_o: port_my1_o
+DRIVER: sub_my1_mode_o: port_my1_mode_o
+DRIVER: sub_my1_send_o: port_my1_send_o
+DRIVER: sub_my1_return_i: port_my1_return_i
+DRIVER: sub_uint_i: port_uint_i

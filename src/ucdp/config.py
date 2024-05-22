@@ -26,7 +26,7 @@
 import datetime
 import hashlib
 
-from .consts import PAT_IDENTIFIER
+from .consts import PAT_OPT_IDENTIFIER
 from .object import Field, LightObject
 
 
@@ -111,12 +111,12 @@ class AConfig(LightObject):
         * fix name type
     """
 
-    name: str = Field(pattern=PAT_IDENTIFIER)
+    name: str = Field(pattern=PAT_OPT_IDENTIFIER, default="")
 
     _posargs: tuple[str, ...] = ("name",)
 
-    def __init__(self, name, **kwargs):
-        super().__init__(name=name, **kwargs)
+    def __init__(self, name: str = "", **kwargs):
+        super().__init__(name=name, **kwargs)  # type: ignore[call-arg]
 
 
 class AUniqueConfig(LightObject):
@@ -165,7 +165,7 @@ class AUniqueConfig(LightObject):
 
 
 BaseConfig = AConfig | AUniqueConfig
-""" BaseConfig """
+"""BaseConfig"""
 
 
 class AVersionConfig(AConfig):

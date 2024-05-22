@@ -38,6 +38,7 @@ from typing import Any
 
 from pydantic import model_validator
 
+from .casting import Casting
 from .doc import Doc
 from .object import Light, Object
 from .slices import DOWN, Slice
@@ -65,13 +66,13 @@ class BaseType(Object):
         """
         raise NotImplementedError
 
-    def cast(self, other: "BaseType"):
+    def cast(self, other: "BaseType") -> Casting:
         """
         How to cast an input of type `self` from a value of type `other`.
 
         `self = cast(other)`
         """
-        return NotImplemented
+        return None
 
     @property
     def bits(self):
@@ -187,11 +188,7 @@ class AVecType(AScalarType):
     @property
     def slice_(self):
         """Slice."""
-        right = self.right
-        # Ensure slim expressions
-        if isinstance(right, int) and right == 0:
-            return Slice(left=self.width - 1, right=0)
-        return Slice(left=right + self.width - 1, right=right)
+        return Slice(width=self.width, right=self.right)
 
 
 class ACompositeType(BaseType):

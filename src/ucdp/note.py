@@ -31,7 +31,7 @@ class Note(LightObject):
 
 
 OPEN = Note(note="OPEN")
-""" Open Note."""
+"""Open Note."""
 
 TODO = Note(note="TODO")
-""" Todo Note."""
+"""Todo Note."""

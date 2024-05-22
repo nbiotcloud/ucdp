@@ -80,6 +80,7 @@ opt_show_diff = click.option(
 )
 opt_maxlevel = click.option("--maxlevel", "-L", type=int, help="Limit to maximum number of hierarchy levels.")
 opt_dry_run = click.option("--dry-run", default=False, is_flag=True, help="Do nothing.")
+opt_maxworkers = click.option("--maxworkers", "-J", type=int, help="Maximum Number of Processes.")
 
 
 def _load_top(ctx, top, paths) -> Top:
@@ -136,12 +137,13 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 @arg_filelist
 @opt_target
 @opt_show_diff
+@opt_maxworkers
 @pass_ctx
-def gen(ctx, top, path, filelist, target=None, show_diff=False):
+def gen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=None):
     """Generate."""
     top = _load_top(ctx, top, path)
     makolator = get_makolator(show_diff=show_diff)
-    generate(top.mod, filelist, target=target, makolator=makolator)
+    generate(top.mod, filelist, target=target, makolator=makolator, maxworkers=maxworkers)
 
 
 @ucdp.command(
@@ -159,12 +161,13 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 @opt_target
 @opt_show_diff
 @opt_dry_run
+@opt_maxworkers
 @pass_ctx
-def cleangen(ctx, top, path, filelist, target=None, show_diff=False, dry_run=False):
+def cleangen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=None, dry_run=False):
     """Clean Generated Files."""
     top = _load_top(ctx, top, path)
     makolator = get_makolator(show_diff=show_diff)
-    clean(top.mod, filelist, target=target, makolator=makolator, dry_run=dry_run)
+    clean(top.mod, filelist, target=target, makolator=makolator, maxworkers=maxworkers, dry_run=dry_run)
 
 
 @ucdp.command(

@@ -96,7 +96,7 @@ class BaseStructType(Dict, ACompositeType):
 
     filter_: StructFilter | None = None
     _items: dict[Any, Any] = PrivateField(default_factory=dict)
-    _locked: bool = PrivateField(default=False)
+    _is_locked: bool = PrivateField(default=False)
 
     def _add(
         self,
@@ -124,8 +124,8 @@ class BaseStructType(Dict, ACompositeType):
 
         :meta public:
         """
-        if self._locked:
-            raise LockError(self)
+        if self._is_locked:
+            raise LockError(f"{self}: Cannot add item {name!r}.")
         items = self._items
         if name not in items.keys():
             doc = doc_from_type(type_, title=title, descr=descr, comment=comment)
@@ -250,7 +250,7 @@ class AStructType(BaseStructType, Light):
     def model_post_init(self, __context: Any) -> None:
         """Run Build."""
         self._build()
-        self._locked = True
+        self._is_locked = True
 
 
 class AGlobalStructType(BaseStructType, Light):
@@ -277,7 +277,7 @@ class AGlobalStructType(BaseStructType, Light):
     >>> bus._add('data', u.UintType(8))
     Traceback (most recent call last):
       ...
-    ucdp.exceptions.LockError: BusType() is already locked for modification.
+    ucdp.exceptions.LockError: BusType(): Cannot add item 'data'.
     """
 
     def add(
@@ -350,7 +350,7 @@ class DynamicStructType(BaseStructType):
     >>> bus._add('data', u.UintType(8))
     Traceback (most recent call last):
       ...
-    ucdp.exceptions.LockError: BusType() is already locked for modification.
+    ucdp.exceptions.LockError: BusType(): Cannot add item 'data'.
     """
 
     def add(

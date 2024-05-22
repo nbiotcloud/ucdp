@@ -32,8 +32,9 @@ from functools import cached_property
 from typing import Any, ClassVar, Optional, Union, no_type_check
 
 from caseconverter import snakecase
+from uniquer import uniquetuple
 
-from .assigns import Assigns, AssignSource, Drivers, Note
+from .assigns import Assigns, Drivers, Note, Source
 from .baseclassinfo import get_baseclassinfos
 from .const import Const
 from .consts import UPWARDS
@@ -57,7 +58,6 @@ from .param import Param
 from .routepath import Routeables, RoutePath, parse_routepaths
 from .signal import BaseSignal, Port, Signal
 from .typebase import BaseType
-from .typeclkrst import ClkType, RstAnType
 from .typedescriptivestruct import DescriptiveStructType
 from .typestruct import StructItem
 
@@ -111,9 +111,7 @@ class BaseMod(NamedObject):
     def __init__(self, parent: Optional["BaseMod"] = None, name: str | None = None, **kwargs):
         cls = self.__class__
         if not cls.__name__.endswith("Mod"):
-            raise ValueError(f"Name of {cls} MUST end with 'Mod'")
-        if cls.__name__ == "BaseMod":
-            raise ValueError("BaseMod is forbidden to be used directly")
+            raise NameError(f"Name of {cls} MUST end with 'Mod'")
         if not name:
             if parent:
                 raise ValueError("'name' is required for sub modules.")
@@ -153,7 +151,7 @@ class BaseMod(NamedObject):
     @cached_property
     def basequalnames(self) -> tuple[str, ...]:
         """Qualified Name (Library Name + Module Name) of Base Modules."""
-        return tuple(f"{baseclassinfo.libname}.{baseclassinfo.modname}" for baseclassinfo in get_modbaseinfos(self))
+        return uniquetuple(f"{bci.libname}.{bci.modname}" for bci in get_modbaseinfos(self))
 
     @classmethod
     def get_modref(cls) -> ModRef:
@@ -165,14 +163,28 @@ class BaseMod(NamedObject):
             modclsname=bci.clsname,
         )
 
+    @classmethod
+    def get_basemodrefs(cls) -> tuple[ModRef, ...]:
+        """Python Class Reference."""
+        return tuple(
+            ModRef(
+                libname=bci.libname,
+                modname=bci.modname,
+                modclsname=bci.clsname,
+            )
+            for bci in get_modbaseinfos(cls)
+        )
+
     @property
     def hiername(self) -> str:
         """Hierarchical Name."""
-        has_hiername = self.has_hiername
-        basename = split_prefix(self.name)[1] if has_hiername else ""
-        if basename and self.parent:
-            return join_names(self.parent.hiername, basename)
-        return basename
+        mod: "BaseMod" | None = self
+        names: list[str] = []
+        while mod is not None:
+            if mod.has_hiername:
+                names.insert(0, split_prefix(mod.name)[1])
+            mod = mod.parent
+        return join_names(*names)
 
     @property
     @abstractmethod
@@ -266,7 +278,7 @@ class BaseMod(NamedObject):
             value = self.paramdict.pop(name, None)
             param = Param(type_=type_, name=name, doc=doc, ifdef=ifdef, value=value)
         if self.__is_locked:
-            raise LockError(f"{self}: Cannot add param {name!r}. Module built was already completed and is froozen.")
+            raise LockError(f"{self}: Cannot add parameter {name!r}.")
         self.namespace.add(param, exist_ok=exist_ok)
         self.params.add(param, exist_ok=exist_ok)
         return param
@@ -303,7 +315,7 @@ class BaseMod(NamedObject):
             doc = doc_from_type(type_, title=title, descr=descr, comment=comment)
             const = Const(type_=type_, name=name, doc=doc, ifdef=ifdef)
         if self.__is_locked:
-            raise LockError(f"{self}: Cannot add const {name!r}. Module built was already completed and is froozen.")
+            raise LockError(f"{self}: Cannot add constant {name!r}.")
         self.namespace.add(const, exist_ok=exist_ok)
         return const
 
@@ -363,7 +375,7 @@ class BaseMod(NamedObject):
             direction = Direction.from_name(name) or IN
         port = Port(type_, name, direction=direction, doc=doc, ifdef=ifdef)
         if self.__is_locked:
-            raise LockError(f"{self}: Cannot add port {name!r}. Module built was already completed and is froozen.")
+            raise LockError(f"{self}: Cannot add port {name!r}.")
         self.namespace[name] = port
         self.portssignals[name] = port
         self.ports[name] = port
@@ -400,7 +412,7 @@ class BaseMod(NamedObject):
         doc = doc_from_type(type_, title, descr, comment)
         signal = Signal(type_, name, direction=direction, doc=doc, ifdef=ifdef)
         if self.__is_locked:
-            raise LockError(f"{self}: Cannot add port {name!r}. Module built was already completed and is froozen.")
+            raise LockError(f"{self}: Cannot add signal {name!r}.")
         self.namespace[name] = signal
         self.portssignals[name] = signal
         for routepath in parse_routepaths(route):
@@ -477,8 +489,8 @@ class BaseMod(NamedObject):
         The assignment is done **without** routing.
 
         Args:
-            target (Expr): Target to be driven. Must be known within this module.
-            source (Expr): Source driving target. Must be known within this module.
+            target: Target to be driven. Must be known within this module.
+            source: Source driving target. Must be known within this module.
 
         Keyword Args:
             cast (bool): Cast. `False` by default.
@@ -486,13 +498,10 @@ class BaseMod(NamedObject):
             filter_ (str, Callable): Target names or function to filter target identifiers.
         """
         if self.__is_locked:
-            raise LockError(
-                f"{self}: Cannot add assign '{source}' to '{target}'. "
-                "Module built was already completed and is froozen."
-            )
+            raise LockError(f"{self}: Cannot add assign '{source}' to '{target}'.")
         parser = self.parser
         assigntarget: BaseSignal = parser.parse(target, only=BaseSignal)  # type: ignore[assignment]
-        assignsource: AssignSource = parser.parse_note(source, only=AssignSource)  # type: ignore[assignment]
+        assignsource: Source = parser.parse_note(source, only=Source)  # type: ignore[assignment]
         self.assigns.set(assigntarget, assignsource, cast=cast, overwrite=overwrite)
 
     def add_inst(self, inst: "BaseMod") -> None:
@@ -502,10 +511,12 @@ class BaseMod(NamedObject):
         Args:
             inst: Instance.
         """
+        if self.__is_locked:
+            raise LockError(f"{self}: Cannot add instance '{inst}'.")
         inst.set_parent(self)
         self.insts.add(inst)  # type: ignore[arg-type]
-        assigns = Assigns(targets=inst.ports, sources=self.namespace, drivers=self.drivers, all=True, sub=True)
-        parser = ExprParser(namespace=inst.ports, strict=False, context=str(inst))
+        assigns = Assigns(targets=inst.ports, sources=self.namespace, drivers=Drivers(), inst=True)
+        parser = ExprParser(namespace=inst.ports, context=str(inst))
         self.__instcons[inst.name] = assigns, parser
 
     def get_inst(self, inst_or_name: Union["BaseMod", str]) -> "BaseMod":
@@ -513,7 +524,10 @@ class BaseMod(NamedObject):
         Get Module Instance.
         """
         if not isinstance(inst_or_name, str):
-            return self.insts[inst_or_name.name]
+            try:
+                return self.insts[inst_or_name.name]
+            except KeyError:
+                raise ValueError(f"{inst_or_name} is not a sub-module of {self}") from None
         inst = self
         for part in inst_or_name.split("/"):
             if part == UPWARDS:
@@ -521,7 +535,10 @@ class BaseMod(NamedObject):
                     raise ValueError(f"{self}: {inst} has no parent.")
                 inst = inst.parent
             else:
-                inst = inst.insts[part]
+                try:
+                    inst = inst.insts.get_dym(part)  # type: ignore[assignment]
+                except ValueError as exc:
+                    raise ValueError(f"{self} has no sub-module {exc}") from None
         return inst
 
     def set_instcon(
@@ -547,26 +564,17 @@ class BaseMod(NamedObject):
             overwrite: Overwrite existing assignment.
         """
         if self.__is_locked:
-            raise LockError(
-                f"{self}: Cannot add {inst} instance connections of {port} to {expr}. "
-                "Module built was already completed and is froozen."
-            )
-        mod: "BaseMod" = self._resolve_inst(inst)
+            raise LockError(f"{self}: Cannot connect '{port}' of'{inst}' to '{expr}'.")
+        mod: "BaseMod" = self.get_inst(inst)
         assigns, parser = self.__instcons[mod.name]
         assigntarget: BaseSignal = parser.parse(port, only=BaseSignal)  # type: ignore[assignment]
-        assignsource: AssignSource = self.parser.parse_note(expr, only=AssignSource)  # type: ignore[assignment]
+        assignsource: Source = self.parser.parse_note(expr, only=Source)  # type: ignore[assignment]
         assigns.set(assigntarget, assignsource, cast=cast, overwrite=overwrite)
 
     def get_instcons(self, inst: Union["BaseMod", str]) -> Assigns:
         """Retrieve All Instance Connections Of `inst`."""
-        mod: "BaseMod" = self._resolve_inst(inst)
+        mod: "BaseMod" = self.get_inst(inst)
         return self.__instcons[mod.name][0]
-
-    def _resolve_inst(self, inst: Union["BaseMod", str]) -> "BaseMod":
-        if isinstance(inst, str):
-            return self.insts[inst]
-        # Ensure that instance is known
-        return self.insts[inst.name]
 
     def add_flipflop(
         self,
@@ -596,12 +604,12 @@ class BaseMod(NamedObject):
         """
         parser = self.parser
         if self.__is_locked:
-            raise LockError(f"{self}: Cannot add flipflop {name!r}. Module built was already completed and is froozen.")
+            raise LockError(f"{self}: Cannot add flipflop {name!r}.")
         out = self.add_signal(type_, name)
         # clk
-        clk_sig: BaseSignal = parser.parse(clk, types=ClkType, only=BaseSignal)  # type: ignore[assignment]
+        clk_sig: BaseSignal = parser.parse(clk, only=BaseSignal)  # type: ignore[assignment]
         # rst_an
-        rst_an_sig: BaseSignal = parser.parse(rst_an, types=RstAnType, only=BaseSignal)  # type: ignore[assignment]
+        rst_an_sig: BaseSignal = parser.parse(rst_an, only=BaseSignal)  # type: ignore[assignment]
         # nxt
         if nxt is None:
             nxt = self.add_signal(type_, f"{out.basename}_nxt_s")
@@ -672,13 +680,13 @@ class BaseMod(NamedObject):
         See :any:`Mux.set()` how to fill the multiplexer and the example above.
         """
         if self.__is_locked:
-            raise LockError(f"{self}: Cannot add mux {name!r}. Module built was already completed and is froozen.")
+            raise LockError(f"{self}: Cannot add mux {name!r}.")
         doc = Doc(title=title, descr=descr, comment=comment)
         self.__muxes[name] = mux = Mux(
             name=name,
             targets=self.portssignals,
             namespace=self.namespace,
-            drivers=self.drivers,
+            # drivers=self.drivers,
             parser=self.parser,
             doc=doc,
         )
@@ -694,8 +702,8 @@ class BaseMod(NamedObject):
     def get_mux(self, mux: Mux | str) -> Mux:
         """Get Multiplexer."""
         if not isinstance(mux, str):
-            return self.__muxes[mux.name]
-        return self.__muxes[mux]
+            return self.__muxes.get_dym(mux.name)  # type: ignore[return-value]
+        return self.__muxes.get_dym(mux)  # type: ignore[return-value]
 
     @property
     def is_locked(self) -> bool:
@@ -715,7 +723,7 @@ class BaseMod(NamedObject):
         later. Use a different module type or enumeration or struct type, if you have issues with locking.
         """
         if self.__is_locked:
-            raise LockError(f"{self} already locked. Cannot lock again.")
+            raise LockError(f"{self} is already locked. Cannot lock again.")
         for _, obj in self:
             if isinstance(obj, Namespace):
                 obj.lock()

@@ -23,8 +23,12 @@
 #
 """Test Assigns."""
 
+import re
+from pathlib import Path
+
 import ucdp as u
 from pytest import fixture, raises
+from test2ref import assert_refdata
 
 
 class ModeType(u.AEnumType):
@@ -67,7 +71,14 @@ def top() -> u.Idents:
             u.Port(MyType(), "port_o"),
             u.Port(MyType(), "other_i"),
             u.Port(MyType(), "other_o"),
+            u.Port(StructType(), "struct_i"),
+            u.Port(StructType(), "struct_o"),
+            u.Signal(StructType(), "struct_s"),
             u.Signal(MyType(), "sig_s"),
+            u.Port(u.UintType(8), "data_i"),
+            u.Port(u.UintType(8), "data_o"),
+            u.Signal(u.UintType(8), "data0_s"),
+            u.Signal(u.UintType(8), "data1_s"),
         ]
     )
 
@@ -79,412 +90,324 @@ def sub() -> u.Idents:
         [
             u.Port(MyType(), "sub_i"),
             u.Port(MyType(), "sub_o"),
+            u.Port(u.UintType(8), "data_i"),
+            u.Port(u.UintType(8), "data_o"),
         ]
     )
 
 
-# @fixture
-# def some_ports():
-#     """Some Ports."""
-#     return u.Idents(
-#         [
-#             u.Port(u.ClkRstAnType(), "main_i"),
-#             u.Port(u.UintType(8), "vec_a_i"),
-#             u.Port(u.UintType(8), "vec_a_o"),
-#             u.Port(MyType(), "my_a_i"),
-#             u.Port(MyType(), "my_a_o"),
-#             u.Port(ComplexType(), "comp_lex_i"),
-#             u.Port(ComplexType(), "comp_lex_o"),
-#         ]
-#     )
+def _dump_assigns(assigns: u.Assigns, path: Path, name: str = "assigns", full: bool = False):
+    filepath = path / f"{name}.txt"
+    with filepath.open("w") as file:
+        if not full:
+            file.write("SET-ONLY\n")
+        for assign in assigns:
+            if full or assign.source is not None:
+                file.write(f"ASSIGN: {assign}\n")
+        if assigns.drivers:
+            for name, value in assigns.drivers:
+                file.write(f"DRIVER: {name}: {value}\n")
 
 
-# @fixture
-# def some_ports_signals(ports):
-#     """Some Signals."""
-#     return u.Idents(
-#         [
-#             u.Signal(u.UintType(8), "vec_a_s"),
-#             u.Signal(u.UintType(4), "vec_b_s"),
-#             u.Signal(u.UintType(4), "vec_c_s"),
-#             u.Signal(MyType(), "my_a_s"),
-#             u.Signal(MyType(), "my_b_s"),
-#             u.Signal(ComplexType(), "comp_lex_s"),
-#             *ports,
-#         ]
-#     )
+def test_basic(top):
+    """Assign Basics."""
+    doc = u.Doc(title="title", descr="descr", comment="comment")
+    target = u.Port(u.UintType(8), "a_i", doc=doc, ifdef="IFDEF")
+    source = u.Signal(u.UintType(8), "b_s")
+    assign = u.Assign(target=target, source=source)
+
+    assert assign.name == "a_i"
+    assert assign.type_ == u.UintType(8)
+    assert assign.doc is doc
+    assert assign.direction == u.IN
+    assert assign.ifdef == "IFDEF"
 
 
-# @fixture
-# def ports():
-#     """Some Ports."""
-#     return u.Idents(
-#         [
-#             u.Port(u.ClkRstAnType(), "main_i"),
-#             u.Port(u.UintType(8), "vec_a_i"),
-#             u.Port(u.UintType(8), "vec_a_o"),
-#             u.Port(u.UintType(14), "vec_b_i"),
-#             u.Port(u.UintType(14, default=0xFF), "vec_b_o"),
-#             u.Port(u.UintType(4), "vec_c_i"),
-#             u.Port(u.UintType(4), "vec_c_o"),
-#             u.Port(u.UintType(8), "vec_d_i"),
-#             u.Port(u.UintType(8), "vec_d_o"),
-#             u.Port(MyType(), "my_a_i"),
-#             u.Port(MyType(), "my_a_o"),
-#             u.Port(MyType(), "my_b_i"),
-#             u.Port(MyType(), "my_b_o"),
-#             u.Port(ComplexType(), "comp_lex_i"),
-#             u.Port(ComplexType(), "comp_lex_o"),
-#         ]
-#     )
-
-
-# @fixture
-# def ports_signals(ports):
-#     """Some Signals."""
-#     return u.Idents(
-#         [
-#             u.Signal(u.UintType(8), "vec_a_s"),
-#             u.Signal(u.UintType(4), "vec_b_s"),
-#             u.Signal(u.UintType(4), "vec_c_s"),
-#             u.Signal(MyType(), "my_a_s"),
-#             u.Signal(MyType(), "my_b_s"),
-#             u.Signal(ComplexType(), "comp_lex_s"),
-#             *ports,
-#         ]
-#     )
-
-
-# @fixture
-# def othersignals():
-#     """Other Signals."""
-#     return u.Idents(
-#         [
-#             u.Signal(u.UintType(8), "ovec_a_s"),
-#             u.Signal(u.UintType(4), "ovec_b_s"),
-#             u.Signal(u.UintType(4), "ovec_c_s"),
-#             u.Signal(MyType(), "omy_a_s"),
-#             u.Signal(MyType(), "omy_b_s"),
-#             u.Signal(ComplexType(), "ocomp_lex_s"),
-#         ]
-#     )
-
-
-# @fixture
-# def params():
-#     """Other Signals."""
-#     return u.Idents(
-#         [
-#             u.Param(u.UintType(8), "a_p"),
-#             u.Param(u.UintType(4), "b_p"),
-#         ]
-#     )
-
-
-def test_assign_empty(top):
+def test_assign_empty(top, tmp_path):
     """Empty Assigns."""
     assigns = u.Assigns(targets=top, sources=top)
-    assert [str(assign) for assign in assigns] == []
+    _dump_assigns(assigns, tmp_path, full=True)
+    assert_refdata(test_assign_empty, tmp_path)
 
 
-def test_assign_empty_all(top):
-    """Empty Assigns for all."""
-    assigns = u.Assigns(targets=top, sources=top, all=True)
-    assert [str(assign) for assign in assigns] == [
-        "port_i  ---->  None",
-        "port_my0_i  ---->  None",
-        "port_my0_mode_i  ---->  None",
-        "port_my0_send_i  ---->  None",
-        "port_my0_return_o  <----  None",
-        "port_my1_o  <----  None",
-        "port_my1_mode_o  <----  None",
-        "port_my1_send_o  <----  None",
-        "port_my1_return_i  ---->  None",
-        "port_uint_i  ---->  None",
-        "port_o  <----  None",
-        "port_my0_o  <----  None",
-        "port_my0_mode_o  <----  None",
-        "port_my0_send_o  <----  None",
-        "port_my0_return_i  ---->  None",
-        "port_my1_i  ---->  None",
-        "port_my1_mode_i  ---->  None",
-        "port_my1_send_i  ---->  None",
-        "port_my1_return_o  <----  None",
-        "port_uint_o  <----  None",
-        "other_i  ---->  None",
-        "other_my0_i  ---->  None",
-        "other_my0_mode_i  ---->  None",
-        "other_my0_send_i  ---->  None",
-        "other_my0_return_o  <----  None",
-        "other_my1_o  <----  None",
-        "other_my1_mode_o  <----  None",
-        "other_my1_send_o  <----  None",
-        "other_my1_return_i  ---->  None",
-        "other_uint_i  ---->  None",
-        "other_o  <----  None",
-        "other_my0_o  <----  None",
-        "other_my0_mode_o  <----  None",
-        "other_my0_send_o  <----  None",
-        "other_my0_return_i  ---->  None",
-        "other_my1_i  ---->  None",
-        "other_my1_mode_i  ---->  None",
-        "other_my1_send_i  ---->  None",
-        "other_my1_return_o  <----  None",
-        "other_uint_o  <----  None",
-        "sig_s  ---->  None",
-        "sig_my0_s  ---->  None",
-        "sig_my0_mode_s  ---->  None",
-        "sig_my0_send_s  ---->  None",
-        "sig_my0_return_s  <----  None",
-        "sig_my1_s  <----  None",
-        "sig_my1_mode_s  <----  None",
-        "sig_my1_send_s  <----  None",
-        "sig_my1_return_s  ---->  None",
-        "sig_uint_s  ---->  None",
-    ]
+def test_assign_empty_inst(top, tmp_path):
+    """Empty Assigns for inst."""
+    assigns = u.Assigns(targets=top, sources=top, inst=True)
+    _dump_assigns(assigns, tmp_path, full=True)
+    assert_refdata(test_assign_empty_inst, tmp_path)
 
 
-# # def test_assign(tmp_path, ports, signals):
-# #     """Test Assigns"""
-# #     assigns = u.Assigns(ports, signals, drivers={})
+def test_reassign(top, tmp_path):
+    """Assigns."""
+    assigns = u.Assigns(targets=top, sources=top)
+    assigns.set(top["port_o"], top["other_i"])
 
-# #     # valid assignment
-# #     assigns.set(ports["vec_a_o"], ports["vec_a_i"])
+    msg = "'port_o' already assigned to 'other_i'"
+    with raises(ValueError, match=re.escape(msg)):
+        assigns.set(top["port_o"], top["port_i"])
 
-# #     # re-assignement
-# #     with raises(ValueError) as raised:
-# #         assigns.set(ports["vec_a_o"], ports["vec_d_i"])
-# #     assert (
-# #         str(raised.value)
-# #         == "'Port(UintType(8), name='vec_a_o')' already assigned to 'Port(UintType(8), name='vec_a_i')'"
-# #     )
-
-# #     # assign type mismatch
-# #     # with raises(TypeError) as raised:
-# #     #     assigns.set(ports["vec_c_o"], ports["vec_b_i"])
-# #     # assert str(raised.value) == "Cannot assign 'vec_b_i' of UintType(14) to 'vec_c_o' of UintType(4)"
-# #     # with raises(TypeError) as raised:
-# #     #     assigns.set(ports["vec_c_o"], ports["vec_b_i"][12:2])
-# #     # assert str(raised.value) == "Cannot assign 'vec_b_i[12:2]' of UintType(11) to 'vec_c_o' of UintType(4)"
-
-# #     # assign
-# #     assigns.set(ports["vec_c_o"], ports["vec_b_i"][12:9])
-
-# #     # assign Concat
-# #     assigns.set(ports["vec_d_o"], u.concat((ports["vec_c_i"], ports["vec_c_i"])))
-
-# #     # # no target
-# #     # with raises(ValueError) as raised:
-# #     #     assigns.set(signals["my_b_s"], signals["my_a_s"])
-# #     # assert str(raised.value) == "'my_b_s' is not available within target namespace"
-
-# #     assigns.set(ports["my_a_o"], ports["my_a_i"])
-# #     assigns.set(ports["my_b_o"], signals["my_a_s"])
-
-# #     assert_assigns(tmp_path, "test_assign", assigns)
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_reassign, tmp_path)
 
 
-# # def test_assign_inst(tmp_path, ports, signals):
-# #     """Test Assign with complete=True."""
-# #     assigns = u.Assigns(ports, signals, inst=True)
-# #     assert_assigns(tmp_path, "test_assign_inst", assigns)
+def test_direction_error(top, tmp_path):
+    """Assigns."""
+    assigns = u.Assigns(targets=top, sources=top)
+
+    msg = "Cannot drive 'other_i' by 'port_i'"
+    with raises(ValueError, match=re.escape(msg)):
+        assigns.set(top["other_i"], top["port_i"])
+
+    assigns.set(top["other_o"], top["port_o"])
+    assigns.set(top["port_i"], top["port_o"])
+    assigns.set(top["data0_s"], top["data1_s"])
+
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_direction_error, tmp_path)
 
 
-# # def test_assign_slice(tmp_path, ports, signals):
-# #     """Test Assign slice."""
-# #     assigns = u.Assigns(ports, signals)
-# #     assigns.set_default(ports["vec_a_o"], ports["vec_a_i"])
-# #     assigns.set(ports["vec_a_o"][4:3], ports["vec_d_i"][3:2])
-# #     assigns.set(ports["vec_b_o"][6:3], ports["vec_c_i"])
-# #     assigns.set(ports["vec_b_o"][12:9], ports["vec_c_i"])
-# #     assert_assigns(tmp_path, "test_assign_slice", assigns)
+def test_inst_direction_error(top, tmp_path):
+    """Assigns."""
+    assigns = u.Assigns(targets=top, inst=True)
+
+    msg = "Cannot drive 'other_o' by 'port_i'"
+    with raises(ValueError, match=re.escape(msg)):
+        assigns.set(top["other_o"], top["port_i"])
+
+    assigns.set(top["other_o"], top["port_o"])
+    assigns.set(top["other_i"], top["port_o"])
+    assigns.set(top["data0_s"], top["data1_s"])
+
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_inst_direction_error, tmp_path)
 
 
-# # def test_assign_slice_inst(tmp_path, ports, signals):
-# #     """Test Assign slice at inst."""
-# #     assigns = u.Assigns(ports, signals, inst=True)
-# #     assigns.set(ports["vec_a_i"][4:3], ports["vec_d_o"][3:2])
-# #     assigns.set(ports["vec_b_o"][6:3], ports["vec_c_o"])
-# #     assigns.set(ports["vec_b_o"][12:9], ports["vec_c_o"])
-# #     assert_assigns(tmp_path, "test_assign_inst", assigns)
+def test_drivers(top, tmp_path):
+    """Multiple Drivers."""
+    drivers = u.Drivers()
+    assigns0 = u.Assigns(targets=top, sources=top, drivers=drivers)
+    assigns0.set(top["port_o"], top["other_i"])
+    assigns1 = u.Assigns(targets=top, sources=top, drivers=drivers)
+
+    msg = "'other_i' already driven by 'other_i'"
+    with raises(u.MultipleDriverError, match=re.escape(msg)):
+        assigns1.set(top["port_o"], top["other_i"])
+
+    _dump_assigns(assigns0, tmp_path, name="assign0")
+    _dump_assigns(assigns1, tmp_path, name="assign1")
+    assert_refdata(test_drivers, tmp_path)
 
 
-# def test_top_dir_err(top):
-#     """Top - Direction Error."""
-#     drivers = u.Drivers()
-#     assigns = u.Assigns(targets=top, sources=top, drivers=drivers)
+def test_lock(top, tmp_path):
+    """Lock."""
+    assigns = u.Assigns(targets=top, sources=top)
+    assert assigns.is_locked is False
 
-#     # top-input MUST NOT drive from top-input
-#     with raises(u.DirectionError) as exc:
-#         assigns.set(top["port_i"], top["other_i"])
-#     assert str(exc.value) == "Cannot connect IN 'port_i' and IN 'other_i'"
+    assigns.lock()
 
-#     # top-output MUST NOT drive output top-output
-#     with raises(u.DirectionError) as exc:
-#         assigns.set(top["port_o"], top["other_o"])
-#     assert str(exc.value) == "Cannot connect OUT 'port_o' and OUT 'other_o'"
+    assert assigns.is_locked is True
 
-#     # Drivers not modified
-#     assert tuple(drivers) == ()
+    msg = "Cannot set 'other_i' to 'port_o'"
+    with raises(u.LockError, match=re.escape(msg)):
+        assigns.set(top["port_o"], top["other_i"])
+
+    msg = "Cannot set default 'other_i' to 'port_o'"
+    with raises(u.LockError, match=re.escape(msg)):
+        assigns.set_default(top["port_o"], top["other_i"])
+
+    msg = "Assigns are already locked. Cannot lock again."
+    with raises(u.LockError, match=re.escape(msg)):
+        assigns.lock()
+
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_lock, tmp_path)
 
 
-def test_top_in(top):
+def test_assign(top, tmp_path):
+    """Test Assigns."""
+    assigns = u.Assigns(targets=top)
+
+    # valid assignment
+    assigns.set(top["port_o"], top["port_i"])
+
+    # re-assignement
+    msg = "'port_o' already assigned to 'port_i'"
+    with raises(ValueError, match=re.escape(msg)):
+        assigns.set(top["port_o"], top["other_i"])
+
+    # assign
+    msg = "Cannot assign 'data_o' of type UintType(8) to 'port_i' of type MyType()."
+    with raises(TypeError, match=re.escape(msg)):
+        assigns.set(top["port_i"], top["data_o"])
+
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_assign, tmp_path)
+
+
+def test_concat(tmp_path):
+    """Test Concatenation."""
+    a_i = u.Port(u.UintType(4), "a_i")
+    b_i = u.Port(u.UintType(4), "b_i")
+    c_o = u.Port(u.UintType(8), "c_o")
+    idents = u.Idents([a_i, b_i, c_o])
+    assigns = u.Assigns(targets=idents)
+
+    assigns.set(c_o, u.ConcatExpr((a_i, b_i)))
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_concat, tmp_path)
+
+
+def test_const(top, tmp_path):
+    """Type Error."""
+    assigns = u.Assigns(targets=top)
+    constscal = u.Const(u.UintType(8), "scal")
+    myconst = u.Const(MyType(), "const_c")
+
+    msg = "Target const_c is not a Signal, Port or Slice of them"
+    with raises(ValueError, match=re.escape(msg)):
+        assigns.set(myconst, top["port_i"])
+
+    assigns.set(top["data_o"], constscal)
+
+    msg = "Target const_my0_return_c is not a Signal or Port"
+    with raises(ValueError, match=re.escape(msg)):
+        assigns.set(top["port_o"], myconst)
+
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_const, tmp_path)
+
+
+def test_assign_slice(tmp_path):
+    """Test Assign slice."""
+    a_i = u.Port(u.UintType(4), "a_i")
+    b_i = u.Port(u.UintType(4), "b_i")
+    c_i = u.Port(u.UintType(4), "c_i")
+    c_o = u.Port(u.UintType(10, default=0x1A1), "c_o")
+    idents = u.Idents([a_i, b_i, c_o])
+    drivers = u.Drivers()
+    assigns = u.Assigns(targets=idents, drivers=drivers)
+
+    assigns.set(c_o[3:1], a_i[2:0])
+    assigns.set(c_o[6:5], b_i[2:1])
+
+    msg = "Slice 6:5 is already taken by SliceOp(Port(UintType(4), 'b_i', direction=IN), Slice('2:1'))"
+    with raises(ValueError, match=re.escape(msg)):
+        assigns.set(c_o[6:5], c_i[2:1])
+
+    msg = "Cannot slice bit(s) 11 from UintType(10, default=417)"
+    with raises(ValueError, match=re.escape(msg)):
+        assigns.set(c_o[11], b_i[3])
+
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_assign_slice, tmp_path)
+
+
+def test_assign_slice_inst(tmp_path):
+    """Test Assign slice."""
+    a_i = u.Port(u.UintType(4), "a_i")
+    b_i = u.Port(u.UintType(4), "b_i")
+    c_i = u.Port(u.UintType(4), "c_i")
+    c_o = u.Port(u.UintType(10, default=0x1A1), "c_o")
+    idents = u.Idents([a_i, b_i, c_i, c_o])
+    drivers = u.Drivers()
+    assigns = u.Assigns(targets=idents, drivers=drivers, inst=True)
+
+    assigns.set(c_o[3:1], a_i[2:0])
+    assigns.set(c_o[6:5], b_i[2:1])
+
+    msg = "Slice 6:5 is already taken by SliceOp(Port(UintType(4), 'b_i', direction=IN), Slice('2:1'))"
+    with raises(ValueError, match=re.escape(msg)):
+        assigns.set(c_o[6:5], c_i[2:1])
+
+    msg = "Cannot slice bit(s) 11 from UintType(10, default=417)"
+    with raises(ValueError, match=re.escape(msg)):
+        assigns.set(c_o[11], b_i[3])
+
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_assign_slice_inst, tmp_path)
+
+
+def test_top_in(top, tmp_path):
     """Top - Input."""
     drivers = u.Drivers()
-    assigns = u.Assigns(targets=top, sources=top, drivers=drivers)
+    assigns = u.Assigns(targets=top, drivers=drivers)
     assigns.set(top["port_i"], top["port_o"])
-    assert [str(assign) for assign in assigns] == [
-        "port_i  ---->  port_o",
-        "port_my0_i  ---->  port_my0_o",
-        "port_my0_mode_i  ---->  port_my0_mode_o",
-        "port_my0_send_i  ---->  port_my0_send_o",
-        "port_my0_return_o  <----  port_my0_return_i",
-        "port_my1_o  <----  port_my1_i",
-        "port_my1_mode_o  <----  port_my1_mode_i",
-        "port_my1_send_o  <----  port_my1_send_i",
-        "port_my1_return_i  ---->  port_my1_return_o",
-        "port_uint_i  ---->  port_uint_o",
-    ]
-    assert tuple(f"{name}: {driver}" for name, driver in drivers) == (
-        "port_my0_return_o: port_my0_return_i",
-        "port_my1_o: port_my1_i",
-        "port_my1_mode_o: port_my1_mode_i",
-        "port_my1_send_o: port_my1_send_i",
-    )
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_top_in, tmp_path)
 
 
-def test_top_out(top):
+def test_top_out(top, tmp_path):
     """Top - Output."""
     drivers = u.Drivers()
-    assigns = u.Assigns(targets=top, sources=top, drivers=drivers)
+    assigns = u.Assigns(targets=top, drivers=drivers)
     assigns.set(top["port_o"], top["port_i"])
-    assert [str(assign) for assign in assigns] == [
-        "port_o  <----  port_i",
-        "port_my0_o  <----  port_my0_i",
-        "port_my0_mode_o  <----  port_my0_mode_i",
-        "port_my0_send_o  <----  port_my0_send_i",
-        "port_my0_return_i  ---->  port_my0_return_o",
-        "port_my1_i  ---->  port_my1_o",
-        "port_my1_mode_i  ---->  port_my1_mode_o",
-        "port_my1_send_i  ---->  port_my1_send_o",
-        "port_my1_return_o  <----  port_my1_return_i",
-        "port_uint_o  <----  port_uint_i",
-    ]
-    assert tuple(f"{name}: {driver}" for name, driver in drivers) == (
-        "port_o: port_i",
-        "port_my0_o: port_my0_i",
-        "port_my0_mode_o: port_my0_mode_i",
-        "port_my0_send_o: port_my0_send_i",
-        "port_my1_return_o: port_my1_return_i",
-        "port_uint_o: port_uint_i",
-    )
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_top_out, tmp_path)
 
 
-# def test_top_sub_dir_err(top, sub):
-#     """Top with Sub - Direction Error."""
-#     drivers = u.Drivers()
-#     assigns = u.Assigns(targets=sub, sources=top, sub=True, drivers=drivers)
-
-#     # sub-output MUST NOT drive against top-input
-#     with raises(u.DirectionError) as exc:
-#         assigns.set(sub["sub_o"], top["port_i"])
-#     assert str(exc.value) == "Cannot connect sub-level OUT 'sub_o' and IN 'port_i'"
-
-#     # sub-input MUST NOT drive from top-output
-#     with raises(u.DirectionError) as exc:
-#         assigns.set(sub["sub_i"], top["port_o"])
-#     assert str(exc.value) == "Cannot connect sub-level IN 'sub_i' and OUT 'port_o'"
-
-#     assert [str(assign) for assign in assigns] == []
-#     assert tuple(f"{name}: {driver}" for name, driver in drivers) == ()
-
-
-def test_top_sub_in(top, sub):
+def test_top_inst_in(top, sub, tmp_path):
     """Top with Sub - Input."""
     drivers = u.Drivers()
-    assigns = u.Assigns(targets=sub, sources=top, sub=True, drivers=drivers)
+    assigns = u.Assigns(targets=sub, sources=top, inst=True, drivers=drivers)
     assigns.set(sub["sub_i"], top["port_i"])
-    assert [str(assign) for assign in assigns] == [
-        "sub_i  ---->  port_i",
-        "sub_my0_i  ---->  port_my0_i",
-        "sub_my0_mode_i  ---->  port_my0_mode_i",
-        "sub_my0_send_i  ---->  port_my0_send_i",
-        "sub_my0_return_o  <----  port_my0_return_o",
-        "sub_my1_o  <----  port_my1_o",
-        "sub_my1_mode_o  <----  port_my1_mode_o",
-        "sub_my1_send_o  <----  port_my1_send_o",
-        "sub_my1_return_i  ---->  port_my1_return_i",
-        "sub_uint_i  ---->  port_uint_i",
-    ]
-    assert tuple(f"{name}: {driver}" for name, driver in drivers) == (
-        "sub_i: port_i",
-        "sub_my0_i: port_my0_i",
-        "sub_my0_mode_i: port_my0_mode_i",
-        "sub_my0_send_i: port_my0_send_i",
-        "sub_my1_return_i: port_my1_return_i",
-        "sub_uint_i: port_uint_i",
-    )
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_top_inst_in, tmp_path)
 
 
-def test_top_sub_out(top, sub):
+def test_top_inst_out(top, sub, tmp_path):
     """Top with Sub - Output."""
     drivers = u.Drivers()
-    assigns = u.Assigns(targets=sub, sources=top, sub=True, drivers=drivers)
+    assigns = u.Assigns(targets=sub, sources=top, inst=True, drivers=drivers)
     assigns.set(sub["sub_o"], top["port_o"])
-    assert [str(assign) for assign in assigns] == [
-        "sub_o  <----  port_o",
-        "sub_my0_o  <----  port_my0_o",
-        "sub_my0_mode_o  <----  port_my0_mode_o",
-        "sub_my0_send_o  <----  port_my0_send_o",
-        "sub_my0_return_i  ---->  port_my0_return_i",
-        "sub_my1_i  ---->  port_my1_i",
-        "sub_my1_mode_i  ---->  port_my1_mode_i",
-        "sub_my1_send_i  ---->  port_my1_send_i",
-        "sub_my1_return_o  <----  port_my1_return_o",
-        "sub_uint_o  <----  port_uint_o",
-    ]
-    assert tuple(f"{name}: {driver}" for name, driver in drivers) == (
-        "sub_my0_return_i: port_my0_return_i",
-        "sub_my1_i: port_my1_i",
-        "sub_my1_mode_i: port_my1_mode_i",
-        "sub_my1_send_i: port_my1_send_i",
-    )
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_top_inst_out, tmp_path)
 
 
-def test_top_sub_in_note(top, sub):
+def test_top_inst_in_note(top, sub, tmp_path):
     """Top with Sub - Input."""
     drivers = u.Drivers()
-    assigns = u.Assigns(targets=sub, sources=top, sub=True, drivers=drivers)
+    assigns = u.Assigns(targets=sub, sources=top, inst=True, drivers=drivers)
     assigns.set(sub["sub_my1_i"], u.TODO)
-    assert [str(assign) for assign in assigns] == [
-        "sub_my1_i  ---->  TODO",
-        "sub_my1_mode_i  ---->  TODO",
-        "sub_my1_send_i  ---->  TODO",
-        "sub_my1_return_o  <----  TODO",
-    ]
-    assert [f"{name}: {driver}" for name, driver in drivers] == []
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_top_inst_in_note, tmp_path)
 
 
-def test_top_sub_in_const(top, sub):
+def test_top_inst_in_const(top, sub, tmp_path):
     """Top with Sub - Input."""
     drivers = u.Drivers()
-    assigns = u.Assigns(targets=sub, sources=top, sub=True, drivers=drivers)
-    assigns.set(sub["sub_my1_mode_i"], u.const("2h2"))
-    assert [str(assign) for assign in assigns] == [
-        "sub_my1_mode_i  ---->  ConstExpr(UintType(2, default=2))",
-    ]
-    assert [f"{name}: {driver}" for name, driver in drivers] == [
-        "sub_my1_mode_i: ConstExpr(UintType(2, default=2))",
-    ]
+    assigns = u.Assigns(targets=sub, sources=top, inst=True, drivers=drivers)
+    assigns.set(sub["data_i"], u.const("8h2"))
+
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_top_inst_in_const, tmp_path)
 
 
-def test_top_sub_in_type_err(top, sub):
-    """Top with Sub - Type Error."""
-    drivers = u.Drivers()
-    assigns = u.Assigns(targets=sub, sources=top, sub=True, drivers=drivers)
-    with raises(TypeError) as exc:
-        assigns.set(sub["sub_my1_mode_i"], u.const("3h2"))
-    assert (
-        str(exc.value) == "Cannot assign 'ConstExpr(UintType(3, default=2))' "
-        "of UintType(3, default=2) to sub-level 'sub_my1_mode_i' of ModeType()"
+def test_assign_cast(tmp_path):
+    """Test Casting."""
+
+    class MyEnumType(u.AEnumType):
+        keytype: u.UintType = u.UintType(4)
+
+        def _build(self):
+            self._add(u.AUTO, "a")
+            self._add(u.AUTO, "b")
+            self._add(u.AUTO, "c")
+
+    targets = u.Idents(
+        [
+            u.Port(u.UintType(4), "data_i"),
+            u.Port(MyEnumType(), "a_o"),
+            u.Port(MyEnumType(), "b_o"),
+            u.Port(MyEnumType(), "c_o"),
+        ]
     )
+    assigns = u.Assigns(targets=targets)
+
+    msg = "MyEnumType(). Try to cast."
+    with raises(TypeError, match=re.escape(msg)):
+        assigns.set(targets["a_o"], targets["data_i"])
+
+    assigns.set(targets["b_o"], targets["data_i"], cast=None)
+
+    _dump_assigns(assigns, tmp_path)
+    assert_refdata(test_assign_cast, tmp_path)

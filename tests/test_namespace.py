@@ -25,6 +25,8 @@
 
 # from collections import namedtuple
 
+import re
+
 import ucdp
 from hypothesis import assume, given
 from hypothesis import strategies as st
@@ -197,7 +199,7 @@ def test_get_dym(int1, int2, int3, int4, str1, str2, str3):
 
     tmp_dict = {myobject1.name: myobject1, myobject2.name: myobject2}
     dym = ucdp.nameutil.didyoumean(str3, tmp_dict.keys(), known=True)
-    assert str(excep.value) == f"{str3!r}{dym}"
+    assert str(excep.value) == f"{str3!r}.{dym}"
 
 
 @given(
@@ -357,15 +359,19 @@ def test_lock(int1, int2, int3, int4, str1, str2):
     assert namespace.is_locked is False
     namespace.lock()
     assert namespace.is_locked is True
-    with raises(AssertionError) as excep:
+
+    msg = "Namespace is already locked. Cannot lock again."
+    with raises(ucdp.LockError, match=re.escape(msg)):
         namespace.lock()
-    assert str(excep.value) == f"{namespace!r} is already locked"
-    with raises(ValueError) as excep:
+
+    msg = "Namespace is already locked. Cannot add items anymore."
+    with raises(ucdp.LockError, match=re.escape(msg)):
         namespace.add(myobject2)
-    assert str(excep.value) == "Namespace is already locked"
-    with raises(ValueError) as excep:
+
+    msg = "Namespace is already locked. Cannot add items anymore."
+    with raises(ucdp.LockError, match=re.escape(msg)):
         namespace.update({myobject2.name: myobject2})
-    assert str(excep.value) == "Namespace is already locked"
+
     assert len(namespace) == 1
 
 
@@ -384,9 +390,9 @@ def test_ior():
     namespace.lock()
     assert tuple(namespace) == (myobject1, myobject2)
 
-    with raises(ValueError) as excep:
+    msg = "Namespace is already locked. Cannot add items anymore."
+    with raises(ucdp.LockError, match=re.escape(msg)):
         namespace |= {"str3": myobject3}
-    assert str(excep.value) == "Namespace is already locked"
 
     assert tuple(namespace) == (myobject1, myobject2)
 
@@ -407,8 +413,34 @@ def test_or():
     namespace2.lock()
     assert tuple(namespace2) == (myobject1, myobject2)
 
-    with raises(ValueError) as excep:
+    msg = "Namespace is already locked. Cannot add items anymore."
+    with raises(ucdp.LockError, match=re.escape(msg)):
         namespace2 | {"str3": myobject3}
-    assert str(excep.value) == "Namespace is already locked"
 
     assert tuple(namespace2) == (myobject1, myobject2)
+
+
+def test_set_default():
+    """Namespace IOR-Operator."""
+    myobject1 = ucdp.NamedObject(name="str1")
+    myobject2 = ucdp.NamedObject(name="str2")
+    myobject3 = ucdp.NamedObject(name="str3")
+    namespace = ucdp.Namespace()
+    assert namespace.set_default("str1", myobject1) is myobject1
+    assert tuple(namespace) == (myobject1,)
+    assert namespace.set_default("str1", myobject1) is myobject1
+    assert tuple(namespace) == (myobject1,)
+
+    msg = "NamedObject(name='str3') with must be stored at name 'str3' not at 'str2'"
+    with raises(ValueError, match=re.escape(msg)):
+        namespace.set_default("str2", myobject3)
+
+    assert tuple(namespace) == (myobject1,)
+
+    namespace.lock()
+
+    msg = "Namespace is already locked. Cannot add items anymore."
+    with raises(ValueError, match=re.escape(msg)):
+        namespace.set_default("str2", myobject2)
+
+    assert tuple(namespace) == (myobject1,)

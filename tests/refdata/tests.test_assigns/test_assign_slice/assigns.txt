@@ -1,0 +1,3 @@
+SET-ONLY
+ASSIGN: c_o  <----  ConcatExpr((ConstExpr(UintType(3, default=3)), SliceOp(Port(UintType(4), 'b_i', direction=IN), Slice('2:1')), ConstExpr(UintType(1)), SliceOp(Port(UintType(4), 'a_i', direction=IN), Slice('2:0')), ConstExpr(UintType(1, default=1))))
+DRIVER: c_o: SliceAssign(type_=UintType(10, default=417), expr=Port(UintType(10, default=417), 'c_o', direction=OUT))

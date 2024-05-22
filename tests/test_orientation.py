@@ -21,14 +21,33 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""Test Multiplexer."""
+"""Test Orientation."""
+
+import re
+
+import ucdp as u
+from pytest import raises
 
 
-# TESTME
-# * use fixture for mux instance with reasonable namespace and parser
-# * test different sel and sel types (param, const, signal, port, expr, concat)
-# * test different cond and cond types (param, const, signal, port, range, expr)
-# * test different out and out types (param, const, signal, port, expr, slicing)
-# * test different value and value types (param, const, signal, port, expr, slicing)
-# * test default value handling
-# * test sels
+def test_orientation_error():
+    """Orientation Error."""
+    with raises(ValueError, match=re.escape("Invalid mode 0")):
+        u.Orientation(mode=0)
+
+    with raises(ValueError, match=re.escape("Invalid mode 2")):
+        u.Orientation(mode=2)
+
+    with raises(ValueError, match=re.escape("Cannot cast 0")):
+        u.Orientation.cast(0)
+
+    with raises(ValueError, match=re.escape("Cannot cast 2")):
+        u.Orientation.cast(2)
+
+
+def test_direction_error():
+    """Direction Error."""
+    with raises(ValueError, match=re.escape("Invalid mode 2")):
+        u.Direction(mode=2)
+
+    with raises(ValueError, match=re.escape("Cannot cast 2")):
+        u.Direction.cast(2)

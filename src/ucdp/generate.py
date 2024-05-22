@@ -53,6 +53,7 @@ def generate(
     filelistparser: FileListParser | None = None,
     makolator: Makolator | None = None,
     maxlevel: int | None = None,
+    maxworkers: int | None = None,
 ):
     """
     Generate for Top-Module.
@@ -66,6 +67,7 @@ def generate(
         filelistparser: Specific File List Parser
         makolator: Specific Makolator
         maxlevel: Stop Generation on given hierarchy level.
+        maxworkers: Maximal Parallelism.
     """
     makolator = makolator or get_makolator()
     LOGGER.debug("%s", makolator.config)
@@ -77,7 +79,7 @@ def generate(
         replace_envvars=True,
         maxlevel=maxlevel,
     )
-    with ThreadPoolExecutor() as executor:
+    with ThreadPoolExecutor(max_workers=maxworkers) as executor:
         jobs = []
         for mod, modfilelist in modfilelists:
             if modfilelist.gen == "no":
@@ -109,6 +111,7 @@ def clean(
     filelistparser: FileListParser | None = None,
     makolator: Makolator | None = None,
     maxlevel: int | None = None,
+    maxworkers: int | None = None,
     dry_run: bool = False,
 ):
     """
@@ -123,6 +126,7 @@ def clean(
         filelistparser: Specific File List Parser
         makolator: Specific Makolator
         maxlevel: Stop Generation on given hierarchy level.
+        maxworkers: Maximal Parallelism.
         dry_run: Do nothing.
     """
     makolator = makolator or get_makolator()
@@ -135,12 +139,16 @@ def clean(
         replace_envvars=True,
         maxlevel=maxlevel,
     )
-    for _, modfilelist in modfilelists:
-        filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
-        if modfilelist.gen == "gen":
-            for filepath in filepaths:
-                print("Removing '{filepath!s}'")
-                if not dry_run:
-                    filepath.unlink(missing_ok=True)
+    with ThreadPoolExecutor(max_workers=maxworkers) as executor:
+        jobs = []
+        for _, modfilelist in modfilelists:
+            filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
+            if modfilelist.gen == "full":
+                for filepath in filepaths:
+                    print(f"Removing '{filepath!s}'")
+                    if not dry_run:
+                        jobs.append(executor.submit(filepath.unlink, missing_ok=True))
+        for job in jobs:
+            job.result()
     if dry_run:
         print("DRY RUN. Nothing done.")

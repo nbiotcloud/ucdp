@@ -25,6 +25,8 @@
 Expression Resolver.
 """
 
+from typing import Any, ClassVar
+
 from .expr import (
     BoolOp,
     ConcatExpr,
@@ -39,10 +41,12 @@ from .expr import (
     SOp,
     TernaryExpr,
 )
-from .ident import Ident
+from .ident import Ident, Idents
 from .namespace import Namespace
+from .note import Note
 from .object import Object
 from .slices import Slice
+from .typearray import ArrayType
 from .typebase import BaseScalarType, BaseType
 from .typeenum import BaseEnumType
 from .typescalar import BitType, BoolType, IntegerType, RailType, SintType, UintType
@@ -68,73 +72,111 @@ class ExprResolver(Object):
 
             >>> resolver = u.ExprResolver(namespace=idents)
             >>> resolver.resolve(expr)
+            'uint_s * 2'
+            >>> resolver.resolve(expr, brackets=True)
             '(uint_s * 2)'
     """
 
     namespace: Namespace | None = None
+    remap: Idents | None = None
 
-    def resolve(self, expr: Expr) -> str:
-        """Resolve.
+    _opremap: ClassVar[dict[str, str]] = {}
+    _BRACKETTYPES: tuple[Any, ...] = (Op, BoolOp, SOp, TernaryExpr)
+
+    def __call__(self, expr: Expr, brackets: bool = False) -> str:
+        """
+        Resolve.
 
         Args:
             expr: Expression
-
+            brackets: Use brackets if necessary for topmost expr.
         """
-        return self._resolve(expr)
+        return self._resolve(expr, brackets=brackets)
 
-    def _resolve(self, expr: Expr) -> str:  # noqa: C901, PLR0911, PLR0912
+    def resolve(self, expr: Expr | Note, brackets: bool = False) -> str:
+        """
+        Resolve.
+
+        Args:
+            expr: Expression
+            brackets: Use brackets if necessary for topmost expr.
+        """
+        return self._resolve(expr, brackets=brackets)
+
+    def _resolve(self, expr: Expr | Note, brackets: bool = False) -> str:  # noqa: C901, PLR0912
         if isinstance(expr, Ident):
-            return self._resolve_ident(expr)
-        if isinstance(expr, Op):
-            return self._resolve_op(expr)
-        if isinstance(expr, BoolOp):
-            return self._resolve_boolop(expr)
-        if isinstance(expr, SOp):
-            return self._resolve_sop(expr)
-        if isinstance(expr, SliceOp):
-            return self._resolve_sliceop(expr)
-        if isinstance(expr, SOp):
-            return self._resolve_sop(expr)
-        if isinstance(expr, ConstExpr):
-            return self._resolve_constexpr(expr)
-        if isinstance(expr, ConcatExpr):
-            return self._resolve_concatexpr(expr)
-        if isinstance(expr, TernaryExpr):
-            return self._resolve_ternaryexpr(expr)
-        if isinstance(expr, Log2Expr):
-            return self._resolve_log2expr(expr)
-        if isinstance(expr, MinimumExpr):
-            return self._resolve_minimumexpr(expr)
-        if isinstance(expr, MaximumExpr):
-            return self._resolve_maximumexpr(expr)
-        if isinstance(expr, RangeExpr):
-            return self._resolve_rangeexpr(expr)
-        raise ValueError(expr)
+            resolved = self._resolve_ident(expr)
+        elif isinstance(expr, BoolOp):
+            resolved = self._resolve_boolop(expr)
+        elif isinstance(expr, SOp):
+            resolved = self._resolve_sop(expr)
+        elif isinstance(expr, Op):
+            resolved = self._resolve_op(expr)
+        elif isinstance(expr, SliceOp):
+            resolved = self._resolve_sliceop(expr)
+        elif isinstance(expr, ConstExpr):
+            resolved = self._resolve_constexpr(expr)
+        elif isinstance(expr, ConcatExpr):
+            resolved = self._resolve_concatexpr(expr)
+        elif isinstance(expr, TernaryExpr):
+            resolved = self._resolve_ternaryexpr(expr)
+        elif isinstance(expr, Log2Expr):
+            resolved = self._resolve_log2expr(expr)
+        elif isinstance(expr, MinimumExpr):
+            resolved = self._resolve_minimumexpr(expr)
+        elif isinstance(expr, MaximumExpr):
+            resolved = self._resolve_maximumexpr(expr)
+        elif isinstance(expr, RangeExpr):
+            resolved = self._resolve_rangeexpr(expr)
+        elif isinstance(expr, Note):
+            resolved = self._get_note(expr)
+        else:
+            raise ValueError(f"{expr!r} is not a valid expression.")
+        if brackets and isinstance(expr, self._BRACKETTYPES):
+            resolved = f"({resolved})"
+        return resolved
 
     def _resolve_ident(self, ident: Ident) -> str:
-        # Check if in namespace?
+        # Remapping of identifier, i.e. on instance port list
+        if self.remap is not None:
+            if ident.name in self.remap.keys():
+                ref = self.remap[ident.name]
+                if ref.value is not None and ref.value != ref:
+                    # resolve remappend identifier value
+                    return self.resolve(ref.value)
+                # just use default value
+                return self._resolve_value(ident.type_)
+
+        # Namespace checking
+        if self.namespace is not None:
+            # check if identifier exists in namespace.
+            if ident.name not in self.namespace.keys():
+                raise ValueError(f"{ident!r} not known within current namespace.")
+
         return ident.name
 
     def _resolve_op(self, op: Op) -> str:
-        left = self._resolve(op.left)
-        right = self._resolve(op.right)
-        sign = op.sign
-        if sign == "//":
-            sign = "/"
-        return f"({left} {sign} {right})"
+        left = self._resolve(op.left, brackets=True)
+        right = self._resolve(op.right, brackets=True)
+        sign = self._opremap.get(op.sign, op.sign)
+        return f"{left} {sign} {right}"
 
     def _resolve_boolop(self, op: BoolOp) -> str:
-        left = self._resolve(op.left)
-        right = self._resolve(op.right)
-        return f"({left} {op.sign} {right})"
+        left = self._resolve(op.left, brackets=True)
+        right = self._resolve(op.right, brackets=True)
+        return f"{left} {op.sign} {right}"
 
     def _resolve_sop(self, op: SOp) -> str:
         one = self._resolve(op.one)
-        return f"{op.sign}{one}"
+        return f"{op.sign}{one}{op.postsign}"
 
     def _resolve_sliceop(self, op: SliceOp) -> str:
         one = self._resolve(op.one)
         return f"{one}{self._resolve_slice(op.slice_)}"
+
+    def resolve_slice(self, slice_: Slice) -> str:
+        """Resolve Slice."""
+        return self._resolve_slice(slice_)
 
     def _resolve_slice(self, slice_: Slice) -> str:
         left = slice_.left
@@ -149,7 +191,7 @@ class ExprResolver(Object):
         if not isinstance(right, int):
             right = self.resolve(right)
         if isinstance(left, int) and isinstance(right, int) and right == 0:
-            return f"[{left+1}-1:0]"
+            return f"[{left}:0]"
         return f"[{left}:{right}]"
 
     def _resolve_concatexpr(self, expr: ConcatExpr) -> str:
@@ -157,9 +199,9 @@ class ExprResolver(Object):
         return f"{{{items}}}"
 
     def _resolve_ternaryexpr(self, expr: TernaryExpr) -> str:
-        cond = self._resolve(expr.cond)
-        one = self._resolve(expr.one)
-        other = self._resolve(expr.other)
+        cond = self._resolve(expr.cond, brackets=True)
+        one = self._resolve(expr.one, brackets=True)
+        other = self._resolve(expr.other, brackets=True)
         return f"{cond} ? {one} : {other}"
 
     def _resolve_log2expr(self, expr: Log2Expr) -> str:
@@ -180,13 +222,23 @@ class ExprResolver(Object):
         except ValueError as exc:
             raise ValueError(f"{expr} {exc}") from None
 
-    def _resolve_value(self, type_: BaseType, value=None) -> str:  # noqa: C901, PLR0911, PLR0912
-        if not isinstance(type_, BaseScalarType):
-            raise ValueError("")
+    def resolve_value(self, type_: BaseType, value=None) -> str:
+        """Resolve Value."""
+        return self._resolve_value(type_, value=value)
 
-        # ensure value
+    def _resolve_value(self, type_: BaseType, value=None) -> str:  # noqa: C901, PLR0911, PLR0912
+        if isinstance(type_, ArrayType):
+            # TODO: value
+            itemvalue = self._resolve_value(type_.itemtype)
+            return self._get_array_value(itemvalue, type_.slice_)
+
+        if not isinstance(type_, (BaseScalarType, StringType)):
+            raise ValueError(f"Cannot resolve type {type_}")
         if value is None:
             value = type_.default
+
+        if isinstance(type_, StringType):
+            return self._get_string_value(value)
 
         # None
         if value is None:
@@ -206,27 +258,24 @@ class ExprResolver(Object):
             width = int(type_.width)
             if width < 1:
                 raise ValueError(f"Invalid width {width}")
-            return self._get_uint_value(value, width)
+            return self._get_uint_value(value, type_.width)
 
         if isinstance(type_, SintType):
             width = int(type_.width)
             if width < 1:
                 raise ValueError(f"Invalid width {width}")
-            return self._get_sint_value(value, width)
+            return self._get_sint_value(value, type_.width)
 
         if isinstance(type_, IntegerType):
             return self._get_integer_value(value)
 
         if isinstance(type_, RailType):
-            return self._get_rail_value(int(value))
+            return self._get_rail_value(value)
 
         if isinstance(type_, BoolType):
             return self._get_bool_value(value)
 
-        if isinstance(type_, StringType):
-            return self._get_string_value(value)
-
-        raise ValueError(type_)
+        raise AssertionError
 
     @staticmethod
     def _get_rail_value(value: int) -> str:
@@ -237,11 +286,11 @@ class ExprResolver(Object):
         return str(value)
 
     @staticmethod
-    def _get_uint_value(value: int, width: int) -> str:
+    def _get_uint_value(value: int, width: int | Expr) -> str:
         return str(value)
 
     @staticmethod
-    def _get_sint_value(value: int, width: int) -> str:
+    def _get_sint_value(value: int, width: int | Expr) -> str:
         return str(value)
 
     @staticmethod
@@ -251,3 +300,14 @@ class ExprResolver(Object):
     @staticmethod
     def _get_bool_value(value: bool) -> str:
         return str(value)
+
+    @staticmethod
+    def _get_string_value(value: int) -> str:
+        return repr(value)
+
+    @staticmethod
+    def _get_note(note: Note) -> str:
+        return repr(note.note)
+
+    def _get_array_value(self, itemvalue: str, slice_: Slice) -> str:
+        raise NotImplementedError

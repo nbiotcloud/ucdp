@@ -1,0 +1,2 @@
+SET-ONLY
+ASSIGN: b_o  <----  data_i

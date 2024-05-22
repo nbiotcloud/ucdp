@@ -28,15 +28,15 @@ theme:
 
 nav:
   - Get Started:
-    - Welcome to UCDP: index.md
-    - Why use UCDP: why.md
-    - Features: features.md
+    # - Welcome to UCDP: index.md
+    # - Why use UCDP: why.md
+    # - Features: features.md
     - Installation: install.md
-    - Contributing: contributing.md
-  - Concepts:
-    - Overview: concepts/overview.md
+    # - Contributing: contributing.md
+  # - Concepts:
+  #   - Overview: concepts/overview.md
   - Examples: examples/
-  - Errors: errors/
+  # - Errors: errors/
   - Command Line Interface: cli.md
   - API Documentation: api/
 

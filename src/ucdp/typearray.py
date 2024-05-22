@@ -83,7 +83,7 @@ class ArrayType(ACompositeType, Light):
     @property
     def slice_(self):
         """Get Slice of Matrix."""
-        return Slice(left=self.left, right=self.depth - 1)
+        return Slice(left=self.left, width=self.depth, direction=UP)
 
     def is_connectable(self, other) -> bool:
         """

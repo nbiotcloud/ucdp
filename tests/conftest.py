@@ -1,6 +1,8 @@
 """Pytest Configuration and Fixtures."""
 
+import os
 from pathlib import Path
+from unittest import mock
 
 import ucdp as u
 from pytest import fixture
@@ -38,3 +40,10 @@ def example_param():
     example_path = EXAMPLES_PATH / "param"
     with u.extend_sys_path((example_path,)):
         yield example_path
+
+
+@fixture
+def prjroot(tmp_path):
+    """Project Environment."""
+    with mock.patch.dict(os.environ, {"PRJROOT": str(tmp_path)}):
+        yield tmp_path

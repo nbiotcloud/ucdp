@@ -23,6 +23,8 @@
 #
 """Test Loader and Top."""
 
+import re
+
 import ucdp as u
 from pytest import raises
 
@@ -94,6 +96,36 @@ def test_load_complex(example_simple):
         repr(top.get_mod("glbl_lib.clk_gate"))
         == "<glbl_lib.clk_gate.ClkGateMod(inst='uart/u_clk_gate', libname='glbl_lib', modname='clk_gate')>"
     )
+    assert [repr(mod) for mod in top.get_mods("glbl_lib.clk_gate")] == [
+        "<glbl_lib.clk_gate.ClkGateMod(inst='uart/u_clk_gate', libname='glbl_lib', modname='clk_gate')>",
+        "<glbl_lib.clk_gate.ClkGateMod(inst='uart/u_regf/u_clk_gate', libname='glbl_lib', modname='clk_gate')>",
+    ]
+    assert [repr(mod) for mod in top.get_mods("glbl_lib.regf")] == []
+    assert [repr(mod) for mod in top.get_mods("glbl_lib.regf", base=True)] == [
+        "<glbl_lib.regf.RegfMod(inst='uart/u_regf', libname='uart_lib', modname='uart_regf')>",
+    ]
+
+    msg = (
+        "'glbl_lib.regf' not found. Known are:\n  glbl_lib.clk_gate\n  uart_lib.uart\n  "
+        "uart_lib.uart_core\n  uart_lib.uart_regf"
+    )
+    with raises(ValueError, match=re.escape(msg)):
+        top.get_mod("glbl_lib.regf")
+
+    assert (
+        repr(top.get_mod("glbl_lib.regf", base=True))
+        == "<glbl_lib.regf.RegfMod(inst='uart/u_regf', libname='uart_lib', modname='uart_regf')>"
+    )
+
+    msg = (
+        "Found multiple hardware modules for 'uart_lib.*':\n  uart_lib.uart\n  uart_lib.uart_core\n  uart_lib.uart_regf"
+    )
+    with raises(ValueError, match=re.escape(msg)):
+        top.get_mod("uart_lib.*")
+
+    msg = "'glbl_lib.foo' not found. Known are:\n  glbl_lib.clk_gate\n  glbl_lib.regf\n  uart_lib.uart"
+    with raises(ValueError, match=re.escape(msg)):
+        top.get_mod("glbl_lib.foo", base=True)
 
 
 def test_load_complex_sub(example_simple):

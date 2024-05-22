@@ -8,3 +8,5 @@
 /report.xml
 /site/
 /.hypothesis
+.pdm-python
+.test2ref

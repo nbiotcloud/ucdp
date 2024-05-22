@@ -37,6 +37,11 @@ class StringType(BaseType, Light):
     >>> example = u.StringType()
     >>> example
     StringType()
+    >>> example = u.StringType(default='data')
+    >>> example
+    StringType(default='data')
+    >>> example[1:3]
+    StringType(default='at')
     """
 
     default: str = ""
@@ -63,4 +68,4 @@ class StringType(BaseType, Light):
         """
         Return Sliced Variant.
         """
-        return self.default[slice_]
+        return StringType(default=self.default[slice_])
