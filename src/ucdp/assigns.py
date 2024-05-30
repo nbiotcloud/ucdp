@@ -110,7 +110,7 @@ from .exprparser import ExprParser
 from .ident import Ident, Idents, get_subname
 from .nameutil import split_suffix
 from .note import Note
-from .object import LightObject, Object, PrivateField, model_validator
+from .object import Object, PrivateField, model_validator
 from .orientation import BWD, FWD, IN, INOUT, OUT, Direction
 from .signal import BaseSignal, Port
 
@@ -124,7 +124,7 @@ _DIRECTION_MAP = {
 TargetFilter = Callable[[BaseSignal], bool]
 
 
-class Assign(LightObject):
+class Assign(Object):
     """
     A Single Assignment of `expr` to `target`.
 

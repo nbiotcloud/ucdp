@@ -187,7 +187,6 @@ class BaseEnumType(BaseScalarType, Dict):
             isinstance(other, BaseEnumType)
             and self.keytype.is_connectable(other.keytype)
             and self.valuetype == other.valuetype
-            and len(self) == len(other)
             and self.keys() == other.keys()
             and all(
                 selfitem.value == otheritem.value

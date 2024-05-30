@@ -137,14 +137,15 @@ class BaseStructType(Dict, ACompositeType):
 
     def is_connectable(self, other) -> bool:
         """Check For Valid Connection To `other`."""
-        return (
-            isinstance(other, BaseStructType)
-            and len(self) == len(other)
-            and all(
+        if not isinstance(other, BaseStructType):
+            return False
+        try:
+            return all(
                 self._cmpitem(selfitem, otheritem)
-                for selfitem, otheritem in zip(self.values(), other.values(), strict=False)
+                for selfitem, otheritem in zip(self.values(), other.values(), strict=True)
             )
-        )
+        except ValueError:
+            return False
 
     @staticmethod
     def _cmpitem(selfitem, otheritem):
