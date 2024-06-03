@@ -14,4 +14,5 @@ build:
     - pip install --upgrade --no-cache-dir pip
     - pip install --no-cache-dir nox
     - nox -s doc
-    - cp -r site _readthedocs
+    - mkdir _readthedocs
+    - cp -r site _readthedocs/html

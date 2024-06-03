@@ -95,7 +95,13 @@ def _build_top(modcls, **kwargs):
 
 @lru_cache
 def _load_modcls(modref: ModRef):
-    pymod = import_module(f"{modref.libname}.{modref.modname}")
+    name = f"{modref.libname}.{modref.modname}"
+    try:
+        pymod = import_module(name)
+    except ModuleNotFoundError as exc:
+        if exc.name == name:
+            raise exc
+        raise RuntimeError(f"Import of {exc.name!r} failed.") from exc
     modclsname = modref.modclsname or f"{pascalcase(modref.modname)}Mod"
     modcls = getattr(pymod, modclsname)
     if not issubclass(modcls, BaseMod):

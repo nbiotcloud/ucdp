@@ -5,6 +5,6 @@ ena -
   data_r  ---->  data_i
 clk main_clk_i
 rst_an main_rst_an_i
-rst ctrl_i == 0
+rst ctrl_i == 0x0
 ena -
   other_r  ---->  other_nxt_s

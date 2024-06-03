@@ -26,11 +26,12 @@
 
 from pydantic import ValidationError
 
+from . import cli
 from .assigns import Assign, Assigns
 from .baseclassinfo import BaseClassInfo, get_baseclassinfos
 from .buildproduct import ABuildProduct
 from .casting import Casting
-from .config import AConfig, AUniqueConfig, AVersionConfig, BaseConfig
+from .config import AConfig, AVersionConfig, BaseConfig
 from .const import Const
 from .consts import AUTO, PAT_IDENTIFIER
 from .dict import Dict
@@ -122,7 +123,7 @@ from .typestruct import (
     bwdfilter,
     fwdfilter,
 )
-from .util import extend_sys_path
+from .util import extend_sys_path, get_copyright
 
 __all__ = [
     "ABuildProduct",
@@ -143,7 +144,6 @@ __all__ = [
     "AStructType",
     "ATailoredMod",
     "ATbMod",
-    "AUniqueConfig",
     "AUTO",
     "AVecType",
     "AVersionConfig",
@@ -168,6 +168,7 @@ __all__ = [
     "Bytes",
     "cast_booltype",
     "Casting",
+    "cli",
     "ClkRstAnType",
     "ClkType",
     "ConcatExpr",
@@ -294,6 +295,7 @@ __all__ = [
     "TODO",
     "ToPaths",
     "TopModRef",
+    "get_copyright",
     "UintType",
     "uniquemods",
     "UP",

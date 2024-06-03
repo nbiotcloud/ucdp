@@ -21,53 +21,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+"""Command Line Command."""
 
-"""Utilities."""
+import click
+from ucdp import cli
 
-import sys
-from collections.abc import Iterable
-from contextlib import contextmanager
-from functools import lru_cache
-from inspect import getfile
-from pathlib import Path
-from typing import Any
+UCDP_COMMANDS = ["prjcmd"]
 
 
-@contextmanager
-def extend_sys_path(paths: Iterable[Path]):
-    """Context with extended sys.path.
-
-    Args:
-        paths: Paths
-    """
-    pathstrs = [str(path) for path in paths]
-    if pathstrs:
-        orig = sys.path
-        sys.path = [*sys.path, *pathstrs]
-        yield
-        sys.path = orig
-    else:
-        yield
-
-
-def get_copyright(obj: Any) -> str:
-    """Determine from Source Code of ``obj``."""
-    if isinstance(obj, Path):
-        path = obj
-    elif isinstance(obj, object):
-        path = Path(getfile(obj.__class__))
-    else:
-        path = Path(getfile(obj))
-    return _get_copyright(path)
-
-
-@lru_cache
-def _get_copyright(path: Path) -> str:
-    lines = []
-    with path.open(encoding="utf-8") as file:
-        for line in file:
-            if line.startswith("#"):
-                lines.append(line[1:])
-            else:
-                break
-    return "".join(lines)
+@click.command()
+@cli.arg_top
+@cli.opt_path
+@cli.pass_ctx
+def prjcmd(ctx, top, path):
+    """A Project Command."""
+    top = cli.load_top(ctx, top, path)
+    ctx.console.log(f"{str(top.ref)!r} checked.")

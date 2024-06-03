@@ -158,3 +158,17 @@ def test_load_non_tb(example_simple):
     assert (
         str(exc.value) == "<class 'glbl_lib.regf.RegfMod'> is not a testbench module aka child of <class ucdp.ATbMod>."
     )
+
+
+def test_imp_err(testdata):
+    """Import Error."""
+    msg = "No module named 'imp_err_lib.not_existing'"
+    with raises(ModuleNotFoundError, match=re.escape(msg)):
+        u.load("imp_err_lib.not_existing")
+
+
+def test_imp_err_dep(testdata):
+    """Broken Dependency."""
+    msg = "Import of 'imp_err_lib.not_existing' failed."
+    with raises(RuntimeError, match=re.escape(msg)):
+        u.load("imp_err_lib.imp_err")

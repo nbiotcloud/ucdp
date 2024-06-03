@@ -77,10 +77,10 @@ def test_op(rslvr):
     a = u.const("2")
     b = u.const("3")
 
-    assert rslvr.resolve(a + b) == "2 + 3"
-    assert rslvr.resolve(a == b) == "2 == 3"
-    assert rslvr.resolve(-a) == "-2"
-    assert rslvr.resolve(abs(-a)) == "abs(-2)"
+    assert rslvr.resolve(a + b) == "0x2 + 0x3"
+    assert rslvr.resolve(a == b) == "0x2 == 0x3"
+    assert rslvr.resolve(-a) == "-0x2"
+    assert rslvr.resolve(abs(-a)) == "abs(-0x2)"
 
 
 def test_slice(rslvr):
@@ -119,29 +119,29 @@ def test_values(rslvr):
     assert rslvr.resolve(u.ConstExpr(u.BoolType(default=param))) == "param"
 
     param = u.Param(u.UintType(8), "param")
-    assert rslvr.resolve(u.ConstExpr(u.UintType(8))) == "0"
-    assert rslvr.resolve(u.ConstExpr(u.UintType(8, default=1))) == "1"
+    assert rslvr.resolve(u.ConstExpr(u.UintType(8))) == "0x0"
+    assert rslvr.resolve(u.ConstExpr(u.UintType(8, default=1))) == "0x1"
     assert rslvr.resolve(u.ConstExpr(u.UintType(8, default=param))) == "param"
 
     param = u.Param(u.UintType(8), "param")
-    assert rslvr.resolve(u.ConstExpr(u.UintType(8))) == "0"
-    assert rslvr.resolve(u.ConstExpr(u.UintType(8, default=1))) == "1"
+    assert rslvr.resolve(u.ConstExpr(u.UintType(8))) == "0x0"
+    assert rslvr.resolve(u.ConstExpr(u.UintType(8, default=1))) == "0x1"
     assert rslvr.resolve(u.ConstExpr(u.UintType(8, default=param))) == "param"
 
     with raises(ValueError):
         rslvr.resolve(u.ConstExpr(u.UintType(-8)))
 
     param = u.Param(u.SintType(8), "param")
-    assert rslvr.resolve(u.ConstExpr(u.SintType(8))) == "0"
-    assert rslvr.resolve(u.ConstExpr(u.SintType(8, default=1))) == "1"
+    assert rslvr.resolve(u.ConstExpr(u.SintType(8))) == "0x0"
+    assert rslvr.resolve(u.ConstExpr(u.SintType(8, default=1))) == "0x1"
     assert rslvr.resolve(u.ConstExpr(u.SintType(8, default=param))) == "param"
 
     with raises(ValueError):
         rslvr.resolve(u.ConstExpr(u.SintType(-8)))
 
     param = u.Param(MyEnumType(), "param")
-    assert rslvr.resolve(u.ConstExpr(MyEnumType())) == "0"
-    assert rslvr.resolve(u.ConstExpr(MyEnumType(default=1))) == "1"
+    assert rslvr.resolve(u.ConstExpr(MyEnumType())) == "0x0"
+    assert rslvr.resolve(u.ConstExpr(MyEnumType(default=1))) == "0x1"
     assert rslvr.resolve(u.ConstExpr(MyEnumType(default=param))) == "param"
 
     assert rslvr.resolve(u.ConstExpr(u.StringType())) == "''"
@@ -177,7 +177,7 @@ def test_concat(rslvr):
             u.ConstExpr(u.UintType(16, default=3)),
         )
     )
-    assert rslvr.resolve(expr) == "{5, 1, 3}"
+    assert rslvr.resolve(expr) == "{0x5, 0x1, 0x3}"
 
 
 def test_ternary(rslvr):
@@ -186,7 +186,7 @@ def test_ternary(rslvr):
     ident0 = rslvr.namespace["ident0"]
     ident1 = rslvr.namespace["ident1"]
     expr = u.TernaryExpr(param == 5, ident0, ident1)
-    assert rslvr.resolve(expr) == "(param == 5) ? ident0 : ident1"
+    assert rslvr.resolve(expr) == "(param == 0x5) ? ident0 : ident1"
 
 
 def test_remap():
@@ -207,7 +207,7 @@ def test_remap():
 
     remap = u.Idents([param])
     rslvr = u.ExprResolver(namespace=namespace, remap=remap)
-    assert rslvr(param) == "8"
+    assert rslvr(param) == "0x8"
     assert rslvr(width) == "width"
 
 
@@ -253,10 +253,10 @@ def test_array(rslvr, namespace):
     """Array."""
     param = namespace["param"]
     expr = u.ConstExpr(u.ArrayType(u.UintType(8, default=4), param))
-    assert rslvr(expr) == "param#4"
+    assert rslvr(expr) == "param#0x4"
 
     expr = u.ConstExpr(u.ArrayType(u.UintType(8, default=2), param * 2))
-    assert rslvr(expr) == "(param * 2)#2"
+    assert rslvr(expr) == "(param * 0x2)#0x2"
 
     expr = u.ConstExpr(u.ArrayType(u.UintType(8, default=2), param * 2, left=3))
-    assert rslvr(expr) == "(param * 2)#2"
+    assert rslvr(expr) == "(param * 0x2)#0x2"

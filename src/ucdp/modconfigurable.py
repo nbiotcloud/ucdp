@@ -27,6 +27,7 @@ Configurable Module.
 """
 
 from .config import BaseConfig
+from .modbase import BaseMod
 from .modbasetop import BaseTopMod
 from .modutil import get_topmodname
 from .nameutil import join_names
@@ -88,10 +89,19 @@ class AConfigurableMod(BaseTopMod):
 
     config: BaseConfig
 
+    def __init__(self, parent: BaseMod | None = None, name: str | None = None, **kwargs):
+        if "config" not in kwargs and parent is not None:
+            raise ValueError("'config' is required if 'parent' is given")
+        super().__init__(parent=parent, name=name, **kwargs)  # type: ignore[call-arg]
+
     @property
     def modname(self) -> str:
         """Module Name."""
-        return join_names(self.basename, self.config.name)
+        config = self.config
+        name = config.name
+        if not name and "config" in self.model_fields_set:
+            name = config.hash
+        return join_names(self.basename, name)
 
     @property
     def topmodname(self) -> str:

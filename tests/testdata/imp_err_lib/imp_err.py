@@ -21,53 +21,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
+"""A Module with a broken Dependency."""
 
-"""Utilities."""
+import ucdp as u
 
-import sys
-from collections.abc import Iterable
-from contextlib import contextmanager
-from functools import lru_cache
-from inspect import getfile
-from pathlib import Path
-from typing import Any
+# a broken dependency
+from imp_err_lib.not_existing import GarbageMod
 
 
-@contextmanager
-def extend_sys_path(paths: Iterable[Path]):
-    """Context with extended sys.path.
+class ImpErrMod(u.AMod):
+    """Test Data."""
 
-    Args:
-        paths: Paths
-    """
-    pathstrs = [str(path) for path in paths]
-    if pathstrs:
-        orig = sys.path
-        sys.path = [*sys.path, *pathstrs]
-        yield
-        sys.path = orig
-    else:
-        yield
-
-
-def get_copyright(obj: Any) -> str:
-    """Determine from Source Code of ``obj``."""
-    if isinstance(obj, Path):
-        path = obj
-    elif isinstance(obj, object):
-        path = Path(getfile(obj.__class__))
-    else:
-        path = Path(getfile(obj))
-    return _get_copyright(path)
-
-
-@lru_cache
-def _get_copyright(path: Path) -> str:
-    lines = []
-    with path.open(encoding="utf-8") as file:
-        for line in file:
-            if line.startswith("#"):
-                lines.append(line[1:])
-            else:
-                break
-    return "".join(lines)
+    def _build(self) -> None:
+        GarbageMod(self, "u_garbage")

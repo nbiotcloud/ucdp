@@ -24,7 +24,7 @@
 
 [project]
 name = "ucdp"
-version = "0.4.1"
+version = "0.5.0"
 description = "Unified Chip Design Platform"
 readme = "README.md"
 authors = [
@@ -41,7 +41,7 @@ dependencies = [
     "fuzzywuzzy>=0.18.0",
     "humannum>=1.0.0",
     "icdutil>=0.3.1",
-    "makolator>=2.6.0",
+    "makolator>=2.7.0",
     "matchor>=0.1.0",
     "pydantic>=2.7.0",
     "python-Levenshtein>=0.25.1",

@@ -24,7 +24,11 @@
 
 """Command Line Interface."""
 
+import importlib
 import logging
+import os
+from collections.abc import Iterable
+from importlib.metadata import entry_points
 from pathlib import Path
 
 import click
@@ -37,10 +41,12 @@ from rich.pretty import pprint
 from .fileset import FileSet
 from .generate import clean, generate, get_makolator
 from .loader import load
+from .logging import LOGGER
 from .modfilelist import iter_modfilelists
 from .moditer import ModPreIter
 from .modtopref import PAT_TOPMODREF
 from .top import Top
+from .util import extend_sys_path
 
 _LOGLEVELMAP = {
     0: logging.WARNING,
@@ -59,6 +65,51 @@ class Ctx(BaseModel):
     console: Console
 
 
+class MainGroup(click.Group):  # pragma: no cover
+    """Main Command Group with Dynamically Loaded Commands."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._dynamic_commands = dict(MainGroup.find_commands())
+
+    @staticmethod
+    def find_commands():
+        """Find Commands."""
+        for entry_point in entry_points(group="ucdp.cli"):
+            yield entry_point.name, entry_point.value
+        paths = tuple(Path(path) for path in os.environ.get("UCDP_PATH", "").split())
+        if paths:
+            with extend_sys_path(paths):
+                for path in paths:
+                    for clifile in path.glob("*/cli.py"):
+                        libname, modname = clifile.parts[-2], clifile.stem
+                        climod = importlib.import_module(f"{libname}.cli")
+                        clicmds = getattr(climod, "UCDP_COMMANDS", [])
+                        if not isinstance(clicmds, (list, tuple)):
+                            LOGGER.warning("Invalid UCDP_COMMANDS in %s", clifile)
+                            continue
+                        for clicmd in clicmds:
+                            yield clicmd, f"{libname}.{modname}.{clicmd}"
+
+    def list_commands(self, ctx):
+        """List Commands."""
+        base = super().list_commands(ctx)
+        lazy = list(self._dynamic_commands)
+        return sorted(base + lazy)
+
+    def get_command(self, ctx, cmd_name):
+        """Load Command."""
+        if cmd_name in self._dynamic_commands:
+            return self._load(cmd_name)
+        return super().get_command(ctx, cmd_name)
+
+    def _load(self, cmd_name):
+        import_path = self._dynamic_commands[cmd_name]
+        modname, cmd_object_name = import_path.rsplit(".", 1)
+        mod = importlib.import_module(modname)
+        return getattr(mod, cmd_object_name)
+
+
 pass_ctx = click.make_pass_decorator(Ctx)
 arg_top = click.argument("top", envvar="UCDP_TOP")
 opt_path = click.option(
@@ -73,7 +124,7 @@ This option can be specified multiple times.
 Environment Variable 'UCDP_PATH'.
 """,
 )
-arg_filelist = click.argument("filelist", envvar="UCDP_FILELIST")
+arg_filelist = click.argument("filelist", nargs=-1, required=True, envvar="UCDP_FILELIST")
 opt_target = click.option("--target", "-t", help="Filter File List for Target", envvar="UCDP_TARGET")
 opt_show_diff = click.option(
     "--show-diff", "-s", default=False, is_flag=True, help="Show What Changed", envvar="UCDP_SHOW_DIFF"
@@ -83,12 +134,14 @@ opt_dry_run = click.option("--dry-run", default=False, is_flag=True, help="Do no
 opt_maxworkers = click.option("--maxworkers", "-J", type=int, help="Maximum Number of Processes.")
 
 
-def _load_top(ctx, top, paths) -> Top:
+def load_top(ctx: Ctx, top: str, paths: Iterable[str | Path]) -> Top:
+    """Load Top Module."""
+    lpaths = [Path(path) for path in paths]
     with ctx.console.status(f"Loading {top!r}"):
-        return load(top, paths=paths)
+        return load(top, paths=lpaths)
 
 
-@click.group(context_settings={"help_option_names": ["-h", "--help"]})
+@click.group(cls=MainGroup, context_settings={"help_option_names": ["-h", "--help"]})
 @click.option("-v", "--verbose", count=True, help="Increase Verbosity.")
 @click.version_option()
 @click.pass_context
@@ -115,7 +168,7 @@ TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 @pass_ctx
 def check(ctx, top, path, stat=False):
     """Check."""
-    top = _load_top(ctx, top, path)
+    top = load_top(ctx, top, path)
     ctx.console.log(f"{str(top.ref)!r} checked.")
     if stat:
         print("Statistics:")
@@ -141,9 +194,10 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 @pass_ctx
 def gen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=None):
     """Generate."""
-    top = _load_top(ctx, top, path)
+    top = load_top(ctx, top, path)
     makolator = get_makolator(show_diff=show_diff)
-    generate(top.mod, filelist, target=target, makolator=makolator, maxworkers=maxworkers)
+    for item in filelist:
+        generate(top.mod, item, target=target, makolator=makolator, maxworkers=maxworkers)
 
 
 @ucdp.command(
@@ -165,9 +219,10 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 @pass_ctx
 def cleangen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=None, dry_run=False):
     """Clean Generated Files."""
-    top = _load_top(ctx, top, path)
+    top = load_top(ctx, top, path)
     makolator = get_makolator(show_diff=show_diff)
-    clean(top.mod, filelist, target=target, makolator=makolator, maxworkers=maxworkers, dry_run=dry_run)
+    for item in filelist:
+        clean(top.mod, item, target=target, makolator=makolator, maxworkers=maxworkers, dry_run=dry_run)
 
 
 @ucdp.command(
@@ -186,13 +241,14 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 @pass_ctx
 def filelist(ctx, top, path, filelist, target=None):
     """File List."""
-    top = _load_top(ctx, top, path)
+    top = load_top(ctx, top, path)
 
-    fileset = FileSet.from_mod(top.mod, filelist, target=target)
-    for incdir in fileset.inc_dirs:
-        print(f"-incdir {incdir}")
-    for libfilepath in fileset.filepaths:
-        print(str(libfilepath.path))
+    for item in filelist:
+        fileset = FileSet.from_mod(top.mod, item, target=target)
+        for incdir in fileset.inc_dirs:
+            print(f"-incdir {incdir}")
+        for libfilepath in fileset.filepaths:
+            print(str(libfilepath.path))
 
 
 @ucdp.command(
@@ -212,14 +268,15 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 @pass_ctx
 def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None):
     """File List."""
-    top = _load_top(ctx, top, path)
-    pprint(
-        {
-            str(mod): modfilelist
-            for mod, modfilelist in iter_modfilelists(top.mod, filelist, target=target, maxlevel=maxlevel)
-        },
-        indent_guides=False,
-    )
+    top = load_top(ctx, top, path)
+    for item in filelist:
+        pprint(
+            {
+                str(mod): modfilelist
+                for mod, modfilelist in iter_modfilelists(top.mod, item, target=target, maxlevel=maxlevel)
+            },
+            indent_guides=False,
+        )
 
 
 @ucdp.command(
@@ -234,7 +291,7 @@ TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 @pass_ctx
 def overview(ctx, top, path):
     """Overview."""
-    top = _load_top(ctx, top, path)
+    top = load_top(ctx, top, path)
     nodes = {}
     for inst in ModPreIter(top.mod):
         parent = nodes.get(inst.parent.inst, None) if inst.parent else None

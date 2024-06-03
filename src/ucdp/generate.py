@@ -86,7 +86,7 @@ def generate(
                 continue
             filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
             template_filepaths: tuple[Path, ...] = modfilelist.template_filepaths or ()  # type: ignore[assignment]
-            context = {"mod": mod}
+            context = {"mod": mod, "modfilelist": modfilelist}
             if modfilelist.gen == "inplace":
                 for filepath in filepaths:
                     if not filepath.exists():

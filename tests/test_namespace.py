@@ -23,8 +23,6 @@
 #
 """Test Configuration."""
 
-# from collections import namedtuple
-
 import re
 
 import ucdp

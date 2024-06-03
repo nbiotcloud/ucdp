@@ -216,3 +216,15 @@ def test_doc():
             super().__init__(8)
 
     assert MyUintType().doc == u.Doc(title="mytitle", descr="mydescr", comment="mycomment")
+
+
+class MyUintType(u.UintType):
+    """Example Uint."""
+
+    def __init__(self, width=42):
+        super().__init__(width=width)
+
+
+def test_fixed_vector_size():
+    """Uint with fixed size."""
+    assert MyUintType().width == 42

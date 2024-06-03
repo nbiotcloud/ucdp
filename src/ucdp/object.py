@@ -77,11 +77,11 @@ class Object(pyd.BaseModel):
         data.update(kwargs)
         return self.__class__(**data)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """String."""
         return get_repr(self)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Representation."""
         return get_repr(self)
 
@@ -148,7 +148,7 @@ class NamedLightObject(NamedObject, Light):
     """
 
 
-def get_repr(obj):
+def get_repr(obj) -> str:
     """DOCME."""
     posargs = obj._posargs
     model_fields_set = obj.model_fields_set

@@ -27,25 +27,23 @@ import ucdp as u
 from pytest import raises
 
 
+class MyConfig(u.AConfig):
+    """My Configuration."""
+
+    mem_baseaddr: u.Hex
+    ram_size: u.Bytes
+    rom_size: u.Bytes = 0
+    feature: bool = False
+
+
 def test_config():
     """Example."""
-
-    class MyConfig(u.AConfig):
-        """My Configuration."""
-
-        mem_baseaddr: u.Hex
-        ram_size: u.Bytes
-        rom_size: u.Bytes = 0
-        feature: bool = False
-
     # Missing Arguments
     with raises(u.ValidationError):
         MyConfig(name="myconfig")
 
     config = MyConfig("myconfig", mem_baseaddr=0xF100, ram_size="16 kB")
-    assert (
-        str(config) == "test_config.<locals>.MyConfig('myconfig', mem_baseaddr=Hex('0xF100'), ram_size=Bytes('16 KB'))"
-    )
+    assert str(config) == "MyConfig('myconfig', mem_baseaddr=Hex('0xF100'), ram_size=Bytes('16 KB'))"
     assert dict(config) == {
         "feature": False,
         "mem_baseaddr": u.Hex("0xF100"),
@@ -53,3 +51,25 @@ def test_config():
         "ram_size": u.Bytes("16 KB"),
         "rom_size": u.Bytes("0 bytes"),
     }
+
+    assert config.hash == "db829f1d9872ab0e"
+    assert config.is_default is False
+
+
+class OtherConfig(u.AConfig):
+    """Other Configuration."""
+
+    ram_size: u.Bytes = 0x100
+    rom_size: u.Bytes = 0
+    feature: bool = False
+
+
+def test_default_config():
+    """Default Configuration."""
+    config = OtherConfig()
+    assert config.hash == "180b3344e5934705"
+    assert config.is_default is True
+
+    config = OtherConfig(name="abc")
+    assert config.hash == "06449e0c672f3868"
+    assert config.is_default is False

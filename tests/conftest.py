@@ -47,3 +47,11 @@ def prjroot(tmp_path):
     """Project Environment."""
     with mock.patch.dict(os.environ, {"PRJROOT": str(tmp_path)}):
         yield tmp_path
+
+
+@fixture
+def testdata():
+    """Add access to ``testdata``."""
+    path = Path(__file__).parent / "testdata"
+    with u.extend_sys_path((path,)):
+        yield path

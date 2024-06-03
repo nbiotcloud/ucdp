@@ -72,9 +72,9 @@ class ExprResolver(Object):
 
             >>> resolver = u.ExprResolver(namespace=idents)
             >>> resolver.resolve(expr)
-            'uint_s * 2'
+            'uint_s * 0x2'
             >>> resolver.resolve(expr, brackets=True)
-            '(uint_s * 2)'
+            '(uint_s * 0x2)'
     """
 
     namespace: Namespace | None = None
@@ -150,7 +150,7 @@ class ExprResolver(Object):
         # Namespace checking
         if self.namespace is not None:
             # check if identifier exists in namespace.
-            if ident.name not in self.namespace.keys():
+            if ident.name not in self.namespace:
                 raise ValueError(f"{ident!r} not known within current namespace.")
 
         return ident.name
@@ -287,15 +287,19 @@ class ExprResolver(Object):
 
     @staticmethod
     def _get_uint_value(value: int, width: int | Expr) -> str:
-        return str(value)
+        return f"0x{value:X}"
 
     @staticmethod
     def _get_sint_value(value: int, width: int | Expr) -> str:
-        return str(value)
+        if value < 0:
+            return f"-0x{-value:X}"
+        return f"0x{value:X}"
 
     @staticmethod
     def _get_integer_value(value: int) -> str:
-        return str(value)
+        if value < 0:
+            return f"-0x{-value:X}"
+        return f"0x{value:X}"
 
     @staticmethod
     def _get_bool_value(value: bool) -> str:

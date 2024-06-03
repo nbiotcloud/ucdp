@@ -175,7 +175,7 @@ class Ident(Expr, NamedObject, Light):
         return self.name
 
     def __int__(self):
-        return int(self.type_.default)
+        return int(getattr(self.type_, "default", -1))
 
     def __iter__(self):
         return _iters([self])

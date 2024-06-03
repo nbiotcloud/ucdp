@@ -67,6 +67,10 @@ class Slice(LightObject):
     slice(9, 6, -1)
     >>> tuple(s)
     (9, 8, 7, 6)
+    >>> s.prev
+    5
+    >>> s.nxt
+    10
 
     >>> s = Slice(left=6, right=9)
     >>> s
@@ -87,6 +91,10 @@ class Slice(LightObject):
     slice(6, 9, 1)
     >>> tuple(s)
     (6, 7, 8, 9)
+    >>> s.prev
+    5
+    >>> s.nxt
+    10
 
     >>> Slice(left=7, right=4) in Slice(left=7, right=4)
     True
@@ -268,6 +276,20 @@ class Slice(LightObject):
         if self.width > 1:
             return f"{self.left}:{self.right}"
         return f"{self.left}"
+
+    @property
+    def prev(self):
+        """Previous Bit respecting direction."""
+        if self.left >= self.right:
+            return self.right - 1
+        return self.left - 1
+
+    @property
+    def nxt(self):
+        """Next Free Bit respecting direction."""
+        if self.left >= self.right:
+            return self.right + self.width
+        return self.left + self.width
 
     def __str__(self):
         return self.bits

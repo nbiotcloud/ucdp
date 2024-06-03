@@ -295,7 +295,7 @@ class BitType(AScalarType):
         >>> BitType().is_connectable(UintType(2))
         False
         """
-        return isinstance(other, (BitType, UintType)) and int(other.width) == 1  # type: ignore[operator]
+        return isinstance(other, (BitType)) and int(other.width) == 1  # type: ignore[operator]
 
     def cast(self, other: BaseType) -> Casting:
         """
@@ -303,7 +303,7 @@ class BitType(AScalarType):
 
         `self = cast(other)`
         """
-        if isinstance(other, (UintType, BitType, SintType, IntegerType)) and self.width == other.width:  # type: ignore[operator]
+        if isinstance(other, (UintType, BitType, SintType, IntegerType, RailType)) and self.width == other.width:  # type: ignore[operator]
             return [("", "")]
 
         if isinstance(other, BaseEnumType) and self.width == other.keytype.width:  # type: ignore[operator]
@@ -551,7 +551,7 @@ class RailType(AScalarType):
 
         `self = cast(other)`
         """
-        if isinstance(other, (BitType, UintType)) and other.width == 1:  # type: ignore[operator]
+        if isinstance(other, (UintType, BitType, SintType, IntegerType, RailType)) and self.width == other.width:  # type: ignore[operator]
             return [("", "")]
 
         if isinstance(other, BaseEnumType) and self.width == other.keytype.width:  # type: ignore[operator]
@@ -844,7 +844,7 @@ class SintType(AVecType):
         >>> SintType(1).is_connectable(UintType(1))
         False
         """
-        return isinstance(other, (SintType, IntegerType)) and self.width == other.width  # type: ignore[operator]
+        return isinstance(other, (SintType)) and self.width == other.width  # type: ignore[operator]
 
     def cast(self, other: BaseType) -> Casting:
         """
@@ -852,7 +852,7 @@ class SintType(AVecType):
 
         `self = cast(other)`
         """
-        if isinstance(other, (UintType, BitType)) and self.width == other.width:  # type: ignore[operator]
+        if isinstance(other, (UintType, BitType, IntegerType)) and self.width == other.width:  # type: ignore[operator]
             return [("", "")]
 
         if isinstance(other, BaseEnumType) and self.width == other.keytype.width:

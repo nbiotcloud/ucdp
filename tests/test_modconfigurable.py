@@ -23,6 +23,8 @@
 #
 """Test Module File Information."""
 
+import re
+
 import ucdp as u
 from pytest import raises
 
@@ -55,20 +57,52 @@ class MyOtherMod(MyMod):
     config: MyConfig = MyConfig(feature=True)
 
 
+class AnotherMod(MyMod):
+    """Configurable Module with Other Config."""
+
+    config: MyConfig = MyConfig("foo")
+
+
 def test_noconfig():
     """Configurable Module."""
     with raises(ValueError):
         MyMod()
 
 
-def test_default_config():
+def test_config():
     """Configurable Module."""
     mod = MyMod(config=MyConfig())
-    assert mod.modname == "my"
+    assert mod.modname == "my_14a7d5a75a4f5652"
     assert mod.topmodname == "my"
 
     config = mod.config
     assert config == MyConfig("")
+    assert config.feature is False
+    assert config.size == 0
+
+
+class TopMod(u.AMod):
+    """Instance without Config."""
+
+    def _build(self) -> None:
+        MyOtherMod(self, "u_inst")
+
+
+def test_no_inst_config():
+    """Config is required on Instance Creation."""
+    msg = "'config' is required if 'parent' is given"
+    with raises(ValueError, match=re.escape(msg)):
+        TopMod()
+
+
+def test_no_default_config():
+    """Configurable Module."""
+    mod = MyMod(config=MyConfig("name"))
+    assert mod.modname == "my_name"
+    assert mod.topmodname == "my"
+
+    config = mod.config
+    assert config == MyConfig("name")
     assert config.feature is False
     assert config.size == 0
 
@@ -80,6 +114,13 @@ def test_other():
     assert mod.topmodname == "my"
 
     config = mod.config
-    assert config == MyConfig("", feature=True)
+    assert config == MyConfig(feature=True)
     assert config.feature is True
     assert config.size == 0
+
+
+def test_another():
+    """Another Configurable Module."""
+    mod = AnotherMod()
+    assert mod.modname == "another_foo"
+    assert mod.topmodname == "my"
