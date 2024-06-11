@@ -729,6 +729,11 @@ class BaseMod(NamedObject):
                 obj.lock()
         self.__is_locked = True
 
+    def check_lock(self):
+        """Check if module is locked for modifications."""
+        if self.__is_locked:
+            raise LockError(f"{self}: Is already locked for modifications.")
+
     def con(self, port: Routeables, source: Routeables):
         """Connect `port` to `dest`."""
         parents = self.__parents

@@ -24,7 +24,7 @@
 
 [project]
 name = "ucdp"
-version = "0.5.0"
+version = "0.6.0"
 description = "Unified Chip Design Platform"
 readme = "README.md"
 authors = [
@@ -54,7 +54,7 @@ ucdp = "ucdp.cli:ucdp"
 
 [project.urls]
 "Homepage" = "https://github.com/nbiotcloud/ucdp"
-"Documentation" = "https://ucdp.readthedocs.io/en/latest/"
+"Documentation" = "https://ucdp.readthedocs.io/en/stable/"
 "Bug Tracker" = "https://github.com/nbiotcloud/ucdp/issues"
 
 [build-system]
