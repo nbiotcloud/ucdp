@@ -24,11 +24,8 @@
 
 """Command Line Interface."""
 
-import importlib
 import logging
-import os
 from collections.abc import Iterable
-from importlib.metadata import entry_points
 from pathlib import Path
 
 import click
@@ -38,15 +35,14 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.pretty import pprint
 
+from ._cligroup import MainGroup
 from .fileset import FileSet
 from .generate import clean, generate, get_makolator
 from .loader import load
-from .logging import LOGGER
 from .modfilelist import iter_modfilelists
 from .moditer import ModPreIter
 from .modtopref import PAT_TOPMODREF
 from .top import Top
-from .util import extend_sys_path
 
 _LOGLEVELMAP = {
     0: logging.WARNING,
@@ -63,51 +59,6 @@ class Ctx(BaseModel):
     )
 
     console: Console
-
-
-class MainGroup(click.Group):  # pragma: no cover
-    """Main Command Group with Dynamically Loaded Commands."""
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._dynamic_commands = dict(MainGroup.find_commands())
-
-    @staticmethod
-    def find_commands():
-        """Find Commands."""
-        for entry_point in entry_points(group="ucdp.cli"):
-            yield entry_point.name, entry_point.value
-        paths = tuple(Path(path) for path in os.environ.get("UCDP_PATH", "").split())
-        if paths:
-            with extend_sys_path(paths):
-                for path in paths:
-                    for clifile in path.glob("*/cli.py"):
-                        libname, modname = clifile.parts[-2], clifile.stem
-                        climod = importlib.import_module(f"{libname}.cli")
-                        clicmds = getattr(climod, "UCDP_COMMANDS", [])
-                        if not isinstance(clicmds, (list, tuple)):
-                            LOGGER.warning("Invalid UCDP_COMMANDS in %s", clifile)
-                            continue
-                        for clicmd in clicmds:
-                            yield clicmd, f"{libname}.{modname}.{clicmd}"
-
-    def list_commands(self, ctx):
-        """List Commands."""
-        base = super().list_commands(ctx)
-        lazy = list(self._dynamic_commands)
-        return sorted(base + lazy)
-
-    def get_command(self, ctx, cmd_name):
-        """Load Command."""
-        if cmd_name in self._dynamic_commands:
-            return self._load(cmd_name)
-        return super().get_command(ctx, cmd_name)
-
-    def _load(self, cmd_name):
-        import_path = self._dynamic_commands[cmd_name]
-        modname, cmd_object_name = import_path.rsplit(".", 1)
-        mod = importlib.import_module(modname)
-        return getattr(mod, cmd_object_name)
 
 
 pass_ctx = click.make_pass_decorator(Ctx)
@@ -138,7 +89,9 @@ def load_top(ctx: Ctx, top: str, paths: Iterable[str | Path]) -> Top:
     """Load Top Module."""
     lpaths = [Path(path) for path in paths]
     with ctx.console.status(f"Loading {top!r}"):
-        return load(top, paths=lpaths)
+        result = load(top, paths=lpaths)
+    ctx.console.log(f"{top!r} checked.")
+    return result
 
 
 @click.group(cls=MainGroup, context_settings={"help_option_names": ["-h", "--help"]})
@@ -169,7 +122,6 @@ TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 def check(ctx, top, path, stat=False):
     """Check."""
     top = load_top(ctx, top, path)
-    ctx.console.log(f"{str(top.ref)!r} checked.")
     if stat:
         print("Statistics:")
         for name, value in top.get_stat().items():

@@ -205,6 +205,6 @@ class Namespace(dict):
             raise LockError("Namespace is already locked. Cannot add items anymore.")
         items = dict(self)
         items.update(other)
-        namespace = Namespace()
+        namespace = self.__class__()
         namespace._set_items(items.items())
         return namespace

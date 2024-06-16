@@ -99,7 +99,7 @@ class AConfigurableMod(BaseTopMod):
         """Module Name."""
         config = self.config
         name = config.name
-        if not name and "config" in self.model_fields_set:
+        if not name and "config" in self.model_fields_set and not config.is_default:
             name = config.hash
         return join_names(self.basename, name)
 

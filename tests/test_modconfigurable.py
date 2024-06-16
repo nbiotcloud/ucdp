@@ -72,7 +72,7 @@ def test_noconfig():
 def test_config():
     """Configurable Module."""
     mod = MyMod(config=MyConfig())
-    assert mod.modname == "my_14a7d5a75a4f5652"
+    assert mod.modname == "my"
     assert mod.topmodname == "my"
 
     config = mod.config
@@ -124,3 +124,31 @@ def test_another():
     mod = AnotherMod()
     assert mod.modname == "another_foo"
     assert mod.topmodname == "my"
+
+
+class SubConfig(u.AConfig):
+    """Sub Configuration."""
+
+    baseaddr: u.Hex = 0x1000
+
+
+class SubMod(u.AConfigurableMod):
+    """Sub Module."""
+
+    def _build(self):
+        pass
+
+
+class RootMod(u.AMod):
+    """Parent Module."""
+
+    def _build(self):
+        SubMod(self, "u_inst", config=SubConfig())
+
+
+def test_sub():
+    """Sub."""
+    mod = RootMod()
+    sub = mod.get_inst("u_inst")
+    assert sub.modname == "inst"
+    assert sub.topmodname == "sub"
