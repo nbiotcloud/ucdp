@@ -29,6 +29,7 @@ from inspect import getfile, getmro
 from pathlib import Path
 from typing import Annotated, Any
 
+from matchor import match
 from pydantic.functional_validators import BeforeValidator
 
 from .consts import Gen
@@ -90,7 +91,6 @@ class ModFileList(NamedLightObject):
     template_filepaths: ToPaths = Field(default=(), strict=False)
     inc_template_filepaths: ToPaths = Field(default=(), strict=False)
     is_leaf: bool = False
-    merge: bool = False
 
     @staticmethod
     def get_mod_placeholder(mod) -> Placeholder:
@@ -119,21 +119,19 @@ def search_modfilelists(
 
     Args:
         modfilelists: ModFileLists.
-        name: Module name.
+        name: Filelist name or pattern.
         target: Implementation Target
 
     """
     for modfilelist in modfilelists:
         # Skip Non-Related File Lists
-        if modfilelist.name != name:
+        if not match(modfilelist.name, name):
             continue
         # Skip Non-Matching Target
         if target and modfilelist.target and not namefilter(modfilelist.target)(target):
             continue
         # Found
         yield modfilelist
-        if not modfilelist.merge:
-            break
 
 
 def resolve_modfilelist(
@@ -152,10 +150,30 @@ def resolve_modfilelist(
         filelistparser: FileListParser
         replace_envvars: Resolve Environment Variables.
     """
-    modfilelists = tuple(search_modfilelists(mod.filelists, name, target=target))
-    if not modfilelists:
-        return None
-    for modfilelist in modfilelists:
+    for modfilelist in resolve_modfilelists(
+        mod, name, target=target, filelistparser=filelistparser, replace_envvars=replace_envvars
+    ):
+        return modfilelist
+    return None
+
+
+def resolve_modfilelists(
+    mod: BaseMod,
+    name: str,
+    target: str | None = None,
+    filelistparser: FileListParser | None = None,
+    replace_envvars: bool = False,
+) -> Iterator[ModFileList]:
+    """Create `ModFileList` for `mod`.
+
+    Args:
+        mod: Module.
+        name: Name or Pattern
+        target: Implementation Target
+        filelistparser: FileListParser
+        replace_envvars: Resolve Environment Variables.
+    """
+    for modfilelist in search_modfilelists(mod.filelists, name, target=target):
         mod_placeholder = modfilelist.get_mod_placeholder(mod)
         # parser
         filelistparser = filelistparser or FileListParser()
@@ -196,40 +214,37 @@ def resolve_modfilelist(
             modfilelist.dep_inc_dirs,
             replace_envvars,
         )
-    # template_filepaths
-    template_filepaths: list[Path] = []
-    inc_template_filepaths: list[Path] = []
-    baseclss = _get_baseclss(mod.__class__)
-    for basecls in reversed(baseclss):
-        basemodfilelists = tuple(search_modfilelists(basecls.filelists, name, target=target))
-        if not basemodfilelists:
-            continue
-        for basemodfilelist in basemodfilelists:
-            cls_placeholder = basemodfilelist.get_cls_placeholder(basecls)
-            _resolve_template_filepaths(
-                basecls,
-                cls_placeholder,
-                template_filepaths,
-                basemodfilelist.template_filepaths,
-                replace_envvars,
-            )
-            _resolve_template_filepaths(
-                basecls,
-                cls_placeholder,
-                inc_template_filepaths,
-                basemodfilelist.inc_template_filepaths,
-                replace_envvars,
-            )
-    # result
-    return modfilelist.new(
-        inc_dirs=tuple(inc_dirs),
-        inc_filepaths=tuple(inc_filepaths),
-        filepaths=tuple(filepaths),
-        dep_filepaths=tuple(dep_filepaths),
-        dep_inc_dirs=tuple(dep_inc_dirs),
-        template_filepaths=tuple(template_filepaths),
-        inc_template_filepaths=tuple(inc_template_filepaths),
-    )
+        # template_filepaths
+        template_filepaths: list[Path] = []
+        inc_template_filepaths: list[Path] = []
+        baseclss = _get_baseclss(mod.__class__)
+        for basecls in reversed(baseclss):
+            for basemodfilelist in search_modfilelists(basecls.filelists, modfilelist.name, target=target):
+                cls_placeholder = basemodfilelist.get_cls_placeholder(basecls)
+                _resolve_template_filepaths(
+                    basecls,
+                    cls_placeholder,
+                    template_filepaths,
+                    basemodfilelist.template_filepaths,
+                    replace_envvars,
+                )
+                _resolve_template_filepaths(
+                    basecls,
+                    cls_placeholder,
+                    inc_template_filepaths,
+                    basemodfilelist.inc_template_filepaths,
+                    replace_envvars,
+                )
+        # result
+        yield modfilelist.new(
+            inc_dirs=tuple(inc_dirs),
+            inc_filepaths=tuple(inc_filepaths),
+            filepaths=tuple(filepaths),
+            dep_filepaths=tuple(dep_filepaths),
+            dep_inc_dirs=tuple(dep_inc_dirs),
+            template_filepaths=tuple(template_filepaths),
+            inc_template_filepaths=tuple(inc_template_filepaths),
+        )
 
 
 def iter_modfilelists(
@@ -244,7 +259,7 @@ def iter_modfilelists(
 
     Args:
         topmod: Top Module.
-        name: Name.
+        name: Name or Name Pattern.
         target: Implementation Target
         filelistparser: FileListParser
         replace_envvars: Resolve Environment Variables.
@@ -261,16 +276,14 @@ def iter_modfilelists(
 
     # iterate
     for mod in ModPostIter(topmod, stop_insts=stop_insts, unique=True, maxlevel=maxlevel):
-        modfilelist = resolve_modfilelist(
+        for modfilelist in resolve_modfilelists(
             mod,
             name=name,
             target=target,
             filelistparser=filelistparser,
             replace_envvars=replace_envvars,
-        )
-        if modfilelist is None:
-            continue
-        yield mod, modfilelist
+        ):
+            yield mod, modfilelist
 
 
 def _resolve_mod(

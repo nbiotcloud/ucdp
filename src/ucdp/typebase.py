@@ -178,7 +178,12 @@ class AVecType(AScalarType):
     """Base Class for all Vector Types."""
 
     default: Any = 0
+    """Default Value."""
     right: Any = 0
+    """Right Bit Position."""
+
+    logic: bool = True
+    """Include X and Z states, not just numeric values."""
 
     _posargs: tuple[str, ...] = ("width",)
 

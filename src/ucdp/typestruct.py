@@ -202,7 +202,6 @@ class AStructType(BaseStructType, Light):
     10
 
     Connections are only allowed to other :any:`AStructType` with the same key-value mapping.
-    Default and isolation values are ignored.
 
     >>> BusType().is_connectable(BusType())
     True

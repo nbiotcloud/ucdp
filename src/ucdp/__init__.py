@@ -76,6 +76,7 @@ from .modfilelist import (
     ToPaths,
     iter_modfilelists,
     resolve_modfilelist,
+    resolve_modfilelists,
     search_modfilelists,
 )
 from .moditer import ModPostIter, ModPreIter, uniquemods
@@ -111,6 +112,7 @@ from .typebaseenum import BaseEnumType, EnumItem, EnumItemFilter
 from .typeclkrst import ClkRstAnType, ClkType, DiffClkRstAnType, DiffClkType, RstAnType, RstAType, RstType
 from .typedescriptivestruct import DescriptiveStructType
 from .typeenum import AEnumType, AGlobalEnumType, BusyType, DisType, DynamicEnumType, EnaType
+from .typefloat import DoubleType, FloatType
 from .typescalar import BitType, BoolType, IntegerType, RailType, SintType, UintType
 from .typestring import StringType
 from .typestruct import (
@@ -185,6 +187,7 @@ __all__ = [
     "DisType",
     "doc_from_type",
     "Doc",
+    "DoubleType",
     "DOWN",
     "Drivers",
     "DriversDuplicateError",
@@ -202,11 +205,13 @@ __all__ = [
     "FileListParser",
     "FileSet",
     "FlipFlop",
+    "FloatType",
     "FWD",
     "fwdfilter",
     "FWDM",
     "generate",
     "get_baseclassinfos",
+    "get_copyright",
     "get_expridents",
     "get_ident",
     "get_modbaseinfos",
@@ -266,6 +271,7 @@ __all__ = [
     "RailType",
     "RangeExpr",
     "resolve_modfilelist",
+    "resolve_modfilelists",
     "Routeable",
     "Routeables",
     "RoutePath",
@@ -295,7 +301,6 @@ __all__ = [
     "TODO",
     "ToPaths",
     "TopModRef",
-    "get_copyright",
     "UintType",
     "uniquemods",
     "UP",

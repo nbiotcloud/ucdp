@@ -134,7 +134,14 @@ def test_values(rslvr):
     param = u.Param(u.SintType(8), "param")
     assert rslvr.resolve(u.ConstExpr(u.SintType(8))) == "0x0"
     assert rslvr.resolve(u.ConstExpr(u.SintType(8, default=1))) == "0x1"
+    assert rslvr.resolve(u.ConstExpr(u.SintType(8, default=-2))) == "-0x2"
     assert rslvr.resolve(u.ConstExpr(u.SintType(8, default=param))) == "param"
+
+    param = u.Param(u.IntegerType(), "param")
+    assert rslvr.resolve(u.ConstExpr(u.IntegerType())) == "0x0"
+    assert rslvr.resolve(u.ConstExpr(u.IntegerType(default=1))) == "0x1"
+    assert rslvr.resolve(u.ConstExpr(u.IntegerType(default=-2))) == "-0x2"
+    assert rslvr.resolve(u.ConstExpr(u.IntegerType(default=param))) == "param"
 
     with raises(ValueError):
         rslvr.resolve(u.ConstExpr(u.SintType(-8)))
@@ -146,6 +153,14 @@ def test_values(rslvr):
 
     assert rslvr.resolve(u.ConstExpr(u.StringType())) == "''"
     assert rslvr.resolve(u.ConstExpr(u.StringType(default="foo"))) == "'foo'"
+
+    assert rslvr.resolve(u.ConstExpr(u.FloatType())) == "0.0"
+    assert rslvr.resolve(u.ConstExpr(u.FloatType(default=1.2))) == "1.2"
+
+    assert rslvr.resolve(u.ConstExpr(u.DoubleType())) == "0.0"
+    assert rslvr.resolve(u.ConstExpr(u.DoubleType(default=1.2))) == "1.2"
+
+    assert rslvr.resolve(u.TODO) == "'TODO'"
 
     with raises(ValueError):
         rslvr.resolve(u.ConstExpr(MyStructType()))
