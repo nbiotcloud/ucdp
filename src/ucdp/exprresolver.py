@@ -49,6 +49,7 @@ from .slices import Slice
 from .typearray import ArrayType
 from .typebase import BaseScalarType, BaseType
 from .typeenum import BaseEnumType
+from .typefloat import DoubleType, FloatType
 from .typescalar import BitType, BoolType, IntegerType, RailType, SintType, UintType
 from .typestring import StringType
 
@@ -232,7 +233,7 @@ class ExprResolver(Object):
             itemvalue = self._resolve_value(type_.itemtype)
             return self._get_array_value(itemvalue, type_.slice_)
 
-        if not isinstance(type_, (BaseScalarType, StringType)):
+        if not isinstance(type_, (BaseScalarType, StringType, FloatType, DoubleType)):
             raise ValueError(f"Cannot resolve type {type_}")
         if value is None:
             value = type_.default
@@ -275,6 +276,12 @@ class ExprResolver(Object):
         if isinstance(type_, BoolType):
             return self._get_bool_value(value)
 
+        if isinstance(type_, FloatType):
+            return self._get_float_value(value)
+
+        if isinstance(type_, DoubleType):
+            return self._get_double_value(value)
+
         raise AssertionError
 
     @staticmethod
@@ -315,3 +322,11 @@ class ExprResolver(Object):
 
     def _get_array_value(self, itemvalue: str, slice_: Slice) -> str:
         raise NotImplementedError
+
+    @staticmethod
+    def _get_float_value(value: float) -> str:
+        return f"{value:.1f}"
+
+    @staticmethod
+    def _get_double_value(value: float) -> str:
+        return f"{value:.1f}"

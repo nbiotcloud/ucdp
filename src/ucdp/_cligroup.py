@@ -44,7 +44,7 @@ def _find_commands(paths: Paths):
     return dict(__find_commands(paths))
 
 
-def __find_commands(paths: Paths):
+def __find_commands(paths: Paths):  # pragma: no cover
     """Find Commands."""
     for entry_point in entry_points(group="ucdp.cli"):
         yield entry_point.name, entry_point.value

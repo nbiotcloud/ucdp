@@ -50,7 +50,7 @@ class IntegerType(AScalarType):
     Native Signed 32-Bit Integer.
 
     Keyword Args:
-        default (int): Default Value. 0 by default.
+        default: Default Value. 0 by default.
 
     The width is fixed to 32.
 
@@ -108,10 +108,19 @@ class IntegerType(AScalarType):
     """
 
     width: ClassVar[int] = INTEGER_WIDTH  # type: ignore[misc]
+    """Width in Bits."""
+
     min_: ClassVar[int] = -1 * 2 ** (width - 1)
+    """Minimal Value."""
+
     max_: ClassVar[int] = 2 ** (width - 1) - 1
+    """Maximal Value."""
+
+    logic: bool = True
+    """Include X and Z states, not just numeric values."""
 
     default: Any = 0
+    """Default Value."""
 
     def check(self, value, what="Value") -> int:
         """
@@ -166,14 +175,17 @@ class IntegerType(AScalarType):
         Check For Valid Connection To `other`.
 
         Connections are only allowed to other :any:`IntegerType`.
-        The default and isolation value have no influence.
 
         >>> IntegerType().is_connectable(IntegerType())
         True
         >>> IntegerType(default=1).is_connectable(IntegerType(default=2))
         True
         """
-        return isinstance(other, (SintType, IntegerType)) and int(other.width) == INTEGER_WIDTH  # type: ignore[operator]
+        return (
+            isinstance(other, (SintType, IntegerType))
+            and int(other.width) == INTEGER_WIDTH  # type: ignore[operator]
+            and self.logic == other.logic
+        )
 
     def __getitem__(self, slice_):
         """Return Sliced Variant."""
@@ -190,7 +202,7 @@ class BitType(AScalarType):
     Native Single Bit.
 
     Keyword Args:
-        default (int): Default Value. 0 by default.
+        default: Default Value. 0 by default.
 
     The width is fixed to 1.
 
@@ -225,10 +237,19 @@ class BitType(AScalarType):
     """
 
     width: ClassVar[int] = 1  # type: ignore[misc]
+    """Width in Bits."""
+
     min_: ClassVar[int] = 0  # type: ignore[misc]
+    """Minimal Value."""
+
     max_: ClassVar[int] = 1  # type: ignore[misc]
+    """Maximal Value."""
+
+    logic: bool = True
+    """Include X and Z states, not just numeric values."""
 
     default: Any = 0
+    """Default Value."""
 
     @staticmethod
     def check(value, what="Value") -> int:
@@ -283,7 +304,6 @@ class BitType(AScalarType):
         Check For Valid Connection To `other`.
 
         Connections are only allowed to other :any:`BitType`.
-        The default and isolation value have no influence.
 
         >>> BitType().is_connectable(BitType())
         True
@@ -295,7 +315,7 @@ class BitType(AScalarType):
         >>> BitType().is_connectable(UintType(2))
         False
         """
-        return isinstance(other, (BitType)) and int(other.width) == 1  # type: ignore[operator]
+        return isinstance(other, BitType) and int(other.width) == 1 and self.logic == other.logic  # type: ignore[operator]
 
     def cast(self, other: BaseType) -> Casting:
         """
@@ -323,7 +343,7 @@ class BoolType(AScalarType):
     Native Boolean.
 
     Keyword Args:
-        default (int): Default Value. 0 by default.
+        default: Default Value. 0 by default.
 
     The width is fixed to 1.
 
@@ -358,7 +378,10 @@ class BoolType(AScalarType):
     """
 
     default: Any = False
+    """Default Value."""
+
     width: ClassVar[int] = 1  # type: ignore[misc]
+    """Width in Bits."""
 
     @staticmethod
     def check(value, what="Value") -> bool:
@@ -413,7 +436,6 @@ class BoolType(AScalarType):
         Check For Valid Connection To `other`.
 
         Connections are only allowed to other :any:`BoolType`.
-        The default and isolation value have no influence.
 
         >>> BoolType().is_connectable(BoolType())
         True
@@ -439,7 +461,7 @@ class RailType(AScalarType):
     Voltage Rail.
 
     Keyword Args:
-        default (int): Default Value. 0 by default.
+        default: Default Value. 0 by default.
 
     The width is fixed to 1.
 
@@ -472,8 +494,14 @@ class RailType(AScalarType):
     ValueError: Cannot slice bit(s) 32:31 from RailType(default=1)
     """
 
-    default: Any | None = None
     width: ClassVar[int] = 1  # type: ignore[misc]
+    """Width in Bits."""
+
+    logic: bool = True
+    """Include X and Z states, not just numeric values."""
+
+    default: Any | None = None
+    """Default Value."""
 
     @staticmethod
     def check(value, what="Value") -> int:
@@ -531,7 +559,6 @@ class RailType(AScalarType):
         Check For Valid Connection To `other`.
 
         Connections are only allowed to other :any:`RailType`.
-        The default and isolation value have no influence.
 
         >>> RailType().is_connectable(RailType())
         True
@@ -543,7 +570,7 @@ class RailType(AScalarType):
         >>> RailType().is_connectable(BitType())
         False
         """
-        return isinstance(other, RailType)
+        return isinstance(other, RailType) and self.logic == other.logic
 
     def cast(self, other: BaseType) -> Casting:
         """
@@ -574,7 +601,7 @@ class UintType(AVecType):
         width (int): Width in bits.
 
     Keyword Args:
-        default (int): Default Value. 0 by default.
+        default: Default Value. 0 by default.
 
     Example:
     >>> import ucdp as u
@@ -615,8 +642,10 @@ class UintType(AVecType):
     """
 
     min_: ClassVar[int] = 0
+    """Minimal Value."""
 
     default: Any = 0
+    """Default Value."""
 
     def __init__(self, width, **kwargs):
         super().__init__(width=width, **kwargs)
@@ -673,7 +702,6 @@ class UintType(AVecType):
         Check For Valid Connection To `other`.
 
         Connections are only allowed to other :any:`UintType` of the same width.
-        The default and isolation value have no influence.
 
         >>> UintType(8).is_connectable(UintType(8))
         True
@@ -689,7 +717,7 @@ class UintType(AVecType):
         >>> UintType(1).is_connectable(SintType(1))
         False
         """
-        return isinstance(other, (UintType, BitType)) and self.width == other.width  # type: ignore[operator]
+        return isinstance(other, (UintType, BitType)) and self.width == other.width and self.logic == other.logic  # type: ignore[operator]
 
     def cast(self, other: BaseType) -> Casting:
         """
@@ -722,8 +750,7 @@ class SintType(AVecType):
         width (int): Width in bits.
 
     Keyword Args:
-        default (int): Default Value. 0 by default.
-        iso (int): Isolation Value. Identical to default if omitted.
+        default: Default Value. 0 by default.
 
     Example:
     >>> import ucdp as u
@@ -760,6 +787,7 @@ class SintType(AVecType):
     """
 
     default: Any = 0
+    """Default Value."""
 
     @property
     def min_(self):
@@ -828,7 +856,6 @@ class SintType(AVecType):
         Check For Valid Connection To `other`.
 
         Connections are only allowed to other :any:`SintType` of the same width.
-        The default and isolation value have no influence.
 
         >>> SintType(8).is_connectable(SintType(8))
         True
@@ -844,7 +871,7 @@ class SintType(AVecType):
         >>> SintType(1).is_connectable(UintType(1))
         False
         """
-        return isinstance(other, (SintType)) and self.width == other.width  # type: ignore[operator]
+        return isinstance(other, (SintType)) and self.width == other.width and self.logic == other.logic  # type: ignore[operator]
 
     def cast(self, other: BaseType) -> Casting:
         """

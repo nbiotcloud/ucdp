@@ -47,8 +47,7 @@ class AEnumType(BaseEnumType, Light):
     Base class for all enumerations, behaves like a dictionary.
 
     Keyword Args:
-        default (int): Default Value. Default value of `keytype` by default.
-        iso (int): Isolation Value. Default value of `keytype` by default.
+        default: Default Value. Default value of `keytype` by default.
 
     The protected method `_build()` should be used to build the type.
 
@@ -234,7 +233,6 @@ class AEnumType(BaseEnumType, Light):
     False
 
     Connections are only allowed to other :any:`EnumType` with the same key-value mapping.
-    Default and isolation values are ignored.
 
     >>> class CType(u.AEnumType):
     ...     keytype: u.AScalarType = u.UintType(1)  # 2 possible values
@@ -450,10 +448,6 @@ class EnaType(AEnumType):
     def _build(self) -> None:
         self._add(0, "dis", "disabled")
         self._add(1, "ena", "enabled")
-
-    # def is_connectable(self, other):
-    #    """Return True if connectable to `other`."""
-    #     return (isinstance(other, BitType) and self.default == other.default) or super().is_connectable(other)
 
 
 class DisType(AEnumType):

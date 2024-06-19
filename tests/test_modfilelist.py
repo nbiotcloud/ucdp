@@ -24,8 +24,11 @@
 """Test Module File Information."""
 
 from pathlib import Path
+from typing import ClassVar
 
 import ucdp as u
+
+TESTS_PATH = Path(__file__).parent
 
 
 def test_basic(example_simple):
@@ -36,8 +39,7 @@ def test_basic(example_simple):
     mod = UartMod()
     prjroot = Path("$PRJROOT")
     filepath = prjroot / "uart_lib" / "uart" / "rtl" / "uart.sv"
-    modfilelist = u.resolve_modfilelist(mod, "hdl")
-    assert modfilelist == HdlFileList(
+    assert u.resolve_modfilelist(mod, "hdl") == HdlFileList(
         gen="full",
         filepaths=(filepath,),
         template_filepaths=(example_simple / "uart_lib" / "main.mako",),
@@ -76,4 +78,35 @@ def test_filelistparser(example_filelist):
             example_filelist / "mod2.sv",
         ),
         inc_dirs=(example_filelist / "filelist_lib" / "inc",),
+    )
+
+
+class MultiMod(u.AMod):
+    """Just An Example Module."""
+
+    filelists: ClassVar[u.ModFileLists] = (
+        u.ModFileList(name="drvhpp", gen="full", filepaths=("drv.hpp",), template_filepaths=("drv.hpp.mako",)),
+        u.ModFileList(name="drvcpp", gen="full", filepaths=("drv.cpp",), template_filepaths=("drv.cpp.mako",)),
+    )
+
+    def _build(self) -> None:
+        pass
+
+
+def test_multi():
+    """Multi Module."""
+    mod = MultiMod()
+    assert tuple(u.resolve_modfilelists(mod, "drv*")) == (
+        u.ModFileList(
+            name="drvhpp",
+            gen="full",
+            filepaths=(TESTS_PATH / "drv.hpp",),
+            template_filepaths=(TESTS_PATH / "drv.hpp.mako",),
+        ),
+        u.ModFileList(
+            name="drvcpp",
+            gen="full",
+            filepaths=(TESTS_PATH / "drv.cpp",),
+            template_filepaths=(TESTS_PATH / "drv.cpp.mako",),
+        ),
     )

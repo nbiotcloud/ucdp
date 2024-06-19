@@ -24,47 +24,81 @@
 
 """Scalar Types aka native Types."""
 
+from typing import Any
+
 from .object import Light
 from .typebase import BaseType
 
 
-class StringType(BaseType, Light):
+class FloatType(BaseType, Light):
     """
-    Native String.
+    Native Floating Point Number.
 
     Example:
     >>> import ucdp as u
-    >>> example = u.StringType()
+    >>> example = u.FloatType()
     >>> example
-    StringType()
-    >>> example = u.StringType(default='data')
-    >>> example
-    StringType(default='data')
-    >>> example[1:3]
-    StringType(default='at')
+    FloatType()
     """
 
-    default: str = ""
+    default: Any = 0
 
     def is_connectable(self, other) -> bool:
         """
         Check For Valid Connection To `other`.
 
-        Connections are only allowed to other :any:`StringType`.
+        Connections are only allowed to other :any:`FloatType`.
 
         >>> import ucdp as u
-        >>> u.StringType().is_connectable(u.StringType())
+        >>> u.FloatType().is_connectable(u.FloatType())
         True
 
         A connection to other types is forbidden.
 
-        >>> u.StringType().is_connectable(u.UintType(1))
+        >>> u.FloatType().is_connectable(u.UintType(1))
         False
         """
-        return isinstance(other, StringType)
+        return isinstance(other, FloatType)
 
     def __getitem__(self, slice_):
         """
         Return Sliced Variant.
         """
-        return StringType(default=self.default[slice_])
+        raise ValueError("Slicing is not allowed floating point numbers")
+
+
+class DoubleType(BaseType, Light):
+    """
+    Native Double Precision Floating Point Number.
+
+    Example:
+    >>> import ucdp as u
+    >>> example = u.DoubleType()
+    >>> example
+    DoubleType()
+    """
+
+    default: Any = 0
+
+    def is_connectable(self, other) -> bool:
+        """
+        Check For Valid Connection To `other`.
+
+        Connections are only allowed to other :any:`DoubleType`.
+
+        >>> import ucdp as u
+        >>> u.DoubleType().is_connectable(u.DoubleType())
+        True
+
+        A connection to other types is forbidden.
+
+        >>> u.DoubleType().is_connectable(u.UintType(1))
+        False
+        """
+        return isinstance(other, DoubleType)
+
+    def __getitem__(self, slice_):
+        """
+        Return Sliced Variant.
+        """
+        raise ValueError("Slicing is not allowed on floating point numbers")
