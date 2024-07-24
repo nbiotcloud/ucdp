@@ -23,6 +23,7 @@
 #
 """UART Example."""
 
+import logging
 from typing import ClassVar
 
 import ucdp as u  # (1)
@@ -71,6 +72,8 @@ class UartMod(u.AMod):
         word = regf.add_word("ctrl")
         word.add_field("ena", u.EnaType(), is_readable=True, route="u_clk_gate/ena_i")
         word.add_field("strt", u.BitType(), is_writable=True, route="create(u_core/strt_i)")
+
+        logging.getLogger(__name__).warning("I am just an example warning. Modules might emit me on suspects.")
 
 
 class UartCoreMod(u.ACoreMod):

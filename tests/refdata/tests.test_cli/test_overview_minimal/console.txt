@@ -1,0 +1,11 @@
+uart  <uart_lib.uart.UartMod(inst='uart', libname='uart_lib', modname='uart')>
+└── u_regf  <glbl_lib.regf.RegfMod(inst='uart/u_regf', libname='uart_lib', modname='uart_regf')>
+    +------------------------------+
+    |                              |
+    |  Word    Field    Type       |
+    |  ------  -------  ---------  |
+    |  ctrl                        |
+    |          .ena     EnaType()  |
+    |          .strt    BitType()  |
+    |                              |
+    +------------------------------+

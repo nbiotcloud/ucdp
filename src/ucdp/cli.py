@@ -29,18 +29,31 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import click
-from anytree import Node, RenderTree
 from pydantic import BaseModel, ConfigDict
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.pretty import pprint
 
 from ._cligroup import MainGroup
+from ._cliutil import (
+    arg_filelist,
+    arg_top,
+    defines2data,
+    opt_defines,
+    opt_dry_run,
+    opt_file,
+    opt_filepath,
+    opt_maxlevel,
+    opt_maxworkers,
+    opt_path,
+    opt_show_diff,
+    opt_target,
+)
+from .consts import PATH
 from .fileset import FileSet
-from .generate import clean, generate, get_makolator
+from .generate import clean, generate, get_makolator, render_generate, render_inplace
 from .loader import load
 from .modfilelist import iter_modfilelists
-from .moditer import ModPreIter
 from .modtopref import PAT_TOPMODREF
 from .top import Top
 
@@ -61,39 +74,6 @@ class Ctx(BaseModel):
     console: Console
 
 
-pass_ctx = click.make_pass_decorator(Ctx)
-arg_top = click.argument("top", envvar="UCDP_TOP")
-opt_path = click.option(
-    "--path",
-    "-p",
-    default=[],
-    multiple=True,
-    envvar="UCDP_PATH",
-    help="""
-Search Path For Data Model Files.
-This option can be specified multiple times.
-Environment Variable 'UCDP_PATH'.
-""",
-)
-arg_filelist = click.argument("filelist", nargs=-1, required=True, envvar="UCDP_FILELIST")
-opt_target = click.option("--target", "-t", help="Filter File List for Target", envvar="UCDP_TARGET")
-opt_show_diff = click.option(
-    "--show-diff", "-s", default=False, is_flag=True, help="Show What Changed", envvar="UCDP_SHOW_DIFF"
-)
-opt_maxlevel = click.option("--maxlevel", "-L", type=int, help="Limit to maximum number of hierarchy levels.")
-opt_dry_run = click.option("--dry-run", default=False, is_flag=True, help="Do nothing.")
-opt_maxworkers = click.option("--maxworkers", "-J", type=int, help="Maximum Number of Processes.")
-
-
-def load_top(ctx: Ctx, top: str, paths: Iterable[str | Path]) -> Top:
-    """Load Top Module."""
-    lpaths = [Path(path) for path in paths]
-    with ctx.console.status(f"Loading {top!r}"):
-        result = load(top, paths=lpaths)
-    ctx.console.log(f"{top!r} checked.")
-    return result
-
-
 @click.group(cls=MainGroup, context_settings={"help_option_names": ["-h", "--help"]})
 @click.option("-v", "--verbose", count=True, help="Increase Verbosity.")
 @click.version_option()
@@ -106,6 +86,20 @@ def ucdp(ctx, verbose=0):
     ctx.obj = Ctx(
         console=Console(log_time=False, log_path=False),
     )
+
+
+pass_ctx = click.make_pass_decorator(Ctx)
+
+
+def load_top(ctx: Ctx, top: str, paths: Iterable[str | Path], quiet: bool = False) -> Top:
+    """Load Top Module."""
+    lpaths = [Path(path) for path in paths]
+    if quiet:
+        return load(top, paths=lpaths)
+    with ctx.console.status(f"Loading {top!r}"):
+        result = load(top, paths=lpaths)
+    ctx.console.log(f"{top!r} checked.")
+    return result
 
 
 @ucdp.command(
@@ -143,13 +137,77 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 @opt_target
 @opt_show_diff
 @opt_maxworkers
+@opt_defines
 @pass_ctx
-def gen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=None):
+def gen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=None, define=None):
     """Generate."""
     top = load_top(ctx, top, path)
-    makolator = get_makolator(show_diff=show_diff)
+    makolator = get_makolator(show_diff=show_diff, paths=path)
+    data = defines2data(define)
     for item in filelist:
-        generate(top.mod, item, target=target, makolator=makolator, maxworkers=maxworkers)
+        generate(top, item, target=target, makolator=makolator, maxworkers=maxworkers, data=data)
+
+
+@ucdp.command(
+    help=f"""
+Load Data Model and Render Template and Create File.
+
+TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
+
+TEMPLATE_FILEPATHS: Templates to render. Environment Variable 'UCDP_TEMPLATE_FILEPATHS'
+                    Templates in `templates` folders are found automatically.
+
+GENFILE: Generated File.
+"""
+)
+@arg_top
+@opt_path
+@click.argument("template_filepaths", type=click.Path(path_type=Path), nargs=-1, envvar="UCDP_TEMPLATE_FILEPATHS")
+@click.argument("genfile", type=click.Path(path_type=Path), nargs=1)
+@opt_show_diff
+@opt_defines
+@pass_ctx
+def rendergen(ctx, top, path, template_filepaths, genfile, show_diff=False, define=None):
+    """Render Generate."""
+    top = load_top(ctx, top, path)
+    makolator = get_makolator(show_diff=show_diff, paths=path)
+    data = defines2data(define)
+    render_generate(top, template_filepaths, genfile=genfile, makolator=makolator, data=data)
+
+
+@ucdp.command(
+    help=f"""
+Load Data Model and Render Template and Update File.
+
+TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
+
+TEMPLATE_FILEPATHS: Templates to render. Environment Variable 'UCDP_TEMPLATE_FILEPATHS'
+                    Templates in `templates` folders are found automatically.
+
+INPLACEFILE: Inplace File.
+"""
+)
+@arg_top
+@opt_path
+@click.argument("template_filepaths", type=click.Path(path_type=Path), nargs=-1, envvar="UCDP_TEMPLATE_FILEPATHS")
+@click.argument("inplacefile", type=click.Path(path_type=Path), nargs=1)
+@opt_show_diff
+@opt_defines
+@click.option("--ignore_unknown", "-i", default=False, is_flag=True, help="Ignore Unknown Placeholder.")
+@pass_ctx
+def renderinplace(ctx, top, path, template_filepaths, inplacefile, show_diff=False, define=None, ignore_unknown=False):
+    """Render Inplace."""
+    top = load_top(ctx, top, path)
+    makolator = get_makolator(show_diff=show_diff, paths=path)
+    data = defines2data(define)
+    render_inplace(
+        top,
+        template_filepaths,
+        inplacefile=inplacefile,
+        makolator=makolator,
+        data=data,
+        ignore_unknown=ignore_unknown,
+    )
 
 
 @ucdp.command(
@@ -172,9 +230,9 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 def cleangen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=None, dry_run=False):
     """Clean Generated Files."""
     top = load_top(ctx, top, path)
-    makolator = get_makolator(show_diff=show_diff)
+    makolator = get_makolator(show_diff=show_diff, paths=path)
     for item in filelist:
-        clean(top.mod, item, target=target, makolator=makolator, maxworkers=maxworkers, dry_run=dry_run)
+        clean(top, item, target=target, makolator=makolator, maxworkers=maxworkers, dry_run=dry_run)
 
 
 @ucdp.command(
@@ -190,17 +248,16 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 @opt_path
 @arg_filelist
 @opt_target
+@opt_file
 @pass_ctx
-def filelist(ctx, top, path, filelist, target=None):
+def filelist(ctx, top, path, filelist, target=None, file=None):
     """File List."""
-    top = load_top(ctx, top, path)
-
+    # Load quiet, otherwise stdout is messed-up
+    top = load_top(ctx, top, path, quiet=True)
     for item in filelist:
         fileset = FileSet.from_mod(top.mod, item, target=target)
-        for incdir in fileset.inc_dirs:
-            print(f"-incdir {incdir}")
-        for libfilepath in fileset.filepaths:
-            print(str(libfilepath.path))
+        for line in fileset:
+            print(line, file=file)
 
 
 @ucdp.command(
@@ -217,10 +274,13 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 @arg_filelist
 @opt_target
 @opt_maxlevel
+@opt_file
 @pass_ctx
-def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None):
+def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, file=None):
     """File List."""
-    top = load_top(ctx, top, path)
+    # Load quiet, otherwise stdout is messed-up
+    top = load_top(ctx, top, path, quiet=True)
+    console = Console(file=file) if file else ctx.console
     for item in filelist:
         pprint(
             {
@@ -228,6 +288,7 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None):
                 for mod, modfilelist in iter_modfilelists(top.mod, item, target=target, maxlevel=maxlevel)
             },
             indent_guides=False,
+            console=console,
         )
 
 
@@ -240,23 +301,15 @@ TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 )
 @arg_top
 @opt_path
+@click.option("--minimal", "-m", default=False, is_flag=True, help="Skip modules without specific details")
+@opt_filepath
 @pass_ctx
-def overview(ctx, top, path):
+def overview(ctx, top, path, minimal=False, file=None):
     """Overview."""
-    top = load_top(ctx, top, path)
-    nodes = {}
-    for inst in ModPreIter(top.mod):
-        parent = nodes.get(inst.parent.inst, None) if inst.parent else None
-        nodes[inst.inst] = Node(name=inst.inst, inst=inst, overview=inst.get_overview() or None, parent=parent)
-    root = nodes[top.mod.inst]
-    for pre, fill, node in RenderTree(root):
-        mod = node.inst
-        print(f"{pre}{mod.name}  {mod!r}")
-        if node.overview:
-            print(fill)
-            for line in node.overview.splitlines():
-                print(f"{fill}    {line}")
-            print(fill)
+    # Load quiet, otherwise stdout is messed-up
+    top = load_top(ctx, top, path, quiet=True)
+    data = {"minimal": minimal}
+    render_generate(top, [PATH / "ucdp-templates" / "overview.txt.mako"], genfile=file, data=data)
 
 
 @ucdp.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -270,3 +323,13 @@ def examples(ctx):
     """Path to Examples."""
     examples_path = Path(__file__).parent / "examples"
     print(str(examples_path))
+
+
+@info.command()
+@opt_path
+@pass_ctx
+def template_paths(ctx, path):
+    """Template Paths."""
+    makolator = get_makolator(paths=path)
+    for template_path in makolator.config.template_paths:
+        print(str(template_path))

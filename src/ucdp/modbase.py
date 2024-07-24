@@ -501,7 +501,7 @@ class BaseMod(NamedObject):
             raise LockError(f"{self}: Cannot add assign '{source}' to '{target}'.")
         parser = self.parser
         assigntarget: BaseSignal = parser.parse(target, only=BaseSignal)  # type: ignore[assignment]
-        assignsource: Source = parser.parse_note(source, only=Source)  # type: ignore[assignment]
+        assignsource: Source = parser.parse_note(source, only=Source)  # type: ignore[arg-type]
         self.assigns.set(assigntarget, assignsource, cast=cast, overwrite=overwrite)
 
     def add_inst(self, inst: "BaseMod") -> None:
@@ -568,7 +568,7 @@ class BaseMod(NamedObject):
         mod: "BaseMod" = self.get_inst(inst)
         assigns, parser = self.__instcons[mod.name]
         assigntarget: BaseSignal = parser.parse(port, only=BaseSignal)  # type: ignore[assignment]
-        assignsource: Source = self.parser.parse_note(expr, only=Source)  # type: ignore[assignment]
+        assignsource: Source = self.parser.parse_note(expr, only=Source)  # type: ignore[arg-type]
         assigns.set(assigntarget, assignsource, cast=cast, overwrite=overwrite)
 
     def get_instcons(self, inst: Union["BaseMod", str]) -> Assigns:

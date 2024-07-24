@@ -40,13 +40,14 @@ Hex = Annotated[
 ]
 """Hex."""
 
-Bytes = Annotated[
-    humannum.Bytes,
-    BeforeValidator(lambda x: humannum.bytes_(x)),
+Bytesize = Annotated[
+    humannum.Bytesize,
+    BeforeValidator(lambda x: humannum.bytesize_(x)),
     PlainSerializer(lambda x: str(x), return_type=str),
     WithJsonSchema({"type": "string"}, mode="serialization"),
 ]
-"""Bytes."""
+"""Bytesize."""
+Bytes = Bytesize
 
 Bin = Annotated[
     humannum.Bin,

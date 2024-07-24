@@ -58,8 +58,8 @@ from .exprresolver import ExprResolver
 from .filelistparser import FileListParser
 from .fileset import FileSet, LibPath
 from .flipflop import FlipFlop
-from .generate import generate
-from .humannum import Bin, Bytes, Hex
+from .generate import clean, generate, get_makolator, render_generate, render_inplace
+from .humannum import Bin, Bytes, Bytesize, Hex
 from .ident import Ident, IdentFilter, Idents, IdentStop, get_expridents, get_ident
 from .iterutil import Names, namefilter, split
 from .loader import load
@@ -106,6 +106,7 @@ from .routepath import Routeable, Routeables, RoutePath, parse_routepath, parse_
 from .signal import BaseSignal, Port, Signal
 from .slices import DOWN, UP, Slice, SliceDirection
 from .test import Test
+from .top import Top
 from .typearray import ArrayType
 from .typebase import ACompositeType, AScalarType, AVecType, BaseScalarType, BaseType
 from .typebaseenum import BaseEnumType, EnumItem, EnumItemFilter
@@ -170,6 +171,7 @@ __all__ = [
     "Bytes",
     "cast_booltype",
     "Casting",
+    "clean",
     "cli",
     "ClkRstAnType",
     "ClkType",
@@ -214,6 +216,7 @@ __all__ = [
     "get_copyright",
     "get_expridents",
     "get_ident",
+    "get_makolator",
     "get_modbaseinfos",
     "get_repr",
     "get_snakecasename",
@@ -225,6 +228,7 @@ __all__ = [
     "improved_glob",
     "improved_resolve",
     "IN",
+    "Top",
     "INM",
     "INOUT",
     "IntegerType",
@@ -251,6 +255,7 @@ __all__ = [
     "NamedObject",
     "namefilter",
     "Names",
+    "Bytesize",
     "Namespace",
     "Note",
     "Object",
@@ -270,6 +275,8 @@ __all__ = [
     "PrivateField",
     "RailType",
     "RangeExpr",
+    "render_generate",
+    "render_inplace",
     "resolve_modfilelist",
     "resolve_modfilelists",
     "Routeable",

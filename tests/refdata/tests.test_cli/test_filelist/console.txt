@@ -1,0 +1,4 @@
+$PRJROOT/glbl_lib/clk_gate/rtl/clk_gate.sv
+$PRJROOT/uart_lib/uart/rtl/uart_regf.sv
+$PRJROOT/uart_lib/uart/rtl/uart_core.sv
+$PRJROOT/uart_lib/uart/rtl/uart.sv

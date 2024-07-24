@@ -28,6 +28,8 @@ Name Utilities.
 
 import functools
 import re
+from collections.abc import Iterable
+from typing import Any
 
 from caseconverter import snakecase
 from fuzzywuzzy import process
@@ -71,15 +73,12 @@ def split_prefix(name: str) -> tuple[str, str]:
 
 
 @functools.lru_cache
-def split_suffix(name: str, suffixes=None) -> tuple[str, str]:
+def split_suffix(name: str) -> tuple[str, str]:
     """
     Split Name Into Basename And Suffix.
 
     Args:
         name: Name.
-
-    Keyword Args:
-        suffixes: Suffixes.
 
     Returns:
         tuple: Tuple of Basename and Suffix
@@ -114,7 +113,7 @@ def split_suffix(name: str, suffixes=None) -> tuple[str, str]:
     return name, ""
 
 
-def join_names(*names, concat="_") -> str:
+def join_names(*names: str, concat: str = "_") -> str:
     """
     Join Names.
 
@@ -139,7 +138,7 @@ def join_names(*names, concat="_") -> str:
     return concat.join(name for name in names if name)
 
 
-def didyoumean(name, names, known=False, multiline=False) -> str:
+def didyoumean(name: str, names: Iterable[str], known: bool = False, multiline: bool = False) -> str:
     """
     Propose matching names.
 
@@ -177,7 +176,7 @@ def didyoumean(name, names, known=False, multiline=False) -> str:
     return msg
 
 
-def get_snakecasename(item):
+def get_snakecasename(item: Any):
     """
     Get snakecase name of `cls`.
 

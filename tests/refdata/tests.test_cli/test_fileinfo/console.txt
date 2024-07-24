@@ -1,0 +1,62 @@
+{
+    "<glbl_lib.clk_gate.ClkGateMod(inst='uart/u_clk_gate', libname='glbl_lib', modname='clk_gate')>": HdlFileList(
+        name='hdl',
+        gen='no',
+        target=None,
+        inc_dirs=(),
+        inc_filepaths=(),
+        filepaths=(PosixPath('$PRJROOT/glbl_lib/clk_gate/rtl/clk_gate.sv'),),
+        dep_inc_dirs=(),
+        dep_filepaths=(),
+        template_filepaths=(
+            PosixPath('$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako'),
+        ),
+        inc_template_filepaths=(),
+        is_leaf=False
+    ),
+    "<glbl_lib.regf.RegfMod(inst='uart/u_regf', libname='uart_lib', modname='uart_regf')>": HdlFileList(
+        name='hdl',
+        gen='full',
+        target=None,
+        inc_dirs=(),
+        inc_filepaths=(),
+        filepaths=(PosixPath('$PRJROOT/uart_lib/uart/rtl/uart_regf.sv'),),
+        dep_inc_dirs=(),
+        dep_filepaths=(),
+        template_filepaths=(
+            PosixPath('$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako'),
+        ),
+        inc_template_filepaths=(),
+        is_leaf=False
+    ),
+    "<uart_lib.uart.UartCoreMod(inst='uart/u_core', libname='uart_lib', modname='uart_core')>": HdlFileList(
+        name='hdl',
+        gen='inplace',
+        target=None,
+        inc_dirs=(),
+        inc_filepaths=(),
+        filepaths=(PosixPath('$PRJROOT/uart_lib/uart/rtl/uart_core.sv'),),
+        dep_inc_dirs=(),
+        dep_filepaths=(),
+        template_filepaths=(
+            PosixPath('$PRJ/src/ucdp/examples/simple/uart_lib/main.mako'),
+        ),
+        inc_template_filepaths=(),
+        is_leaf=False
+    ),
+    "<uart_lib.uart.UartMod(inst='uart', libname='uart_lib', modname='uart')>": HdlFileList(
+        name='hdl',
+        gen='full',
+        target=None,
+        inc_dirs=(),
+        inc_filepaths=(),
+        filepaths=(PosixPath('$PRJROOT/uart_lib/uart/rtl/uart.sv'),),
+        dep_inc_dirs=(),
+        dep_filepaths=(),
+        template_filepaths=(
+            PosixPath('$PRJ/src/ucdp/examples/simple/uart_lib/main.mako'),
+        ),
+        inc_template_filepaths=(),
+        is_leaf=False
+    )
+}

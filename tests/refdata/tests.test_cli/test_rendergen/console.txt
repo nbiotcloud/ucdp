@@ -1,0 +1,2 @@
+'uart_lib.uart' checked.                                                        
+'$GEN/output.txt'... CREATED.

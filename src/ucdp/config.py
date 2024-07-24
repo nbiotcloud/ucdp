@@ -55,19 +55,19 @@ class AConfig(LightObject):
             >>> class MyConfig(u.AConfig):
             ...
             ...     base_addr: u.Hex # required without default
-            ...     ram_size: u.Bytes
-            ...     rom_size: u.Bytes|None = None
+            ...     ram_size: u.Bytesize
+            ...     rom_size: u.Bytesize|None = None
             ...     feature: bool = False
 
         To create 1st variant
 
             >>> variant0  = MyConfig(name='variant0', base_addr=4*1024, ram_size='16kB')
             >>> variant0
-            MyConfig('variant0', base_addr=Hex('0x1000'), ram_size=Bytes('16 KB'))
+            MyConfig('variant0', base_addr=Hex('0x1000'), ram_size=Bytesize('16 KB'))
             >>> variant0.base_addr
             Hex('0x1000')
             >>> variant0.ram_size
-            Bytes('16 KB')
+            Bytesize('16 KB')
             >>> variant0.rom_size
             >>> variant0.feature
             False
@@ -80,19 +80,19 @@ class AConfig(LightObject):
             ...     name, value
             ('name', 'variant0')
             ('base_addr', Hex('0x1000'))
-            ('ram_size', Bytes('16 KB'))
+            ('ram_size', Bytesize('16 KB'))
             ('rom_size', None)
             ('feature', False)
 
             >>> variant1  = MyConfig('variant1', base_addr=8*1024, rom_size="2KB", ram_size="4KB", feature=True)
             >>> variant1
-            MyConfig('variant1', base_addr=Hex('0x2000'), ram_size=Bytes('4 KB'), rom_size=Bytes('2 KB'), feature=True)
+            MyConfig('variant1', base_addr=Hex('0x2000'), ram_size=Bytesize('4 KB'), rom_size=Bytesize('2 KB'), ...)
             >>> variant1.base_addr
             Hex('0x2000')
             >>> variant1.ram_size
-            Bytes('4 KB')
+            Bytesize('4 KB')
             >>> variant1.rom_size
-            Bytes('2 KB')
+            Bytesize('2 KB')
             >>> variant1.feature
             True
             >>> variant1.hash
@@ -102,13 +102,13 @@ class AConfig(LightObject):
 
             >>> variant2 = variant1.new(name='variant2', rom_size='8KB')
             >>> variant2
-            MyConfig('variant2', base_addr=Hex('0x2000'), ram_size=Bytes('4 KB'), rom_size=Bytes('8 KB'), feature=True)
+            MyConfig('variant2', base_addr=Hex('0x2000'), ram_size=Bytesize('4 KB'), rom_size=Bytesize('8 KB'), ...)
             >>> variant2.base_addr
             Hex('0x2000')
             >>> variant2.ram_size
-            Bytes('4 KB')
+            Bytesize('4 KB')
             >>> variant2.rom_size
-            Bytes('8 KB')
+            Bytesize('8 KB')
             >>> variant2.feature
             True
             >>> variant2.hash
@@ -137,14 +137,17 @@ class AConfig(LightObject):
         """Unique Configuration Hash."""
         exclude = self.__class__._hash_excludes
         hashdata = self.model_dump(exclude=exclude)
-        # Note: There may be a better way
-        for key, value in hashdata.items():
+        for key, value in self.__dict__.items():
+            if key not in hashdata:
+                continue
             if isinstance(value, AConfig):
                 hashdata[key] = value.hash
-            if isinstance(value, list):
-                for idx, item in enumerate(value):
+            if isinstance(value, tuple):
+                items = list(value)
+                for idx, item in enumerate(items):
                     if isinstance(item, AConfig):
-                        value[idx] = item.hash
+                        items[idx] = item.hash
+                hashdata[key] = tuple(items)
         return hashlib.sha256(str(hashdata).encode("utf-8")).hexdigest()[:16]
 
 

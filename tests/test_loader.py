@@ -31,7 +31,7 @@ from pytest import raises
 
 def test_load_simple(example_simple):
     """Simple Module."""
-    top = u.load("glbl_lib.clk_gate")
+    top = u.load("glbl_lib.clk_gate", paths=None)
     assert top.ref == u.TopModRef(u.ModRef("glbl_lib", "clk_gate"))
     assert top.mod.libname == "glbl_lib"
     assert top.mod.modname == "clk_gate"
@@ -46,17 +46,21 @@ def test_load_simple(example_simple):
         "libname='glbl_lib', modname='clk_gate')>"
     )
 
+    retop = u.Top.from_mod(top.mod)
+    assert retop.mod == top.mod
+    assert retop.ref == u.TopModRef(u.ModRef("glbl_lib", "clk_gate", modclsname="ClkGateMod"))
+
 
 def test_load_non_mod(example_bad):
     """Simple Module."""
     with raises(ValueError) as exc:
-        u.load("glbl_bad_lib.regf.MyMod")
+        u.load("glbl_bad_lib.regf.MyMod", paths=None)
     assert str(exc.value) == "<class 'glbl_bad_lib.regf.MyMod'> is not a module aka child of <class ucdp.BaseMod>."
 
 
 def test_load_complex(example_simple):
     """Complexer Module."""
-    top = u.load("uart_lib.uart")
+    top = u.load("uart_lib.uart", paths=None)
     assert top.ref == u.TopModRef(u.ModRef("uart_lib", "uart"))
     assert top.mod.libname == "uart_lib"
     assert top.mod.modname == "uart"
@@ -130,7 +134,7 @@ def test_load_complex(example_simple):
 
 def test_load_complex_sub(example_simple):
     """Complexer Module with Sub module."""
-    top = u.load("uart_lib.uart-glbl_lib.clk_gate")
+    top = u.load("uart_lib.uart-glbl_lib.clk_gate", paths=None)
     assert top.ref == u.TopModRef(u.ModRef("uart_lib", "uart"), sub="glbl_lib.clk_gate")
     assert (
         repr(top.mod)
@@ -140,7 +144,7 @@ def test_load_complex_sub(example_simple):
 
 def test_load_tb(example_simple):
     """Complexer Module with Testbench."""
-    top = u.load("glbl_lib.regf_tb#uart_lib.uart-uart_lib.uart_regf")
+    top = u.load("glbl_lib.regf_tb#uart_lib.uart-uart_lib.uart_regf", paths=None)
     assert top.ref == u.TopModRef(
         u.ModRef("uart_lib", "uart"), sub="uart_lib.uart_regf", tb=u.ModRef("glbl_lib", "regf_tb")
     )
@@ -150,11 +154,17 @@ def test_load_tb(example_simple):
     )
     assert repr(top.mod.dut) == "<glbl_lib.regf.RegfMod(inst='uart/u_regf', libname='uart_lib', modname='uart_regf')>"
 
+    retop = u.Top.from_mod(top.mod)
+    assert retop.mod == top.mod
+    assert retop.ref == u.TopModRef(
+        u.ModRef("glbl_lib", "regf", modclsname="RegfMod"), tb=u.ModRef("glbl_lib", "regf_tb", modclsname="RegfTbMod")
+    )
+
 
 def test_load_non_tb(example_simple):
     """Complexer Module with Testbench - Non-TB."""
     with raises(ValueError) as exc:
-        u.load("glbl_lib.regf#uart_lib.uart-uart_lib.uart_regf")
+        u.load("glbl_lib.regf#uart_lib.uart-uart_lib.uart_regf", paths=None)
     assert (
         str(exc.value) == "<class 'glbl_lib.regf.RegfMod'> is not a testbench module aka child of <class ucdp.ATbMod>."
     )
@@ -164,11 +174,11 @@ def test_imp_err(testdata):
     """Import Error."""
     msg = "No module named 'imp_err_lib.not_existing'"
     with raises(ModuleNotFoundError, match=re.escape(msg)):
-        u.load("imp_err_lib.not_existing")
+        u.load("imp_err_lib.not_existing", paths=None)
 
 
 def test_imp_err_dep(testdata):
     """Broken Dependency."""
     msg = "Import of 'imp_err_lib.not_existing' failed."
     with raises(RuntimeError, match=re.escape(msg)):
-        u.load("imp_err_lib.imp_err")
+        u.load("imp_err_lib.imp_err", paths=None)

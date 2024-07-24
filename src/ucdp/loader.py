@@ -58,14 +58,11 @@ def load(topmodref: TopModRef | str, paths: Iterable[Path] | None = None) -> Top
         topmodref: Items.
 
     Keyword Args:
-        paths: Additional Search Paths for Python Modules.
+        paths: Additional Search Paths for Python Modules. UCDP_PATHS environment variable by default.
 
     Returns:
         Top: Top
-
     """
-    paths = tuple(paths or [])
-    LOGGER.debug("paths=%r", paths)
     with extend_sys_path(paths):
         topmodref = TopModRef.cast(topmodref)
         mod = _load_topmod(topmodref)

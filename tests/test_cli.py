@@ -86,6 +86,7 @@ def test_gen(runner, example_simple, prjroot):
 
     assert not uartfile.exists()
 
+    (prjroot / "console.txt").write_text(result.output)
     assert_refdata(test_gen, prjroot)
 
 
@@ -93,13 +94,24 @@ def test_filelist(runner, example_simple, prjroot):
     """Filelist Command."""
     result = runner.invoke(ucdp, ["filelist", "uart_lib.uart", "hdl"])
     assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
     assert_refdata(test_filelist, prjroot)
+
+
+def test_filelist_file(runner, example_simple, prjroot):
+    """Filelist Command."""
+    filepath = prjroot / "file.txt"
+    result = runner.invoke(ucdp, ["filelist", "uart_lib.uart", "hdl", "--file", str(filepath)])
+    assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
+    assert_refdata(test_filelist_file, prjroot)
 
 
 def test_filelist_other(runner, prjroot, example_filelist):
     """Filelist Command."""
     result = runner.invoke(ucdp, ["filelist", "filelist_lib.filelist", "hdl"])
     assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
     assert_refdata(test_filelist_other, prjroot)
 
 
@@ -107,6 +119,7 @@ def test_fileinfo(runner, example_simple, prjroot):
     """Fileinfo Command."""
     result = runner.invoke(ucdp, ["fileinfo", "uart_lib.uart", "hdl"])
     assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
     assert_refdata(test_fileinfo, prjroot)
 
 
@@ -114,18 +127,107 @@ def test_fileinfo_maxlevel(runner, example_simple, prjroot):
     """Fileinfo Command with Maxlevel."""
     result = runner.invoke(ucdp, ["fileinfo", "uart_lib.uart", "hdl", "--maxlevel=1"])
     assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
     assert_refdata(test_fileinfo_maxlevel, prjroot)
+
+
+def test_fileinfo_file(runner, example_simple, prjroot):
+    """Fileinfo Command with File."""
+    filepath = prjroot / "file.txt"
+    result = runner.invoke(ucdp, ["fileinfo", "uart_lib.uart", "hdl", "--file", str(filepath)])
+    assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
+    assert_refdata(test_fileinfo_file, prjroot)
 
 
 def test_overview(runner, example_simple, prjroot):
     """Overview Command."""
     result = runner.invoke(ucdp, ["overview", "uart_lib.uart"])
     assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
     assert_refdata(test_overview, prjroot)
+
+
+def test_overview_minimal(runner, example_simple, prjroot):
+    """Overview Command - Minimal."""
+    result = runner.invoke(ucdp, ["overview", "uart_lib.uart", "-m"])
+    assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
+    assert_refdata(test_overview_minimal, prjroot)
+
+
+def test_overview_file(runner, example_simple, prjroot):
+    """Overview Command - Minimal."""
+    filepath = prjroot / "file.txt"
+    result = runner.invoke(ucdp, ["overview", "uart_lib.uart", "-o", str(filepath)])
+    assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
+    assert_refdata(test_overview_file, prjroot)
 
 
 def test_info_examples(runner, example_simple, prjroot):
     """Info Examples Command."""
     result = runner.invoke(ucdp, ["info", "examples"])
     assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
     assert_refdata(test_info_examples, prjroot)
+
+
+def test_info_templates(runner, example_simple, prjroot):
+    """Info Templates Command."""
+    result = runner.invoke(ucdp, ["info", "template-paths"])
+    assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
+    assert_refdata(test_info_templates, prjroot)
+
+
+def test_rendergen(runner, example_simple, prjroot, testdata):
+    """Command rendergen."""
+    template_filepath = testdata / "example.txt.mako"
+    filepath = prjroot / "output.txt"
+    result = runner.invoke(
+        ucdp,
+        [
+            "rendergen",
+            "uart_lib.uart",
+            str(template_filepath),
+            str(filepath),
+        ],
+    )
+    assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
+    assert_refdata(test_rendergen, prjroot)
+
+
+def test_rendergen_defines(runner, example_simple, prjroot, testdata):
+    """Command rendergen."""
+    template_filepath = testdata / "example.txt.mako"
+    filepath = prjroot / "output.txt"
+    result = runner.invoke(
+        ucdp, ["rendergen", "uart_lib.uart", str(template_filepath), str(filepath), "-D", "one=1", "-D", "two"]
+    )
+    assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
+    assert_refdata(test_rendergen_defines, prjroot)
+
+
+def test_renderinplace(runner, example_simple, prjroot, testdata):
+    """Command renderinplace."""
+    template_filepath = testdata / "example.txt.mako"
+    filepath = prjroot / "output.txt"
+    filepath.write_text("""
+GENERATE INPLACE BEGIN content('test')
+GENERATE INPLACE END content
+""")
+    result = runner.invoke(
+        ucdp,
+        [
+            "renderinplace",
+            "uart_lib.uart",
+            str(template_filepath),
+            str(filepath),
+        ],
+    )
+    assert result.exit_code == 0
+    (prjroot / "console.txt").write_text(result.output)
+    assert_refdata(test_renderinplace, prjroot)

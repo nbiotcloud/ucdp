@@ -23,17 +23,26 @@
 #
 """Test Configuration."""
 
+from typing import ClassVar
+
 import ucdp as u
 from pytest import raises
+from uniquer import uniquelist
 
 
 class MyConfig(u.AConfig):
     """My Configuration."""
 
+    _hash_excludes: ClassVar[set[str]] = {
+        "ignored",
+    }
+
     mem_baseaddr: u.Hex
-    ram_size: u.Bytes
-    rom_size: u.Bytes = 0
+    ram_size: u.Bytesize
+    rom_size: u.Bytesize = 0
     feature: bool = False
+
+    ignored: int = 0
 
 
 def test_config():
@@ -43,13 +52,14 @@ def test_config():
         MyConfig(name="myconfig")
 
     config = MyConfig("myconfig", mem_baseaddr=0xF100, ram_size="16 kB")
-    assert str(config) == "MyConfig('myconfig', mem_baseaddr=Hex('0xF100'), ram_size=Bytes('16 KB'))"
+    assert str(config) == "MyConfig('myconfig', mem_baseaddr=Hex('0xF100'), ram_size=Bytesize('16 KB'))"
     assert dict(config) == {
         "feature": False,
+        "ignored": 0,
         "mem_baseaddr": u.Hex("0xF100"),
         "name": "myconfig",
-        "ram_size": u.Bytes("16 KB"),
-        "rom_size": u.Bytes("0 bytes"),
+        "ram_size": u.Bytesize("16 KB"),
+        "rom_size": u.Bytesize("0 bytes"),
     }
 
     assert config.hash == "db829f1d9872ab0e"
@@ -59,8 +69,8 @@ def test_config():
 class OtherConfig(u.AConfig):
     """Other Configuration."""
 
-    ram_size: u.Bytes = 0x100
-    rom_size: u.Bytes = 0
+    ram_size: u.Bytesize = 0x100
+    rom_size: u.Bytesize = 0
     feature: bool = False
 
 
@@ -73,3 +83,58 @@ def test_default_config():
     config = OtherConfig(name="abc")
     assert config.hash == "06449e0c672f3868"
     assert config.is_default is False
+
+
+class ParentConfig(u.AConfig):
+    """My Configuration."""
+
+    _hash_excludes: ClassVar[set[str]] = {
+        "ignored",
+    }
+
+    mem_baseaddr: u.Hex
+    sub: MyConfig
+    subs: tuple[MyConfig, ...]
+
+    ignored: int = 0
+
+
+def assert_unique_hashes(*configs):
+    """Check for unique hashes."""
+    hashes = [config.hash for config in configs]
+    assert hashes == uniquelist(hashes)
+
+
+def test_hier_config():
+    """Test hierarchical hashes."""
+    my0 = MyConfig(mem_baseaddr=0x1000, ram_size=0x2000)
+    my1 = MyConfig(mem_baseaddr=0x1000, ram_size=0x2001)
+    my2 = MyConfig(mem_baseaddr=0x1000, ram_size=0x2001, ignored=1)
+    assert my0.hash != my1.hash
+    assert my1.hash == my2.hash
+
+    # ignored in parent
+    p0 = ParentConfig(mem_baseaddr=0x1000, sub=my0, subs=(my0, my0))
+    p1 = ParentConfig(mem_baseaddr=0x1000, sub=my0, subs=(my0, my0), ignored=1)
+    assert p0.hash == p1.hash
+
+    # changed sub
+    p2 = ParentConfig(mem_baseaddr=0x1000, sub=my1, subs=(my0, my0))
+    assert p0.hash != p2.hash
+
+    # ignored in sub
+    p3 = ParentConfig(mem_baseaddr=0x1000, sub=my2, subs=(my0, my0))
+    assert p2.hash == p3.hash
+
+    # changed in subs
+    assert_unique_hashes(
+        ParentConfig(mem_baseaddr=0x1000, sub=my0, subs=(my0, my0)),
+        ParentConfig(mem_baseaddr=0x1000, sub=my0, subs=(my1, my0)),
+        ParentConfig(mem_baseaddr=0x1000, sub=my0, subs=(my0, my1)),
+        ParentConfig(mem_baseaddr=0x1000, sub=my0, subs=(my1, my1)),
+    )
+
+    # ignored in subs
+    p4 = ParentConfig(mem_baseaddr=0x1000, sub=my0, subs=(my1, my0))
+    p5 = ParentConfig(mem_baseaddr=0x1000, sub=my0, subs=(my2, my0))
+    assert p4.hash == p5.hash

@@ -130,3 +130,42 @@ def test_dynamicenum():
     assert one != other
     assert tuple(one) == (0, 1)
     assert tuple(other) == (2,)
+
+
+def test_cast():
+    """Enum."""
+
+    class OneType(u.AEnumType):
+        """Enum."""
+
+        keytype: u.AScalarType = u.UintType(4)
+
+        def _build(self) -> None:
+            self._add(u.AUTO, "a", title="title")
+
+    class TwoType(u.AEnumType):
+        """Enum."""
+
+        keytype: u.AScalarType = u.UintType(4)
+
+        def _build(self) -> None:
+            self._add(u.AUTO, "a", title="title")
+
+    class ThreeType(u.AEnumType):
+        """Enum."""
+
+        keytype: u.AScalarType = u.UintType(3)
+
+        def _build(self) -> None:
+            self._add(u.AUTO, "a", title="title")
+
+    assert OneType().cast(TwoType()) == [
+        (
+            "",
+            "",
+        ),
+    ]
+    assert TwoType().cast(OneType()) == OneType().cast(TwoType())
+
+    assert OneType().cast(ThreeType()) is None
+    assert ThreeType().cast(OneType()) is None

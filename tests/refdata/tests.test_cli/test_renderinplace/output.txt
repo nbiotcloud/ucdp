@@ -1,0 +1,5 @@
+
+GENERATE INPLACE BEGIN content('test') =========================================
+test
+top: Top(mod=<uart_lib.uart.UartMod(inst='uart', libname='uart_lib', modname='uart')>)
+GENERATE INPLACE END content ===================================================

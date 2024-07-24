@@ -22,29 +22,31 @@
 # SOFTWARE.
 #
 
-"""Constants."""
+"""
+Struct Type Testing.
+"""
 
 import re
-from pathlib import Path
-from typing import Literal
 
-AUTO: str = "auto"
-"""AUTO."""
-
-PAT_IDENTIFIER: str = r"^[a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?$"
-"""Pattern for Identifier."""
-
-RE_IDENTIFIER = re.compile(PAT_IDENTIFIER)
-"""Regular Expression for Identifier."""
-
-PAT_OPT_IDENTIFIER: str = r"^([a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?)?$"
-"""Pattern for Optional Identifier."""
+import ucdp as u
+from pytest import raises
 
 
-UPWARDS: str = ".."
-"""UPWARDS."""
+def test_float():
+    """Float."""
+    float = u.FloatType()
+    assert float is u.FloatType()
+    assert float.is_connectable(float) is True
+    assert float.is_connectable(u.DoubleType()) is False
+    with raises(ValueError, match=re.escape("Slicing is not allowed floating point numbers")):
+        float[2]
 
-Gen = Literal["no", "inplace", "full"]
-"""Gen."""
 
-PATH = Path(__file__).parent
+def test_double():
+    """Double."""
+    double = u.DoubleType()
+    assert double is u.DoubleType()
+    assert double.is_connectable(double) is True
+    assert double.is_connectable(u.FloatType()) is False
+    with raises(ValueError, match=re.escape("Slicing is not allowed on floating point numbers")):
+        double[2]

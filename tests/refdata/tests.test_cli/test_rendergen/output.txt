@@ -1,0 +1,6 @@
+None
+top: Top(mod=<uart_lib.uart.UartMod(inst='uart', libname='uart_lib', modname='uart')>)
+
+again
+top: Top(mod=<uart_lib.uart.UartMod(inst='uart', libname='uart_lib', modname='uart')>)
+

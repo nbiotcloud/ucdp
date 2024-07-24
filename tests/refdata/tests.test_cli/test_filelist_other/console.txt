@@ -1,0 +1,4 @@
+-incdir $PRJ/src/ucdp/examples/filelist/filelist_lib/inc
+$PRJ/src/ucdp/examples/filelist/filelist_lib/mod0.sv
+$PRJ/src/ucdp/examples/filelist/filelist_lib/sub/mod2.sv
+$PRJ/src/ucdp/examples/filelist/mod2.sv

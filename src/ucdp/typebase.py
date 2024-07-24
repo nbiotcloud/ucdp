@@ -179,6 +179,7 @@ class AVecType(AScalarType):
 
     default: Any = 0
     """Default Value."""
+
     right: Any = 0
     """Right Bit Position."""
 

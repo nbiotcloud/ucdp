@@ -24,23 +24,33 @@
 
 """Utilities."""
 
+import os
 import sys
 from collections.abc import Iterable
 from contextlib import contextmanager
 from functools import lru_cache
 from inspect import getfile
 from pathlib import Path
-from typing import Any
+
+from .logging import LOGGER
+
+
+def get_paths() -> tuple[Path, ...]:
+    """Determine Paths from Environment variable 'UCDP_PATH'."""
+    return tuple(Path(item.strip()) for item in os.environ.get("UCDP_PATH", "").split())
 
 
 @contextmanager
-def extend_sys_path(paths: Iterable[Path]):
+def extend_sys_path(paths: Iterable[Path] | None = None):
     """Context with extended sys.path.
 
-    Args:
-        paths: Paths
+    Keyword Args:
+        paths: Paths. Default
     """
+    if paths is None:
+        paths = get_paths()
     pathstrs = [str(path) for path in paths]
+    LOGGER.debug("paths=%r", pathstrs)
     if pathstrs:
         orig = sys.path
         sys.path = [*sys.path, *pathstrs]
@@ -50,14 +60,12 @@ def extend_sys_path(paths: Iterable[Path]):
         yield
 
 
-def get_copyright(obj: Any) -> str:
+def get_copyright(obj: Path | object) -> str:
     """Determine from Source Code of ``obj``."""
     if isinstance(obj, Path):
         path = obj
-    elif isinstance(obj, object):
-        path = Path(getfile(obj.__class__))
     else:
-        path = Path(getfile(obj))
+        path = Path(getfile(obj.__class__))
     return _get_copyright(path)
 
 

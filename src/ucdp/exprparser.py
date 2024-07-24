@@ -25,6 +25,7 @@
 Expression Parser.
 """
 
+from collections.abc import Iterable
 from functools import cached_property
 from typing import Any
 
@@ -54,6 +55,8 @@ from .typescalar import BoolType
 Parseable = Expr | str | int | BaseType | list | tuple
 Constable = int | str | ConstExpr
 Concatable = list | tuple | ConcatExpr
+Only = type[Expr] | Iterable[type[Expr]] | type[Note]
+Types = type[BaseType] | Iterable[type[BaseType]]
 
 
 class _Globals(dict):
@@ -107,7 +110,7 @@ class ExprParser(Object):
         }
         return _Globals(globals=globals_, namespace=self.namespace, context=self.context)
 
-    def __call__(self, expr: Parseable, only=None, types=None) -> Expr:
+    def __call__(self, expr: Parseable, only: Only | None = None, types: Types | None = None) -> Expr:
         """
         Parse Expression.
 
@@ -122,7 +125,7 @@ class ExprParser(Object):
         """
         return self.parse(expr, only=only, types=types)
 
-    def parse_note(self, expr: Parseable | Note, only=None, types=None) -> Expr | Note:
+    def parse_note(self, expr: Parseable | Note, only: Only | None = None, types: Types | None = None) -> Expr | Note:
         """
         Parse Expression or Note.
 
@@ -138,7 +141,7 @@ class ExprParser(Object):
             return expr
         return self.parse(expr, only=only, types=types)
 
-    def parse(self, expr: Parseable, only=None, types=None) -> Expr:
+    def parse(self, expr: Parseable, only: Only | None = None, types: Types | None = None) -> Expr:
         """
         Parse Expression.
 
@@ -214,13 +217,13 @@ class ExprParser(Object):
         self._check(result, only=only, types=types)
         return result
 
-    def _check(self, expr: Expr | Note, only, types) -> None:
-        if only and not isinstance(expr, only):
+    def _check(self, expr: Expr | Note, only: Only | None, types: Types | None) -> None:
+        if only and not isinstance(expr, only):  # type: ignore[arg-type]
             raise ValueError(f"{expr!r} is not a {only}. It is a {type(expr)}") from None
         if types:
             if isinstance(expr, Note):
                 raise ValueError(f"{expr!r} does not meet type_ {types}.") from None
-            if not isinstance(expr.type_, types):
+            if not isinstance(expr.type_, types):  # type: ignore[arg-type]
                 raise ValueError(f"{expr!r} requires type_ {types}. It is a {expr.type_}") from None
 
     def _parse(self, expr: str) -> Expr:

@@ -73,6 +73,12 @@ class FileSet(Object):
 
         return FileSet(target=target, filepaths=tuple(filepaths), inc_dirs=tuple(inc_dirs))
 
+    def __iter__(self):
+        for incdir in self.inc_dirs:
+            yield f"-incdir {incdir}"
+        for libfilepath in self.filepaths:
+            yield str(libfilepath.path)
+
 
 def _process(
     filepaths: list[LibPath],

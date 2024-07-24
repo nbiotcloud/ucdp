@@ -1,0 +1,14 @@
+uart  <uart_lib.uart.UartMod(inst='uart', libname='uart_lib', modname='uart')>
+├── u_clk_gate  <glbl_lib.clk_gate.ClkGateMod(inst='uart/u_clk_gate', libname='glbl_lib', modname='clk_gate')>
+├── u_regf  <glbl_lib.regf.RegfMod(inst='uart/u_regf', libname='uart_lib', modname='uart_regf')>
+│   +------------------------------+
+│   |                              |
+│   |  Word    Field    Type       |
+│   |  ------  -------  ---------  |
+│   |  ctrl                        |
+│   |          .ena     EnaType()  |
+│   |          .strt    BitType()  |
+│   |                              |
+│   +------------------------------+
+│   └── u_clk_gate  <glbl_lib.clk_gate.ClkGateMod(inst='uart/u_regf/u_clk_gate', libname='glbl_lib', modname='clk_gate')>
+└── u_core  <uart_lib.uart.UartCoreMod(inst='uart/u_core', libname='uart_lib', modname='uart_core')>

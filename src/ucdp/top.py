@@ -27,6 +27,7 @@
 from .iterutil import Names
 from .modbase import BaseMod
 from .moditer import ModPostIter, ModPreIter, get_mod, get_mods
+from .modtb import ATbMod
 from .modtopref import TopModRef
 from .object import _CACHED_INSTANCES, Field, Object
 
@@ -41,6 +42,15 @@ class Top(Object):
 
     ref: TopModRef = Field(repr=False)
     mod: BaseMod
+
+    @staticmethod
+    def from_mod(mod: BaseMod) -> "Top":
+        """Create from Module."""
+        if isinstance(mod, ATbMod):
+            ref = TopModRef(tb=mod.get_modref(), top=mod.dut.get_modref())
+        else:
+            ref = TopModRef(top=mod.get_modref())
+        return Top(ref=ref, mod=mod)
 
     def iter(self, filter_=None, stop=None, maxlevel: int | None = None, unique: bool = False, post: bool = False):
         """
