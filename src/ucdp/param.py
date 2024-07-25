@@ -76,7 +76,6 @@ Module Parameter .
         Param(UintType(6, default=42), 'param_p')
 """
 
-from collections.abc import Iterator
 from typing import Any
 
 from .ident import Ident, _iters
@@ -140,9 +139,3 @@ class Param(Ident):
 
     def __iter__(self):
         return _iters([self], value=self.value)
-
-    def iter(self, filter_=None, stop=None, value=None) -> Iterator:
-        """Iterate over Hierarchy."""
-        if value is None:
-            value = self.value
-        return _iters([self], filter_=filter_, stop=stop, value=value)
