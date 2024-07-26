@@ -73,9 +73,9 @@ class ExprResolver(Object):
 
             >>> resolver = u.ExprResolver(namespace=idents)
             >>> resolver.resolve(expr)
-            'uint_s * 0x2'
+            'uint_s * 2'
             >>> resolver.resolve(expr, brackets=True)
-            '(uint_s * 0x2)'
+            '(uint_s * 2)'
     """
 
     namespace: Namespace | None = None
@@ -177,10 +177,7 @@ class ExprResolver(Object):
 
     def resolve_slice(self, slice_: Slice, opt: bool = True) -> str:
         """Resolve Slice."""
-        return self._resolve_slice(
-            slice_,
-            opt=opt,
-        )
+        return self._resolve_slice(slice_, opt=opt)
 
     def _resolve_slice(self, slice_: Slice, opt: bool = False) -> str:
         left = slice_.left
@@ -303,9 +300,7 @@ class ExprResolver(Object):
 
     @staticmethod
     def _get_integer_value(value: int) -> str:
-        if value < 0:
-            return f"-0x{-value:X}"
-        return f"0x{value:X}"
+        return str(value)
 
     @staticmethod
     def _get_bool_value(value: bool) -> str:
