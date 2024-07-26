@@ -125,7 +125,7 @@ class BaseMod(NamedObject):
 
     @property
     def basename(self) -> str:
-        """Base Name."""
+        """Base Name Derived From Instance."""
         return split_prefix(self.name)[1]
 
     @property
