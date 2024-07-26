@@ -173,26 +173,25 @@ class ExprResolver(Object):
 
     def _resolve_sliceop(self, op: SliceOp) -> str:
         one = self._resolve(op.one)
-        return f"{one}{self._resolve_slice(op.slice_)}"
+        return f"{one}{self._resolve_slice(op.slice_, opt=True)}"
 
-    def resolve_slice(self, slice_: Slice) -> str:
+    def resolve_slice(self, slice_: Slice, opt: bool = True) -> str:
         """Resolve Slice."""
-        return self._resolve_slice(slice_)
+        return self._resolve_slice(
+            slice_,
+            opt=opt,
+        )
 
-    def _resolve_slice(self, slice_: Slice) -> str:
+    def _resolve_slice(self, slice_: Slice, opt: bool = False) -> str:
         left = slice_.left
         right = slice_.right
-        if left == right:
-            if isinstance(left, int):
-                return f"[{left}]"
-            return f"[{self.resolve(left)}]"
+        if opt and left is right:
+            return f"[{left}]"
 
         if not isinstance(left, int):
             left = self.resolve(left)
         if not isinstance(right, int):
             right = self.resolve(right)
-        if isinstance(left, int) and isinstance(right, int) and right == 0:
-            return f"[{left}:0]"
         return f"[{left}:{right}]"
 
     def _resolve_concatexpr(self, expr: ConcatExpr) -> str:

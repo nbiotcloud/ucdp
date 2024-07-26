@@ -35,6 +35,7 @@ def namespace() -> u.Namespace:
     return u.Namespace(
         [
             u.Param(u.IntegerType(default=8), "param"),
+            u.Param(u.IntegerType(default=1), "param1"),
             u.Signal(u.UintType(16, default=15), "uint_s"),
             u.Ident(u.UintType(10), "ident0"),
             u.Ident(u.UintType(10), "ident1"),
@@ -86,6 +87,7 @@ def test_op(rslvr):
 def test_slice(rslvr):
     """Resolver."""
     param = rslvr.namespace["param"]
+    param1 = rslvr.namespace["param1"]
     signal = rslvr.namespace["uint_s"]
 
     assert rslvr.resolve(signal[2]) == "uint_s[2]"
@@ -98,6 +100,8 @@ def test_slice(rslvr):
     assert rslvr.resolve(signal[14:param]) == "uint_s[14:param]"
 
     assert rslvr.resolve_slice(u.Slice(left=param)) == "[param]"
+
+    assert rslvr.resolve(signal[param1:1]) == "uint_s[param1:1]"
 
 
 def test_values(rslvr):
