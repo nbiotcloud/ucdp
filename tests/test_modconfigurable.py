@@ -143,12 +143,27 @@ class RootMod(u.AMod):
     """Parent Module."""
 
     def _build(self):
-        SubMod(self, "u_inst", config=SubConfig())
+        SubMod(self, "u_inst0", config=SubConfig())
+        SubMod(self, "u_inst1", config=SubConfig(baseaddr=0x1000))
+        SubMod(self, "u_inst2", config=SubConfig(baseaddr=0x2000))
+        SubMod(self, "u_inst3", config=SubConfig(name="one", baseaddr=0x2000))
 
 
 def test_sub():
     """Sub."""
     mod = RootMod()
-    sub = mod.get_inst("u_inst")
-    assert sub.modname == "inst"
-    assert sub.topmodname == "sub"
+    inst0 = mod.get_inst("u_inst0")
+    assert inst0.modname == "sub"
+    assert inst0.topmodname == "sub"
+
+    inst1 = mod.get_inst("u_inst1")
+    assert inst1.modname == "sub"
+    assert inst1.topmodname == "sub"
+
+    inst2 = mod.get_inst("u_inst2")
+    assert inst2.modname == "sub_bf7afe6890b5eaaa"
+    assert inst2.topmodname == "sub"
+
+    inst3 = mod.get_inst("u_inst3")
+    assert inst3.modname == "sub_one"
+    assert inst3.topmodname == "sub"

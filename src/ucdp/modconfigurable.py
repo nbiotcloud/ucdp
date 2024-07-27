@@ -29,7 +29,7 @@ Configurable Module.
 from .config import BaseConfig
 from .modbase import BaseMod
 from .modbasetop import BaseTopMod
-from .modutil import get_topmodname
+from .modutil import get_modname, get_topmodname
 from .nameutil import join_names
 
 
@@ -99,9 +99,10 @@ class AConfigurableMod(BaseTopMod):
         """Module Name."""
         config = self.config
         name = config.name
+        modbasename = get_modname(self.__class__)
         if not name and "config" in self.model_fields_set and not config.is_default:
             name = config.hash
-        return join_names(self.basename, name)
+        return join_names(modbasename, name)
 
     @property
     def topmodname(self) -> str:
