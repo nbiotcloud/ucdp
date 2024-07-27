@@ -23,6 +23,7 @@
 #
 """Test Utilities."""
 
+import sys
 from inspect import getfile
 from pathlib import Path
 
@@ -60,3 +61,18 @@ def test_get_copyright(example_simple):
     top = u.load("glbl_lib.clk_gate", paths=None)
     assert u.get_copyright(top.mod).splitlines() == COPYRIGHT
     assert u.get_copyright(Path(getfile(top.mod.__class__))).splitlines() == COPYRIGHT
+
+
+def test_extend_sys_path(tmp_path):
+    """Test Extend Sys Path."""
+    before = tuple(sys.path)
+
+    with u.extend_sys_path([]):
+        pass
+    assert before == tuple(sys.path)
+
+    assert str(tmp_path) not in sys.path
+    with u.extend_sys_path([tmp_path]):
+        assert str(tmp_path) in sys.path
+
+    assert before == tuple(sys.path)

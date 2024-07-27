@@ -22,17 +22,30 @@
 # SOFTWARE.
 #
 
-"""A Simplified Register File Testbench."""
+"""
+Loader.
 
-from typing import ClassVar
+* [load()][ucdp.loader.load] is one and only method to pickup and instantiate the topmost hardware module.
+"""
 
-import ucdp as u
+from importlib import import_module
+
+from .modbase import BaseMod
+from .modref import ModRef
 
 
-class RegfTbMod(u.AGenericTbMod):
-    """Register File Testbench."""
-
-    filelists: ClassVar[u.ModFileLists] = (u.ModFileList(name="hdl", gen="inplace"),)
-
-    def _build(self):
-        pass
+def _load_modcls(modref: ModRef) -> type[BaseMod]:
+    name = f"{modref.libname}.{modref.modname}"
+    try:
+        pymod = import_module(name)
+    except ModuleNotFoundError as exc:
+        if exc.name in (modref.libname, name):
+            raise NameError(f"{name!r} not found.") from None
+        raise exc
+    modclsname = modref.get_modclsname()
+    modcls = getattr(pymod, modclsname, None)
+    if not modcls:
+        raise NameError(f"{name!r} does not contain {modclsname}.") from None
+    if not issubclass(modcls, BaseMod):
+        raise ValueError(f"{modcls} is not a module aka child of <class ucdp.BaseMod>.")
+    return modcls

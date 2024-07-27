@@ -27,7 +27,7 @@
 from .iterutil import Names
 from .modbase import BaseMod
 from .moditer import ModPostIter, ModPreIter, get_mod, get_mods
-from .modtb import ATbMod
+from .modtb import AGenericTbMod
 from .modtopref import TopModRef
 from .object import _CACHED_INSTANCES, Field, Object
 
@@ -46,7 +46,7 @@ class Top(Object):
     @staticmethod
     def from_mod(mod: BaseMod) -> "Top":
         """Create from Module."""
-        if isinstance(mod, ATbMod):
+        if isinstance(mod, AGenericTbMod):
             ref = TopModRef(tb=mod.get_modref(), top=mod.dut.get_modref())
         else:
             ref = TopModRef(top=mod.get_modref())

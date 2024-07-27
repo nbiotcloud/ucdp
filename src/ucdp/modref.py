@@ -29,8 +29,10 @@
 import re
 from typing import Union
 
+from caseconverter import pascalcase
+
 from .consts import PAT_IDENTIFIER
-from .object import Field, LightObject
+from .object import Field, Object
 
 RE_MODREF = re.compile(
     # lib
@@ -43,7 +45,7 @@ RE_MODREF = re.compile(
 PAT_MODREF = "lib.my[.MyMod]"
 
 
-class ModRef(LightObject):
+class ModRef(Object):
     """
     Module Reference.
 
@@ -110,3 +112,12 @@ class ModRef(LightObject):
             return ModRef(**mat.groupdict())
 
         raise ValueError(f"{value!r} does not match pattern {PAT_MODREF!r}")
+
+    def get_modclsname(self) -> str:
+        """Return modclsname or derive from modname."""
+        return self.modclsname or get_modclsname(self.modname)
+
+
+def get_modclsname(modname: str) -> str:
+    """Get Module Class Name."""
+    return f"{pascalcase(modname)}Mod"

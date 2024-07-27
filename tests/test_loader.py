@@ -166,19 +166,33 @@ def test_load_non_tb(example_simple):
     with raises(ValueError) as exc:
         u.load("glbl_lib.regf#uart_lib.uart-uart_lib.uart_regf", paths=None)
     assert (
-        str(exc.value) == "<class 'glbl_lib.regf.RegfMod'> is not a testbench module aka child of <class ucdp.ATbMod>."
+        str(exc.value)
+        == "<class 'glbl_lib.regf.RegfMod'> is not a testbench module aka child of <class ucdp.AGenericTbMod>."
     )
 
 
 def test_imp_err(testdata):
     """Import Error."""
-    msg = "No module named 'imp_err_lib.not_existing'"
-    with raises(ModuleNotFoundError, match=re.escape(msg)):
+    msg = "'imp_err_lib.not_existing' not found."
+    with raises(NameError, match=re.escape(msg)):
         u.load("imp_err_lib.not_existing", paths=None)
 
 
 def test_imp_err_dep(testdata):
     """Broken Dependency."""
-    msg = "Import of 'imp_err_lib.not_existing' failed."
-    with raises(RuntimeError, match=re.escape(msg)):
+    msg = "No module named 'imp_err_lib.not_existing'"
+    with raises(ModuleNotFoundError, match=re.escape(msg)):
         u.load("imp_err_lib.imp_err", paths=None)
+
+
+def test_typo(example_simple):
+    """Typos."""
+    with raises(NameError, match=re.escape("'glbl_li.clk_gate' not found. Did you mean 'glbl_lib.clk_gate' or '")):
+        u.load("glbl_li.clk_gate", paths=None)
+
+    with raises(NameError, match=re.escape("'glbl_lib.clk_ate' not found. Did you mean 'glbl_lib.clk_gate', '")):
+        u.load("glbl_lib.clk_ate", paths=None)
+
+    msg = "'glbl_lib.clk_gate' does not contain GateMod. Did you mean 'glbl_lib.clk_gate', '"
+    with raises(NameError, match=re.escape(msg)):
+        u.load("glbl_lib.clk_gate.GateMod", paths=None)

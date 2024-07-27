@@ -30,17 +30,17 @@ Loader.
 
 from collections.abc import Iterable
 from functools import lru_cache
-from importlib import import_module
 from pathlib import Path
 
-from caseconverter import pascalcase
-
+from ._modclsloader import _load_modcls as _load
+from .finder import find
 from .logging import LOGGER
 from .modbase import BaseMod
 from .moditer import get_mod
 from .modref import ModRef
-from .modtb import ATbMod
+from .modtb import AGenericTbMod
 from .modtopref import TopModRef
+from .nameutil import didyoumean
 from .top import Top
 from .util import extend_sys_path
 
@@ -79,8 +79,8 @@ def _load_topmod(ref: TopModRef) -> BaseMod:
         mod = get_mod(mod, ref.sub)
     if ref.tb:
         tbcls = _load_modcls(ref.tb)
-        if not issubclass(tbcls, ATbMod):
-            raise ValueError(f"{tbcls} is not a testbench module aka child of <class ucdp.ATbMod>.")
+        if not issubclass(tbcls, AGenericTbMod):
+            raise ValueError(f"{tbcls} is not a testbench module aka child of <class ucdp.AGenericTbMod>.")
         return tbcls.build_tb(mod)
     return mod
 
@@ -91,16 +91,11 @@ def _build_top(modcls, **kwargs):
 
 
 @lru_cache
-def _load_modcls(modref: ModRef):
-    name = f"{modref.libname}.{modref.modname}"
+def _load_modcls(modref: ModRef) -> type[BaseMod]:
+    """Load Module Class."""
     try:
-        pymod = import_module(name)
-    except ModuleNotFoundError as exc:
-        if exc.name == name:
-            raise exc
-        raise RuntimeError(f"Import of {exc.name!r} failed.") from exc
-    modclsname = modref.modclsname or f"{pascalcase(modref.modname)}Mod"
-    modcls = getattr(pymod, modclsname)
-    if not issubclass(modcls, BaseMod):
-        raise ValueError(f"{modcls} is not a module aka child of <class ucdp.BaseMod>.")
-    return modcls
+        return _load(modref)
+    except NameError as exc:
+        modrefs = [str(info.modref) for info in find(variants=True)]
+        dym = didyoumean(str(modref), modrefs)
+        raise NameError(f"{exc!s}{dym}") from None

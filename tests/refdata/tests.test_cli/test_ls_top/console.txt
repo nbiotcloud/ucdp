@@ -1,0 +1,33 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━━━━━━━━━━━━━━┓
+┃ Module                                ┃ Top ┃         Bases on ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━━━━━━━━━━━━━━┩
+│ glbl_lib.clk_gate                     │  X  │             AMod │
+│ glbl_lib.regf_tb                      │  X  │    AGenericTbMod │
+│ uart_lib.uart                         │  X  │             AMod │
+│ tests.test_flipflops.FlipFlopMod      │  X  │             AMod │
+│ tests.test_modconfigurable.AnotherMod │  X  │ AConfigurableMod │
+│ tests.test_modconfigurable.MyMod      │  X  │ AConfigurableMod │
+│ tests.test_modconfigurable.MyOtherMod │  X  │ AConfigurableMod │
+│ tests.test_modconfigurable.RootMod    │  X  │             AMod │
+│ tests.test_modconfigurable.SubMod     │  X  │ AConfigurableMod │
+│ tests.test_modconfigurable.TopMod     │  X  │             AMod │
+│ tests.test_modfilelist.MultiMod       │  X  │             AMod │
+│ tests.test_mods.DeclMod               │  X  │             AMod │
+│ tests.test_mods.DocMod                │  X  │             AMod │
+│ tests.test_mods.IpMod                 │  X  │             AMod │
+│ tests.test_mods.NoBuildMod            │  X  │             AMod │
+│ tests.test_mods.NoNameMod             │  X  │             AMod │
+│ tests.test_mods.ParamMod              │  X  │             AMod │
+│ tests.test_mods.SomeMod               │  X  │             AMod │
+│ tests.test_mods.SomeSomeMod           │  X  │             AMod │
+│ tests.test_mods.SubMod                │  X  │             AMod │
+│ tests.test_mods.TopMod                │  X  │             AMod │
+│ tests.test_mods.WrongName             │  X  │             AMod │
+│ tests.test_modtailored.TopMod         │  X  │             AMod │
+│ tests.test_modtb.GenTbMod             │  X  │    AGenericTbMod │
+│ tests.test_modtb.SubMod               │  X  │             AMod │
+│ tests.test_modtb.TbMod                │  X  │           ATbMod │
+│ tests.test_modtb.TopMod               │  X  │             AMod │
+│ tests.test_modtb.TopTbMod             │  X  │           ATbMod │
+│ tests.test_muxes.MuxMod               │  X  │             AMod │
+└───────────────────────────────────────┴─────┴──────────────────┘

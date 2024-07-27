@@ -33,6 +33,7 @@ from pydantic import BaseModel, ConfigDict
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.pretty import pprint
+from rich.table import Table
 
 from ._cligroup import MainGroup
 from ._cliutil import (
@@ -51,6 +52,7 @@ from ._cliutil import (
 )
 from .consts import PATH
 from .fileset import FileSet
+from .finder import find
 from .generate import clean, generate, get_makolator, render_generate, render_inplace
 from .loader import load
 from .modfilelist import iter_modfilelists
@@ -290,6 +292,36 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, file=None):
             indent_guides=False,
             console=console,
         )
+
+
+@ucdp.command(help="""List Available Data Models.""")
+@opt_path
+@click.option("--names", "-n", default=False, is_flag=True, help="Just print names without details")
+@click.option("--top", "-t", default=False, is_flag=True, help="List top modules only.")
+@click.option("--generic-tb", "-g", default=False, is_flag=True, help="List Generic Testbench modules only.")
+@pass_ctx
+def ls(ctx, path, names=False, top=False, generic_tb=False):
+    """List Modules."""
+    infos = find(path)
+    if top:
+        infos = [info for info in infos if info.is_top]
+    if generic_tb:
+        infos = [info for info in infos if info.tb == "Generic"]
+    if names:
+        for info in find(path):
+            print(info.modref)
+    else:
+        table = Table()
+        table.add_column("Module")
+        table.add_column("Top", justify="center")
+        table.add_column("Bases on", justify="right")
+        for info in infos:
+            table.add_row(
+                str(info.modref),
+                "X" if info.is_top else "",
+                info.modbasecls.__name__,
+            )
+        ctx.console.print(table)
 
 
 @ucdp.command(
