@@ -26,7 +26,6 @@
 Testbench Module.
 """
 
-from abc import abstractmethod
 from collections.abc import Iterator
 from typing import Any, ClassVar
 
@@ -52,7 +51,39 @@ class ATbMod(BaseMod):
         title: Title.
         dut: Module Under Test.
         parent: Parent.
+    """
 
+    filelists: ClassVar[ModFileLists] = ()
+    """File Lists."""
+
+    title: str = "Testbench"
+
+    parent: BaseMod | None = Field(default=None, init=False)
+
+    @property
+    def modname(self) -> str:
+        """Module Name."""
+        return get_modname(self.__class__)
+
+    @property
+    def topmodname(self) -> str:
+        """Top Module Name."""
+        return get_topmodname(self.__class__)
+
+    @property
+    def libname(self) -> str:
+        """Library Name."""
+        return get_libname(self.__class__)
+
+    @property
+    def is_tb(self) -> bool:
+        """Determine if module belongs to Testbench or Design."""
+        return True
+
+
+class AGenericTbMod(ATbMod):
+    """
+    A Generic Testbench which adapts to dut.
 
     Create testbench for `dut`.
 
@@ -75,7 +106,7 @@ class ATbMod(BaseMod):
             ...         self.add_port(u.UintType(4), "data_i")
             ...         self.add_port(u.UintType(4), "data_o")
             ...
-            >>> class GenTbMod(u.ATbMod):
+            >>> class GenTbMod(u.AGenericTbMod):
             ...
             ...     def _build(self):
             ...         # Build testbench for self.dut here
@@ -100,16 +131,9 @@ class ATbMod(BaseMod):
     allow pairing of testbench and dut on command line and in configuration files.
     """
 
-    filelists: ClassVar[ModFileLists] = ()
-    """File Lists."""
-
-    dut_mods: ClassVar[tuple[Any, ...]] = ()
+    dut_mods: ClassVar[tuple[type[BaseMod], ...]] = ()
     """Testbench is limited to these kind of modules."""
-
-    title: str = "Testbench"
-
     dut: BaseMod
-    parent: BaseMod | None = Field(default=None, init=False)
 
     def __init__(self, dut: BaseMod | None = None, name: str | None = None, **kwargs):
         cls = self.__class__
@@ -128,31 +152,6 @@ class ATbMod(BaseMod):
         """Module Name."""
         modbasename = get_modname(self.__class__)
         return f"{modbasename}_{self.dut.modname}"
-
-    @property
-    def topmodname(self) -> str:
-        """Top Module Name."""
-        return get_topmodname(self.__class__)
-
-    @property
-    def libname(self) -> str:
-        """Library Name."""
-        return get_libname(self.__class__)
-
-    @property
-    def is_tb(self) -> bool:
-        """Determine if module belongs to Testbench or Design."""
-        return True
-
-    @classmethod
-    def build_tb(cls, dut, **kwargs) -> "ATbMod":
-        """Build Testbench."""
-        return cls(dut, **kwargs)
-
-    @classmethod
-    def build_dut(cls, **kwargs) -> BaseMod:
-        """Build DUT."""
-        raise NotImplementedError
 
     @classmethod
     def search_duts(cls, mod) -> Iterator[BaseMod]:
@@ -182,7 +181,16 @@ class ATbMod(BaseMod):
         """
         yield from ()
 
-    @abstractmethod
+    @classmethod
+    def build_tb(cls, dut, **kwargs) -> "ATbMod":
+        """Build Testbench."""
+        return cls(dut, **kwargs)
+
+    @classmethod
+    def build_dut(cls, **kwargs) -> BaseMod:
+        """Build DUT."""
+        raise NotImplementedError
+
     def _build(self) -> None:
         """Build."""
 
@@ -199,7 +207,3 @@ class ATbMod(BaseMod):
     def __repr__(self):
         modref = self.get_modref()
         return f"<{modref}(inst={self.inst!r}, libname={self.libname!r}, modname={self.modname!r}, dut={self.dut!r})>"
-
-
-class AGenericTbMod(ATbMod):
-    """A Generic Testbench which adapts to dut."""

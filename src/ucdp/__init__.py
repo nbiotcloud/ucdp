@@ -57,6 +57,7 @@ from .exprparser import ExprParser, cast_booltype, const
 from .exprresolver import ExprResolver
 from .filelistparser import FileListParser
 from .fileset import FileSet, LibPath
+from .finder import find
 from .flipflop import FlipFlop
 from .generate import clean, generate, get_makolator, render_generate, render_inplace
 from .humannum import Bin, Bytes, Bytesize, Hex
@@ -81,6 +82,7 @@ from .modfilelist import (
 )
 from .moditer import ModPostIter, ModPreIter, uniquemods
 from .modref import ModRef
+from .modrefinfo import ModRefInfo
 from .modtailored import ATailoredMod
 from .modtb import AGenericTbMod, ATbMod
 from .modtopref import TopModRef
@@ -169,6 +171,7 @@ __all__ = [
     "bwdfilter",
     "BWDM",
     "Bytes",
+    "Bytesize",
     "cast_booltype",
     "Casting",
     "clean",
@@ -206,6 +209,7 @@ __all__ = [
     "Field",
     "FileListParser",
     "FileSet",
+    "find",
     "FlipFlop",
     "FloatType",
     "FWD",
@@ -228,7 +232,6 @@ __all__ = [
     "improved_glob",
     "improved_resolve",
     "IN",
-    "Top",
     "INM",
     "INOUT",
     "IntegerType",
@@ -249,13 +252,13 @@ __all__ = [
     "ModPostIter",
     "ModPreIter",
     "ModRef",
+    "ModRefInfo",
     "MultipleDriverError",
     "Mux",
     "NamedLightObject",
     "NamedObject",
     "namefilter",
     "Names",
-    "Bytesize",
     "Namespace",
     "Note",
     "Object",
@@ -306,6 +309,7 @@ __all__ = [
     "TernaryExpr",
     "Test",
     "TODO",
+    "Top",
     "ToPaths",
     "TopModRef",
     "UintType",

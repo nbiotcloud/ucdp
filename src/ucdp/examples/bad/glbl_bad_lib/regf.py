@@ -29,10 +29,3 @@ import ucdp as u
 
 class MyMod(u.NamedObject):
     """Module which is not a Module."""
-
-
-class RegfMod(u.ATailoredMod):
-    """Register File."""
-
-    def _build(self) -> None:
-        self.add_port(u.ClkRstAnType(), "main_i")

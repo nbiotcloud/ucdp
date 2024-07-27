@@ -57,6 +57,14 @@ class TopMod(u.AMod):
 class TbMod(u.ATbMod):
     """A Testbench Module."""
 
+    def _build(self):
+        mod = DutMod()
+        mod.con("main_i", "create(main_s)")
+
+
+class GenTbMod(u.AGenericTbMod):
+    """A Testbench Module."""
+
     dut_mods: ClassVar[tuple[Any, ...]] = (DutMod,)
 
     @classmethod
@@ -86,19 +94,30 @@ class TopTbMod(u.ATbMod):
 def test_basic():
     """Test Basics."""
     tb = TbMod()
+    assert tb.modname == "tb"
+    assert tb.topmodname == "tb"
+    assert tb.libname == "tests"
+    assert tb.is_tb is True
+    assert repr(tb) == "<tests.test_modtb.TbMod(inst='tb', libname='tests', modname='tb')>"
+    assert tb.get_modref() == u.ModRef("tests", "test_modtb", modclsname="TbMod")
+
+
+def test_generic():
+    """Test Basics."""
+    tb = GenTbMod()
     dut = tb.dut
     assert isinstance(dut, DutMod)
 
-    assert tb.modname == "tb_dut"
-    assert tb.topmodname == "tb"
+    assert tb.modname == "gen_tb_dut"
+    assert tb.topmodname == "gen_tb"
     assert tb.libname == "tests"
     assert tb.is_tb is True
     assert tuple(tb.get_tests()) == ()
     assert repr(tb) == (
-        "<tests.test_modtb.TbMod(inst='tb_dut', libname='tests', modname='tb_dut', "
+        "<tests.test_modtb.GenTbMod(inst='gen_tb_dut', libname='tests', modname='gen_tb_dut', "
         "dut=<tests.test_modtb.DutMod(inst='dut', libname='tests', modname='dut')>)>"
     )
-    assert tb.get_modref() == u.ModRef("tests", "test_modtb", modclsname="TbMod")
+    assert tb.get_modref() == u.ModRef("tests", "test_modtb", modclsname="GenTbMod")
 
     assert dut.modname == "dut"
     assert dut.topmodname == "dut"
@@ -111,38 +130,41 @@ def test_basic():
 def test_wrong_mod():
     """Test Wrong Module."""
     msg = (
-        "<class 'tests.test_modtb.TbMod'> can only test (<class 'tests.test_modtb.DutMod'>,) modules, "
+        "<class 'tests.test_modtb.GenTbMod'> can only test (<class 'tests.test_modtb.DutMod'>,) modules, "
         "but not <class 'tests.test_modtb.SubMod'> module"
     )
     with raises(TypeError, match=re.escape(msg)):
-        TbMod.build_tb(SubMod())
+        GenTbMod.build_tb(SubMod())
 
 
 def test_search():
     """Test Search."""
     top = TopMod()
-    assert [repr(item) for item in TbMod.search_duts(top)] == [
+    assert [repr(item) for item in GenTbMod.search_duts(top)] == [
         "<tests.test_modtb.DutMod(inst='top/u_sub/u_dut', libname='tests', modname='sub_dut')>",
         "<tests.test_modtb.DutMod(inst='top/u_dut', libname='tests', modname='top_dut')>",
     ]
-    assert [repr(item) for item in TopTbMod.search_duts(top)] == [
-        "<tests.test_modtb.TopMod(inst='top', libname='tests', modname='top')>",
+    assert [repr(item) for item in GenTbMod.search_duts(top)] == [
+        "<tests.test_modtb.DutMod(inst='top/u_sub/u_dut', libname='tests', modname='sub_dut')>",
+        "<tests.test_modtb.DutMod(inst='top/u_dut', libname='tests', modname='top_dut')>",
     ]
 
 
 def test_search_modrefs():
     """Test Mod Ref Search."""
     top = TopMod()
-    assert [repr(item) for item in TbMod.search_dut_topmodrefs(top)] == [
+    assert [repr(item) for item in GenTbMod.search_dut_topmodrefs(top)] == [
         "TopModRef(ModRef('tests', 'test_modtb', modclsname='TopMod'), "
         "sub='tests.sub_dut', tb=ModRef('tests', 'test_modtb', "
-        "modclsname='TbMod'))",
+        "modclsname='GenTbMod'))",
         "TopModRef(ModRef('tests', 'test_modtb', modclsname='TopMod'), "
         "sub='tests.top_dut', tb=ModRef('tests', 'test_modtb', "
-        "modclsname='TbMod'))",
+        "modclsname='GenTbMod'))",
     ]
 
-    assert [repr(item) for item in TopTbMod.search_dut_topmodrefs(top)] == [
-        "TopModRef(ModRef('tests', 'test_modtb', modclsname='TopMod'), "
-        "tb=ModRef('tests', 'test_modtb', modclsname='TopTbMod'))",
+    assert [repr(item) for item in GenTbMod.search_dut_topmodrefs(top)] == [
+        "TopModRef(ModRef('tests', 'test_modtb', modclsname='TopMod'), sub='tests.sub_dut', "
+        "tb=ModRef('tests', 'test_modtb', modclsname='GenTbMod'))",
+        "TopModRef(ModRef('tests', 'test_modtb', modclsname='TopMod'), sub='tests.top_dut', "
+        "tb=ModRef('tests', 'test_modtb', modclsname='GenTbMod'))",
     ]
