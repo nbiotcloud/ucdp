@@ -41,7 +41,7 @@ This option can be specified multiple times.
 Environment Variable 'UCDP_PATH'.
 """,
 )
-arg_filelist = click.argument("filelist", nargs=-1, required=True, envvar="UCDP_FILELIST")
+arg_filelist = click.argument("filelist", nargs=-1, envvar="UCDP_FILELIST")
 opt_target = click.option(
     "--target",
     "-t",

@@ -54,6 +54,7 @@ from .consts import PATH
 from .fileset import FileSet
 from .finder import find
 from .generate import clean, generate, get_makolator, render_generate, render_inplace
+from .iterutil import namefilter
 from .loader import load
 from .modfilelist import iter_modfilelists
 from .modtopref import PAT_TOPMODREF
@@ -146,7 +147,7 @@ def gen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=None,
     top = load_top(ctx, top, path)
     makolator = get_makolator(show_diff=show_diff, paths=path)
     data = defines2data(define)
-    for item in filelist:
+    for item in filelist or ["*"]:
         generate(top, item, target=target, makolator=makolator, maxworkers=maxworkers, data=data)
 
 
@@ -233,7 +234,7 @@ def cleangen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=
     """Clean Generated Files."""
     top = load_top(ctx, top, path)
     makolator = get_makolator(show_diff=show_diff, paths=path)
-    for item in filelist:
+    for item in filelist or ["*"]:
         clean(top, item, target=target, makolator=makolator, maxworkers=maxworkers, dry_run=dry_run)
 
 
@@ -256,7 +257,7 @@ def filelist(ctx, top, path, filelist, target=None, file=None):
     """File List."""
     # Load quiet, otherwise stdout is messed-up
     top = load_top(ctx, top, path, quiet=True)
-    for item in filelist:
+    for item in filelist or ["*"]:
         fileset = FileSet.from_mod(top.mod, item, target=target)
         for line in fileset:
             print(line, file=file)
@@ -283,7 +284,7 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, file=None):
     # Load quiet, otherwise stdout is messed-up
     top = load_top(ctx, top, path, quiet=True)
     console = Console(file=file) if file else ctx.console
-    for item in filelist:
+    for item in filelist or ["*"]:
         pprint(
             {
                 str(mod): modfilelist
@@ -294,31 +295,58 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, file=None):
         )
 
 
-@ucdp.command(help="""List Available Data Models.""")
+@ucdp.command(
+    help="""
+              List Available Data Models.
+
+              PATTERN: Limit list to these modules only.
+
+              Examples:
+
+                ucdp ls
+
+                ucdp ls -n
+
+                ucdp ls glbl_lib*
+              """
+)
 @opt_path
+@click.argument("pattern", nargs=-1)
 @click.option("--names", "-n", default=False, is_flag=True, help="Just print names without details")
-@click.option("--top", "-t", default=False, is_flag=True, help="List top modules only.")
+@click.option("--top", "-t", default=False, is_flag=True, help="List loadable top modules only.")
+@click.option("--tb", "-b", default=False, is_flag=True, help="List testbench modules only.")
 @click.option("--generic-tb", "-g", default=False, is_flag=True, help="List Generic Testbench modules only.")
 @pass_ctx
-def ls(ctx, path, names=False, top=False, generic_tb=False):
+def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=False):
     """List Modules."""
     infos = find(path)
     if top:
         infos = [info for info in infos if info.is_top]
+    if tb:
+        infos = [info for info in infos if info.tb]
     if generic_tb:
         infos = [info for info in infos if info.tb == "Generic"]
+    if pattern:
+        filter_ = namefilter(pattern)
+        infos = [info for info in infos if filter_(str(info.modref))]
     if names:
         for info in find(path):
             print(info.modref)
     else:
         table = Table()
-        table.add_column("Module")
+        table.add_column("Reference")
         table.add_column("Top", justify="center")
+        table.add_column("Tb ", justify="center")
         table.add_column("Bases on", justify="right")
         for info in infos:
+            if info.modref.modclsname:
+                ref = str(info.modref)
+            else:
+                ref = f"{info.modref}[.{info.modref.get_modclsname()}]"
             table.add_row(
-                str(info.modref),
+                ref,
                 "X" if info.is_top else "",
+                "X" if info.tb else "",
                 info.modbasecls.__name__,
             )
         ctx.console.print(table)
