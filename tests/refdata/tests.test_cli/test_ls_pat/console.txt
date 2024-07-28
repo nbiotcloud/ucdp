@@ -1,0 +1,9 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Reference                      ┃ Top ┃ Tb  ┃      Bases on ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━━━━━━━━━━┩
+│ glbl_lib.clk_gate[.ClkGateMod] │  X  │     │          AMod │
+│ glbl_lib.regf[.RegfMod]        │     │     │  ATailoredMod │
+│ glbl_lib.regf_tb[.RegfTbMod]   │  X  │  X  │ AGenericTbMod │
+│ tests.test_mods.SomeMod        │  X  │     │          AMod │
+│ tests.test_mods.SomeSomeMod    │  X  │     │          AMod │
+└────────────────────────────────┴─────┴─────┴───────────────┘

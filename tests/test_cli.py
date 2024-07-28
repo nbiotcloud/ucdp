@@ -96,11 +96,30 @@ def test_gen(runner, example_simple, prjroot):
     assert_refdata(test_gen, prjroot)
 
 
+def test_gen_default(runner, example_simple, prjroot):
+    """Generate and Clean Command."""
+    result = runner.invoke(ucdp, ["gen", "uart_lib.uart", "--maxworkers", "1"])
+    assert result.exit_code == 0
+    (prjroot / "gen.txt").write_text(result.output)
+
+    result = runner.invoke(ucdp, ["cleangen", "uart_lib.uart", "--maxworkers", "1"])
+    assert result.exit_code == 0
+    (prjroot / "cleangen.txt").write_text(result.output)
+    assert_refdata(test_gen_default, prjroot)
+
+
 def test_filelist(runner, example_simple, prjroot):
     """Filelist Command."""
     cmd = ["filelist", "uart_lib.uart", "hdl"]
     _run(runner, prjroot, cmd)
     assert_refdata(test_filelist, prjroot)
+
+
+def test_filelist_default(runner, example_simple, prjroot):
+    """Filelist Command with Default."""
+    cmd = ["filelist", "uart_lib.uart"]
+    _run(runner, prjroot, cmd)
+    assert_refdata(test_filelist_default, prjroot)
 
 
 def test_filelist_file(runner, example_simple, prjroot):
@@ -123,6 +142,13 @@ def test_fileinfo(runner, example_simple, prjroot):
     cmd = ["fileinfo", "uart_lib.uart", "hdl"]
     _run(runner, prjroot, cmd)
     assert_refdata(test_fileinfo, prjroot)
+
+
+def test_fileinfo_default(runner, example_simple, prjroot):
+    """Fileinfo Command."""
+    cmd = ["fileinfo", "uart_lib.uart"]
+    _run(runner, prjroot, cmd)
+    assert_refdata(test_fileinfo_default, prjroot)
 
 
 def test_fileinfo_maxlevel(runner, example_simple, prjroot):
@@ -219,12 +245,24 @@ def test_ls_names(runner, example_simple, testdata, prjroot):
 
 
 def test_ls_top(runner, example_simple, testdata, prjroot):
-    """List with Names Only."""
+    """List Top Modules Only."""
     _run(runner, prjroot, ["ls", "-t"])
     assert_refdata(test_ls_top, prjroot)
 
 
 def test_ls_tb(runner, example_simple, testdata, prjroot):
-    """List with Names Only."""
-    _run(runner, prjroot, ["ls", "-g"])
+    """List Testbenches Only."""
+    _run(runner, prjroot, ["ls", "-b"])
     assert_refdata(test_ls_tb, prjroot)
+
+
+def test_ls_gentb(runner, example_simple, testdata, prjroot):
+    """List Generic Testbenches Only."""
+    _run(runner, prjroot, ["ls", "-g"])
+    assert_refdata(test_ls_gentb, prjroot)
+
+
+def test_ls_pat(runner, example_simple, testdata, prjroot):
+    """List Command with Pattern."""
+    _run(runner, prjroot, ["ls", "glbl_lib*", "*SomeMod"])
+    assert_refdata(test_ls_pat, prjroot)

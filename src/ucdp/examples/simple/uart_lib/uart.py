@@ -47,7 +47,14 @@ class UartIoType(u.AStructType):
 class UartMod(u.AMod):
     """A Simple UART."""
 
-    filelists: ClassVar[u.ModFileLists] = (HdlFileList(gen="full"),)
+    filelists: ClassVar[u.ModFileLists] = (
+        HdlFileList(gen="full"),
+        u.ModFileList(
+            name="header",
+            filepaths=("$PRJROOT/{mod.modname}.hpp"),
+            template_filepaths=("hpp.mako"),
+        ),
+    )
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
