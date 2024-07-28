@@ -86,12 +86,21 @@ def ucdp(ctx, verbose=0):
     level = _LOGLEVELMAP.get(verbose, logging.DEBUG)
     handler = RichHandler(show_time=False, show_path=False, rich_tracebacks=True, tracebacks_suppress=("click",))
     logging.basicConfig(level=level, format="%(message)s", handlers=[handler])
-    ctx.obj = Ctx(
-        console=Console(log_time=False, log_path=False),
-    )
+    ctx.obj = Ctx(console=Console(log_time=False, log_path=False))
 
 
 pass_ctx = click.make_pass_decorator(Ctx)
+
+
+def get_group(help=None):
+    """Create Command Group."""
+
+    @click.group(help=help)
+    @click.pass_context
+    def group(ctx):
+        ctx.obj = Ctx(console=Console(log_time=False, log_path=False))
+
+    return group
 
 
 def load_top(ctx: Ctx, top: str, paths: Iterable[str | Path], quiet: bool = False) -> Top:
