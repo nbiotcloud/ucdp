@@ -37,7 +37,7 @@ from .modtailored import ATailoredMod
 from .modtb import AGenericTbMod, ATbMod
 from .object import Object
 
-BASECLSS = (AConfigurableMod, ACoreMod, ATailoredMod, AMod, AGenericTbMod, ATbMod)
+BASECLSS = (AConfigurableMod, ACoreMod, ATailoredMod, AMod, AGenericTbMod, ATbMod, BaseMod)
 
 
 ModCls: TypeAlias = type[BaseMod]

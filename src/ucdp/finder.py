@@ -42,11 +42,15 @@ from .modref import ModRef, get_modclsname
 from .modrefinfo import ModRefInfo
 from .util import LOGGER, extend_sys_path
 
-_RE_IMPORT_UCDP = re.compile("^import ucdp")
+_RE_IMPORT_UCDP = re.compile(r"^\s*class .*Mod\):")
 
 
 def find(paths: Iterable[Path] | None = None, variants: bool = False) -> Iterator[ModRefInfo]:
     """List All Available Module References."""
+    yield from sorted(_find(paths, variants=variants), key=lambda modrefinfo: str(modrefinfo.modref))
+
+
+def _find(paths: Iterable[Path] | None = None, variants: bool = False) -> Iterator[ModRefInfo]:
     with extend_sys_path(paths):
         for filepath, pylibname, pymodname, pymod in _find_pymods():
             yield from _find_modrefs(filepath, pylibname, pymodname, pymod, variants)
@@ -61,7 +65,7 @@ def _find_pymods():
         pymodname = filepath.stem
 
         # skip private
-        if pylibname.startswith("_") or pymodname.startswith("_"):
+        if pylibname.startswith("_") or pymodname.startswith("_") or pylibname == "ucdp":
             continue
 
         # skip non-ucdp files
