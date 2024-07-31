@@ -52,10 +52,17 @@ def test_load_simple(example_simple):
 
 
 def test_load_non_mod(example_bad):
-    """Simple Module."""
+    """Load Non Module."""
     with raises(ValueError) as exc:
         u.load("glbl_bad_lib.regf.MyMod", paths=None)
     assert str(exc.value) == "<class 'glbl_bad_lib.regf.MyMod'> is not a module aka child of <class ucdp.BaseMod>."
+
+
+def test_load_non_top(example_simple):
+    """Load Non-Top Module."""
+    msg = "uart_lib.uart.UartCoreMod is not a top module as it bases on <class 'ucdp.modcore.ACoreMod'>"
+    with raises(ValueError, match=re.escape(msg)):
+        u.load("uart_lib.uart.UartCoreMod")
 
 
 def test_load_complex(example_simple):
