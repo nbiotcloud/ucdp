@@ -56,6 +56,8 @@ class UartMod(u.AMod):
         ),
     )
 
+    tags: ClassVar[u.ModTags] = ("intf",)
+
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
         self.add_port(UartIoType(), "uart_i", route="create(u_core/uart_i)")

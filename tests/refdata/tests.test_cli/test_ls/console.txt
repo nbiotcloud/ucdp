@@ -1,37 +1,37 @@
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━━━━━━━━━━━━━┓
-┃ Reference                             ┃ Top ┃ Tb  ┃         Bases on ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━━━━━━━━━━━━━┩
-│ glbl_lib.clk_gate[.ClkGateMod]        │  X  │     │             AMod │
-│ glbl_lib.regf[.RegfMod]               │     │     │     ATailoredMod │
-│ glbl_lib.regf_tb[.RegfTbMod]          │  X  │  X  │    AGenericTbMod │
-│ tests.test_flipflops.FlipFlopMod      │  X  │     │             AMod │
-│ tests.test_modconfigurable.AnotherMod │  X  │     │ AConfigurableMod │
-│ tests.test_modconfigurable.MyMod      │  X  │     │ AConfigurableMod │
-│ tests.test_modconfigurable.MyOtherMod │  X  │     │ AConfigurableMod │
-│ tests.test_modconfigurable.RootMod    │  X  │     │             AMod │
-│ tests.test_modconfigurable.SubMod     │  X  │     │ AConfigurableMod │
-│ tests.test_modconfigurable.TopMod     │  X  │     │             AMod │
-│ tests.test_modfilelist.MultiMod       │  X  │     │             AMod │
-│ tests.test_mods.DeclMod               │  X  │     │             AMod │
-│ tests.test_mods.DocMod                │  X  │     │             AMod │
-│ tests.test_mods.IpMod                 │  X  │     │             AMod │
-│ tests.test_mods.NoBuildMod            │  X  │     │             AMod │
-│ tests.test_mods.NoNameMod             │  X  │     │             AMod │
-│ tests.test_mods.ParamMod              │  X  │     │             AMod │
-│ tests.test_mods.SomeMod               │  X  │     │             AMod │
-│ tests.test_mods.SomeSomeMod           │  X  │     │             AMod │
-│ tests.test_mods.SubMod                │  X  │     │             AMod │
-│ tests.test_mods.TopMod                │  X  │     │             AMod │
-│ tests.test_mods.WrongName             │  X  │     │             AMod │
-│ tests.test_modtailored.TailMod        │     │     │     ATailoredMod │
-│ tests.test_modtailored.TopMod         │  X  │     │             AMod │
-│ tests.test_modtb.DutMod               │     │     │     ATailoredMod │
-│ tests.test_modtb.GenTbMod             │  X  │  X  │    AGenericTbMod │
-│ tests.test_modtb.SubMod               │  X  │     │             AMod │
-│ tests.test_modtb.TbMod                │  X  │  X  │           ATbMod │
-│ tests.test_modtb.TopMod               │  X  │     │             AMod │
-│ tests.test_modtb.TopTbMod             │  X  │  X  │           ATbMod │
-│ tests.test_muxes.MuxMod               │  X  │     │             AMod │
-│ uart_lib.uart[.UartMod]               │  X  │     │             AMod │
-│ uart_lib.uart.UartCoreMod             │     │     │         ACoreMod │
-└───────────────────────────────────────┴─────┴─────┴──────────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━┓
+┃ Reference                             ┃ Top ┃ Tb  ┃         Bases on ┃ Tags ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━┩
+│ glbl_lib.clk_gate[.ClkGateMod]        │  X  │     │             AMod │      │
+│ glbl_lib.regf[.RegfMod]               │     │     │     ATailoredMod │ bus  │
+│ glbl_lib.regf_tb[.RegfTbMod]          │  X  │  X  │    AGenericTbMod │      │
+│ tests.test_flipflops.FlipFlopMod      │  X  │     │             AMod │      │
+│ tests.test_modconfigurable.AnotherMod │  X  │     │ AConfigurableMod │      │
+│ tests.test_modconfigurable.MyMod      │  X  │     │ AConfigurableMod │      │
+│ tests.test_modconfigurable.MyOtherMod │  X  │     │ AConfigurableMod │      │
+│ tests.test_modconfigurable.RootMod    │  X  │     │             AMod │      │
+│ tests.test_modconfigurable.SubMod     │  X  │     │ AConfigurableMod │      │
+│ tests.test_modconfigurable.TopMod     │  X  │     │             AMod │      │
+│ tests.test_modfilelist.MultiMod       │  X  │     │             AMod │      │
+│ tests.test_mods.DeclMod               │  X  │     │             AMod │      │
+│ tests.test_mods.DocMod                │  X  │     │             AMod │      │
+│ tests.test_mods.IpMod                 │  X  │     │             AMod │ ip   │
+│ tests.test_mods.NoBuildMod            │  X  │     │             AMod │      │
+│ tests.test_mods.NoNameMod             │  X  │     │             AMod │      │
+│ tests.test_mods.ParamMod              │  X  │     │             AMod │      │
+│ tests.test_mods.SomeMod               │  X  │     │             AMod │      │
+│ tests.test_mods.SomeSomeMod           │  X  │     │             AMod │      │
+│ tests.test_mods.SubMod                │  X  │     │             AMod │ ip   │
+│ tests.test_mods.TopMod                │  X  │     │             AMod │ ippp │
+│ tests.test_mods.WrongName             │  X  │     │             AMod │      │
+│ tests.test_modtailored.TailMod        │     │     │     ATailoredMod │      │
+│ tests.test_modtailored.TopMod         │  X  │     │             AMod │      │
+│ tests.test_modtb.DutMod               │     │     │     ATailoredMod │      │
+│ tests.test_modtb.GenTbMod             │  X  │  X  │    AGenericTbMod │      │
+│ tests.test_modtb.SubMod               │  X  │     │             AMod │      │
+│ tests.test_modtb.TbMod                │  X  │  X  │           ATbMod │      │
+│ tests.test_modtb.TopMod               │  X  │     │             AMod │      │
+│ tests.test_modtb.TopTbMod             │  X  │  X  │           ATbMod │      │
+│ tests.test_muxes.MuxMod               │  X  │     │             AMod │      │
+│ uart_lib.uart[.UartMod]               │  X  │     │             AMod │ intf │
+│ uart_lib.uart.UartCoreMod             │     │     │         ACoreMod │      │
+└───────────────────────────────────────┴─────┴─────┴──────────────────┴──────┘

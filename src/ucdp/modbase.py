@@ -29,7 +29,7 @@ Base Hardware Module.
 
 from abc import abstractmethod
 from functools import cached_property
-from typing import Any, ClassVar, Optional, Union, no_type_check
+from typing import Any, ClassVar, Optional, TypeAlias, Union, no_type_check
 
 from caseconverter import snakecase
 from uniquer import uniquetuple
@@ -61,23 +61,26 @@ from .typebase import BaseType
 from .typedescriptivestruct import DescriptiveStructType
 from .typestruct import StructItem
 
+ModTags: TypeAlias = tuple[str, ...]
+
 
 class BaseMod(NamedObject):
     """
     Hardware Module.
 
     Args:
-        parent (BaseMod): Parent Module. `None` by default for top module.
-        name (str): Instance name. Required if parent is provided.
+        parent: Parent Module. `None` by default for top module.
+        name: Instance name. Required if parent is provided.
 
     Keyword Args:
-        title (str): Title
-        descr (str): Description
-        comment (str): Comment
-        paramdict (dict): Parameter values for this instance.
+        title: Title
+        descr: Description
+        comment: Comment
+        paramdict: Parameter values for this instance.
     """
 
     filelists: ClassVar[Any] = ()
+    tags: ClassVar[ModTags] = ModTags()
 
     parent: Optional["BaseMod"] = None
     paramdict: dict = Field(default_factory=dict, repr=False)
