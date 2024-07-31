@@ -71,6 +71,7 @@ class RegfMod(u.ATailoredMod):
     words: u.Namespace = u.Field(default_factory=u.Namespace)
 
     iotype: u.DynamicStructType = u.Field(default_factory=u.DynamicStructType, init=False)
+    tags: ClassVar[u.ModTags] = ("bus",)
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")

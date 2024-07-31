@@ -191,6 +191,13 @@ def test_overview_file(runner, example_simple, prjroot):
     assert_refdata(test_overview_file, prjroot)
 
 
+def test_overview_tags(runner, example_simple, prjroot):
+    """Overview Command."""
+    cmd = ["overview", "uart_lib.uart", "-T", "intf"]
+    _run(runner, prjroot, cmd)
+    assert_refdata(test_overview_tags, prjroot)
+
+
 def test_info_examples(runner, example_simple, prjroot):
     """Info Examples Command."""
     _run(runner, prjroot, ["info", "examples"])
@@ -269,6 +276,12 @@ def test_ls_pat(runner, example_simple, testdata, prjroot):
     """List Command with Pattern."""
     _run(runner, prjroot, ["ls", "glbl_lib*", "*SomeMod"])
     assert_refdata(test_ls_pat, prjroot)
+
+
+def test_ls_tags(runner, example_simple, testdata, prjroot):
+    """List Command with Tags."""
+    _run(runner, prjroot, ["ls", "-T", "intf", "-T", "ip*"])
+    assert_refdata(test_ls_tags, prjroot)
 
 
 def test_autocomplete_top(example_simple):

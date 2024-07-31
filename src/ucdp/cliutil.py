@@ -99,8 +99,13 @@ opt_filepath = click.option(
     shell_complete=auto_path,
     help="Output to file instead of STDOUT",
 )
-
-
+opt_tag = click.option(
+    "--tag",
+    "-T",
+    default=[],
+    multiple=True,
+    help="Filter Modules by Tag Name or Wildcard.",
+)
 arg_template_filepaths = click.argument(
     "template_filepaths",
     type=PathType,

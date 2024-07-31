@@ -24,6 +24,8 @@
 
 """Unified Chip Design Platform."""
 
+from typing import ClassVar
+
 from pydantic import ValidationError
 
 from . import cli
@@ -65,7 +67,7 @@ from .ident import Ident, IdentFilter, Idents, IdentStop, get_expridents, get_id
 from .iterutil import Names, namefilter, split
 from .loader import load
 from .mod import AMod
-from .modbase import BaseMod
+from .modbase import BaseMod, ModTags
 from .modbasetop import BaseTopMod
 from .modconfigurable import AConfigurableMod
 from .modcore import ACoreMod
@@ -166,6 +168,7 @@ __all__ = [
     "BoolOp",
     "BoolType",
     "BuildError",
+    "ClassVar",
     "BusyType",
     "BWD",
     "bwdfilter",
@@ -203,6 +206,7 @@ __all__ = [
     "EnumItem",
     "EnumItemFilter",
     "Expr",
+    "ModTags",
     "ExprParser",
     "ExprResolver",
     "extend_sys_path",

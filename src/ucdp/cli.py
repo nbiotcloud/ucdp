@@ -51,6 +51,7 @@ from .cliutil import (
     opt_maxworkers,
     opt_path,
     opt_show_diff,
+    opt_tag,
     opt_target,
 )
 from .consts import PATH
@@ -297,14 +298,11 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, file=None):
     top = load_top(ctx, top, path, quiet=True)
     console = Console(file=file) if file else ctx.console
     for item in filelist or ["*"]:
-        pprint(
-            {
-                str(mod): modfilelist
-                for mod, modfilelist in iter_modfilelists(top.mod, item, target=target, maxlevel=maxlevel)
-            },
-            indent_guides=False,
-            console=console,
-        )
+        data = {
+            str(mod): modfilelist
+            for mod, modfilelist in iter_modfilelists(top.mod, item, target=target, maxlevel=maxlevel)
+        }
+        pprint(data, indent_guides=False, console=console)
 
 
 @ucdp.command(
@@ -328,10 +326,12 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, file=None):
 @click.option("--top", "-t", default=False, is_flag=True, help="List loadable top modules only.")
 @click.option("--tb", "-b", default=False, is_flag=True, help="List testbench modules only.")
 @click.option("--generic-tb", "-g", default=False, is_flag=True, help="List Generic Testbench modules only.")
+@opt_tag
 @pass_ctx
-def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=False):
+def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=False, tag=None):
     """List Modules."""
-    infos = find(path)
+    with ctx.console.status("Searching"):
+        infos = find(path)
     if top:
         infos = [info for info in infos if info.is_top]
     if tb:
@@ -341,6 +341,9 @@ def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=Fal
     if pattern:
         filter_ = namefilter(pattern)
         infos = [info for info in infos if filter_(str(info.modref))]
+    if tag:
+        filter_ = namefilter(tag)
+        infos = [info for info in infos if any(filter_(tag) for tag in info.modcls.tags)]
     if names:
         for info in find(path):
             print(info.modref)
@@ -350,6 +353,7 @@ def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=Fal
         table.add_column("Top", justify="center")
         table.add_column("Tb ", justify="center")
         table.add_column("Bases on", justify="right")
+        table.add_column("Tags")
         for info in infos:
             if info.modref.modclsname:
                 ref = str(info.modref)
@@ -360,6 +364,7 @@ def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=Fal
                 "X" if info.is_top else "",
                 "X" if info.tb else "",
                 info.modbasecls.__name__,
+                ",".join(info.modcls.tags),
             )
         ctx.console.print(table)
 
@@ -375,12 +380,13 @@ TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 @opt_path
 @click.option("--minimal", "-m", default=False, is_flag=True, help="Skip modules without specific details")
 @opt_filepath
+@opt_tag
 @pass_ctx
-def overview(ctx, top, path, minimal=False, file=None):
+def overview(ctx, top, path, minimal=False, file=None, tag=None):
     """Overview."""
     # Load quiet, otherwise stdout is messed-up
     top = load_top(ctx, top, path, quiet=True)
-    data = {"minimal": minimal}
+    data = {"minimal": minimal, "tag": tag}
     render_generate(top, [PATH / "ucdp-templates" / "overview.txt.mako"], genfile=file, data=data)
 
 
