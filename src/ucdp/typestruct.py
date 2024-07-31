@@ -51,11 +51,9 @@ class StructItem(Object):
     """
     Struct NamedObject.
 
-    Args:
+    Attributes:
         name: Name of struct member
         type_: Type of struct member
-
-    Keyword Args:
         orientation: Orientation of struct member. `FWD` by default
         doc: Documentation Container
         ifdef: IFDEF encapsulation

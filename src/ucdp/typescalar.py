@@ -49,7 +49,7 @@ class IntegerType(AScalarType):
     """
     Native Signed 32-Bit Integer.
 
-    Keyword Args:
+    Attributes:
         default: Default Value. 0 by default.
 
     The width is fixed to 32.
@@ -201,7 +201,7 @@ class BitType(AScalarType):
     """
     Native Single Bit.
 
-    Keyword Args:
+    Attributes:
         default: Default Value. 0 by default.
 
     The width is fixed to 1.
@@ -342,7 +342,7 @@ class BoolType(AScalarType):
     """
     Native Boolean.
 
-    Keyword Args:
+    Attributes:
         default: Default Value. 0 by default.
 
     The width is fixed to 1.
@@ -460,7 +460,7 @@ class RailType(AScalarType):
     """
     Voltage Rail.
 
-    Keyword Args:
+    Attributes:
         default: Default Value. 0 by default.
 
     The width is fixed to 1.
@@ -600,7 +600,7 @@ class UintType(AVecType):
     Args:
         width (int): Width in bits.
 
-    Keyword Args:
+    Attributes:
         default: Default Value. 0 by default.
 
     Example:
@@ -749,7 +749,7 @@ class SintType(AVecType):
     Args:
         width (int): Width in bits.
 
-    Keyword Args:
+    Attributes:
         default: Default Value. 0 by default.
 
     Example:

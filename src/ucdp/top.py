@@ -26,7 +26,7 @@
 
 from .iterutil import Names
 from .modbase import BaseMod
-from .moditer import ModPostIter, ModPreIter, get_mod, get_mods
+from .moditer import FilterFunc, MaxLevel, ModPostIter, ModPreIter, StopFunc, get_mod, get_mods
 from .modtb import AGenericTbMod
 from .modtopref import TopModRef
 from .object import _CACHED_INSTANCES, Field, Object
@@ -36,8 +36,9 @@ class Top(Object):
     """
     Top Module Reference.
 
-    Args:
-        mod (BaseMod): Top Module
+    Attributes:
+        ref: Top Module Reference
+        mod: Top Module Instance
     """
 
     ref: TopModRef = Field(repr=False)
@@ -52,11 +53,18 @@ class Top(Object):
             ref = TopModRef(top=mod.get_modref())
         return Top(ref=ref, mod=mod)
 
-    def iter(self, filter_=None, stop=None, maxlevel: int | None = None, unique: bool = False, post: bool = False):
+    def iter(
+        self,
+        filter_: FilterFunc | None = None,
+        stop: StopFunc | None = None,
+        maxlevel: MaxLevel | None = None,
+        unique: bool = False,
+        post: bool = False,
+    ):
         """
         Iterate Over All Modules.
 
-        Keyword Args:
+        Args:
             filter_: function called with every `mod` as argument, `mod` is returned if `True`.
             stop: stop iteration at `mod` if `stop` function returns `True` for `mod`.
             maxlevel (int): maximum descending in the mod hierarchy.

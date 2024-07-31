@@ -42,33 +42,33 @@ class ArrayType(ACompositeType, Light):
         depth (int):    depth.
 
     Example:
-    >>> import ucdp as u
-    >>> mem = u.ArrayType(u.UintType(16), 10)
-    >>> mem
-    ArrayType(UintType(16), 10)
+        >>> import ucdp as u
+        >>> mem = u.ArrayType(u.UintType(16), 10)
+        >>> mem
+        ArrayType(UintType(16), 10)
 
     Arrays can be nested and combined with all other types.
 
-    >>> class BusType(u.AStructType):
-    ...     def _build(self) -> None:
-    ...         self._add('data', u.UintType(8))
-    ...         self._add('valid', u.BitType())
-    ...         self._add('accept', u.BitType(), orientation=u.BWD)
+        >>> class BusType(u.AStructType):
+        ...     def _build(self) -> None:
+        ...         self._add('data', u.UintType(8))
+        ...         self._add('valid', u.BitType())
+        ...         self._add('accept', u.BitType(), orientation=u.BWD)
 
-    >>> structmatrix = u.ArrayType(u.ArrayType(BusType(), 10), 22)
-    >>> structmatrix
-    ArrayType(ArrayType(BusType(), 10), 22)
+        >>> structmatrix = u.ArrayType(u.ArrayType(BusType(), 10), 22)
+        >>> structmatrix
+        ArrayType(ArrayType(BusType(), 10), 22)
 
     Slicing:
 
-    >>> structmatrix.slice_
-    Slice('0:21')
-    >>> structmatrix[0:15]
-    ArrayType(ArrayType(BusType(), 10), 16)
-    >>> structmatrix[3]
-    ArrayType(BusType(), 10)
-    >>> structmatrix[3][3]
-    BusType()
+        >>> structmatrix.slice_
+        Slice('0:21')
+        >>> structmatrix[0:15]
+        ArrayType(ArrayType(BusType(), 10), 16)
+        >>> structmatrix[3]
+        ArrayType(BusType(), 10)
+        >>> structmatrix[3][3]
+        BusType()
     """
 
     itemtype: BaseType

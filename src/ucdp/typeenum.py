@@ -46,8 +46,8 @@ class AEnumType(BaseEnumType, Light):
     """
     Base class for all enumerations, behaves like a dictionary.
 
-    Keyword Args:
-        default: Default Value. Default value of `keytype` by default.
+    Attributes:
+        default: Default Value. Default value of `type` by default.
 
     The protected method `_build()` should be used to build the type.
 
@@ -344,14 +344,12 @@ class AGlobalEnumType(BaseEnumType, Light):
         """
         Add NamedObject To Enumeration.
 
-        Args:
-            key (int): key value to be mapped.
+        Attributes:
+            key: key value to be mapped.
             value: Mapped value.
-
-        Keyword Args:
-            title (str): Full Spoken Name.
-            descr (str): Documentation Description.
-            comment (str): Source Code Comment.
+            title: Full Spoken Name.
+            descr: Documentation Description.
+            comment: Source Code Comment.
         """
         self._add(key=key, value=value, title=title, descr=descr, comment=comment)
 
@@ -402,14 +400,12 @@ class DynamicEnumType(BaseEnumType):
         """
         Add NamedObject To Enumeration.
 
-        Args:
-            key (int): key value to be mapped.
+        Attributes:
+            key: key value to be mapped.
             value: Mapped value.
-
-        Keyword Args:
-            title (str): Full Spoken Name.
-            descr (str): Documentation Description.
-            comment (str): Source Code Comment.
+            title: Full Spoken Name.
+            descr: Documentation Description.
+            comment: Source Code Comment.
         """
         self._add(key=key, value=value, title=title, descr=descr, comment=comment)
 
