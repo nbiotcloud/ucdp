@@ -74,14 +74,17 @@ class MainGroup(click.Group):  # pragma: no cover
         lazy = list(_find_commands(PATHS))
         return sorted(base + lazy)
 
-    def get_command(self, ctx, cmd_name):
+    def get_command(self, ctx, name):
         """Load Command."""
-        if cmd_name in _find_commands(PATHS):
-            return self._load(cmd_name)
-        return super().get_command(ctx, cmd_name)
+        if name in _find_commands(PATHS):
+            try:
+                return self._load(name)
+            except Exception as exc:  # pragma: no cover
+                LOGGER.error("Could not load command '%s' (%s)", name, exc)
+        return super().get_command(ctx, name)
 
-    def _load(self, cmd_name):
-        import_path = _find_commands(PATHS)[cmd_name]
+    def _load(self, name):
+        import_path = _find_commands(PATHS)[name]
         modname, cmd_object_name = import_path.rsplit(".", 1)
         mod = importlib.import_module(modname)
         return getattr(mod, cmd_object_name)
