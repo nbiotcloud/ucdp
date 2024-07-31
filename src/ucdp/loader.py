@@ -63,7 +63,7 @@ def load(topmodref: TopModRef | str, paths: Iterable[Path] | None = None) -> Top
     Returns:
         Top: Top
     """
-    with extend_sys_path(paths):
+    with extend_sys_path(paths, use_env_default=True):
         topmodref = TopModRef.cast(topmodref)
         mod = _load_topmod(topmodref)
         return Top(ref=topmodref, mod=mod)

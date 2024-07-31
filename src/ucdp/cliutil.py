@@ -28,13 +28,31 @@ from pathlib import Path
 
 import click
 
-arg_top = click.argument("top", envvar="UCDP_TOP")
+from ucdp.finder import find
+from ucdp.pathutil import improved_glob
+
+PathType = click.Path(path_type=Path)
+
+
+def auto_top(ctx, param, incomplete):
+    """Autocompletion for TOP."""
+    infos = find(startswith=incomplete)
+    return [str(info.modref) for info in infos if str(info.modref).startswith(incomplete)]
+
+
+def auto_path(ctr, param, incomplete):
+    """Autocompletion for Paths."""
+    return [str(path) for path in improved_glob(Path(f"{incomplete}*"))]
+
+
+arg_top = click.argument("top", envvar="UCDP_TOP", shell_complete=auto_top)
 opt_path = click.option(
     "--path",
     "-p",
     default=[],
     multiple=True,
     envvar="UCDP_PATH",
+    shell_complete=auto_path,
     help="""
 Search Path For Data Model And Template Files.
 This option can be specified multiple times.
@@ -67,8 +85,29 @@ opt_defines = click.option(
     help="Defines set on the datamodel. Environment Variable 'UCDP_DEFINES'",
     envvar="UCDP_DEFINES",
 )
-opt_file = click.option("--file", "-o", type=click.File("w"), help="Output to file instead of STDOUT")
-opt_filepath = click.option("--file", "-o", type=click.Path(path_type=Path), help="Output to file instead of STDOUT")
+opt_file = click.option(
+    "--file",
+    "-o",
+    type=click.File("w"),
+    shell_complete=auto_path,
+    help="Output to file instead of STDOUT",
+)
+opt_filepath = click.option(
+    "--file",
+    "-o",
+    type=click.Path(path_type=Path),
+    shell_complete=auto_path,
+    help="Output to file instead of STDOUT",
+)
+
+
+arg_template_filepaths = click.argument(
+    "template_filepaths",
+    type=PathType,
+    shell_complete=auto_path,
+    nargs=-1,
+    envvar="UCDP_TEMPLATE_FILEPATHS",
+)
 
 
 def defines2data(defines: list[str]) -> dict[str, str]:

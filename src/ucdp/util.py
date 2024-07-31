@@ -41,15 +41,16 @@ def get_paths() -> tuple[Path, ...]:
 
 
 @contextmanager
-def extend_sys_path(paths: Iterable[Path] | None = None):
+def extend_sys_path(paths: Iterable[Path] | None = None, use_env_default: bool = False):
     """Context with extended sys.path.
 
     Keyword Args:
-        paths: Paths. Default
+        paths: Paths.
+        use_env_default: Use UCDP_PATH as default if paths are unset.
     """
-    if paths is None:
+    if paths is None and use_env_default:
         paths = get_paths()
-    pathstrs = [str(path) for path in paths]
+    pathstrs = [str(path) for path in paths or []]
     LOGGER.debug("paths=%r", pathstrs)
     if pathstrs:
         orig = sys.path

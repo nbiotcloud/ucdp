@@ -23,10 +23,13 @@
 #
 """Test Command-Line-Interface."""
 
+from pathlib import Path
+
+import ucdp as u
 from click.testing import CliRunner
+from contextlib_chdir import chdir
 from pytest import fixture
 from test2ref import assert_refdata
-from ucdp.cli import ucdp
 
 
 @fixture
@@ -40,14 +43,14 @@ def _assert_output(result, lines):
 
 
 def _run(runner, prjroot, cmd):
-    result = runner.invoke(ucdp, cmd)
+    result = runner.invoke(u.cli.ucdp, cmd)
     assert result.exit_code == 0
     (prjroot / "console.txt").write_text(result.output)
 
 
 def test_check(runner, example_simple):
     """Check Command."""
-    result = runner.invoke(ucdp, ["check", "uart_lib.uart"])
+    result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart"])
     assert result.exit_code == 0
     _assert_output(
         result,
@@ -56,11 +59,11 @@ def test_check(runner, example_simple):
         ],
     )
 
-    result = runner.invoke(ucdp, ["check", "uart_lib.uart2"])
+    result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart2"])
     assert result.exit_code == 1
     assert result.output == ""
 
-    result = runner.invoke(ucdp, ["check", "uart_lib.uart", "--stat"])
+    result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart", "--stat"])
     assert result.exit_code == 0
     _assert_output(
         result,
@@ -80,13 +83,13 @@ def test_gen(runner, example_simple, prjroot):
 
     assert not uartfile.exists()
 
-    result = runner.invoke(ucdp, ["gen", "uart_lib.uart", "hdl", "--maxworkers", "1"])
+    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "hdl", "--maxworkers", "1"])
     assert result.exit_code == 0
     (prjroot / "gen.txt").write_text(result.output)
 
     assert uartfile.exists()
 
-    result = runner.invoke(ucdp, ["cleangen", "uart_lib.uart", "hdl", "--maxworkers", "1"])
+    result = runner.invoke(u.cli.ucdp, ["cleangen", "uart_lib.uart", "hdl", "--maxworkers", "1"])
     assert result.exit_code == 0
     (prjroot / "cleangen.txt").write_text(result.output)
 
@@ -98,11 +101,11 @@ def test_gen(runner, example_simple, prjroot):
 
 def test_gen_default(runner, example_simple, prjroot):
     """Generate and Clean Command."""
-    result = runner.invoke(ucdp, ["gen", "uart_lib.uart", "--maxworkers", "1"])
+    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "--maxworkers", "1"])
     assert result.exit_code == 0
     (prjroot / "gen.txt").write_text(result.output)
 
-    result = runner.invoke(ucdp, ["cleangen", "uart_lib.uart", "--maxworkers", "1"])
+    result = runner.invoke(u.cli.ucdp, ["cleangen", "uart_lib.uart", "--maxworkers", "1"])
     assert result.exit_code == 0
     (prjroot / "cleangen.txt").write_text(result.output)
     assert_refdata(test_gen_default, prjroot)
@@ -266,3 +269,29 @@ def test_ls_pat(runner, example_simple, testdata, prjroot):
     """List Command with Pattern."""
     _run(runner, prjroot, ["ls", "glbl_lib*", "*SomeMod"])
     assert_refdata(test_ls_pat, prjroot)
+
+
+def test_autocomplete_top(example_simple):
+    """Autocompletion for Top."""
+    assert len(u.cliutil.auto_top(None, None, "")) > 20
+    assert u.cliutil.auto_top(None, None, "gl") == [
+        "glbl_lib.clk_gate",
+        "glbl_lib.regf",
+        "glbl_lib.regf_tb",
+    ]
+    assert u.cliutil.auto_top(None, None, "glbl_lib.r") == [
+        "glbl_lib.regf",
+        "glbl_lib.regf_tb",
+    ]
+
+
+def test_autocomplete_path(tmp_path):
+    """Autocompletion for Path."""
+    with chdir(tmp_path):
+        Path("aaa.txt").touch()
+        Path("aab.txt").touch()
+        Path("ac.txt").touch()
+
+        assert u.cliutil.auto_path(None, None, "a") == ["aaa.txt", "aab.txt", "ac.txt"]
+        assert u.cliutil.auto_path(None, None, "aa") == ["aaa.txt", "aab.txt"]
+        assert u.cliutil.auto_path(None, None, "b") == []

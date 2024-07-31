@@ -34,6 +34,7 @@ from collections.abc import Iterable, Iterator
 from importlib import import_module
 from inspect import getfile, isclass
 from pathlib import Path
+from typing import TypeAlias
 
 from uniquer import unique
 
@@ -44,20 +45,25 @@ from .util import LOGGER, extend_sys_path
 
 _RE_IMPORT_UCDP = re.compile(r"^\s*class .*Mod\):")
 
+Paths: TypeAlias = Iterable[Path]
 
-def find(paths: Iterable[Path] | None = None, variants: bool = False) -> Iterator[ModRefInfo]:
+
+def find(paths: Paths | None = None, variants: bool = False, startswith: str | None = None) -> Iterator[ModRefInfo]:
     """List All Available Module References."""
-    yield from sorted(_find(paths, variants=variants), key=lambda modrefinfo: str(modrefinfo.modref))
+    modrefinfos = _find(paths, variants=variants, startswith=startswith)
+    yield from sorted(modrefinfos, key=lambda modrefinfo: str(modrefinfo.modref))
 
 
-def _find(paths: Iterable[Path] | None = None, variants: bool = False) -> Iterator[ModRefInfo]:
-    with extend_sys_path(paths):
-        for filepath, pylibname, pymodname, pymod in _find_pymods():
+def _find(paths: Paths | None = None, variants: bool = False, startswith: str | None = None) -> Iterator[ModRefInfo]:
+    with extend_sys_path(paths, use_env_default=True):
+        for filepath, pylibname, pymodname, pymod in _find_pymods(startswith or ""):
             yield from _find_modrefs(filepath, pylibname, pymodname, pymod, variants)
 
 
-def _find_pymods():
-    filepaths = []
+def _find_pymods(startswith: str):
+    # we already evaluate 'startswith', to optimize performance
+    filepaths: list[Path] = []
+    prelib, premod = startswith.split(".", 1) if "." in startswith else (startswith, "")
     for syspathstr in sys.path:
         filepaths.extend(Path(syspathstr).resolve().glob("*/*.py"))
     for filepath in sorted(unique(filepaths)):
@@ -66,6 +72,12 @@ def _find_pymods():
 
         # skip private
         if pylibname.startswith("_") or pymodname.startswith("_") or pylibname == "ucdp":
+            continue
+
+        # skip non-matching
+        if prelib and not pylibname.startswith(prelib):
+            continue
+        if premod and not pymodname.startswith(premod):
             continue
 
         # skip non-ucdp files

@@ -52,7 +52,7 @@ def get_template_paths(paths: Iterable[Path] | None = None) -> list[Path]:
         paths: Search Path For Data Model And Template Files.
     """
     template_paths: list[Path] = []
-    with extend_sys_path(paths):
+    with extend_sys_path(paths, use_env_default=True):
         for path in sys.path:
             template_paths.extend(Path(path).glob("*/ucdp-templates/"))
     return uniquelist(template_paths)
@@ -111,7 +111,7 @@ def generate(
         replace_envvars=True,
         maxlevel=maxlevel,
     )
-    with extend_sys_path(paths):
+    with extend_sys_path(paths, use_env_default=True):
         with ThreadPoolExecutor(max_workers=maxworkers) as executor:
             jobs = []
             for mod, modfilelist in modfilelists:
@@ -177,7 +177,7 @@ def clean(
         replace_envvars=True,
         maxlevel=maxlevel,
     )
-    with extend_sys_path(paths):
+    with extend_sys_path(paths, use_env_default=True):
         with ThreadPoolExecutor(max_workers=maxworkers) as executor:
             jobs = []
             for _, modfilelist in modfilelists:
@@ -217,7 +217,7 @@ def render_generate(
     makolator = makolator or get_makolator(paths=paths)
     LOGGER.debug("%s", makolator.config)
     init_datamodel(makolator.datamodel, top, data=data)
-    with extend_sys_path(paths):
+    with extend_sys_path(paths, use_env_default=True):
         makolator.gen(template_filepaths, dest=genfile)
 
 
@@ -247,7 +247,7 @@ def render_inplace(
     makolator = makolator or get_makolator(paths=paths)
     LOGGER.debug("%s", makolator.config)
     init_datamodel(makolator.datamodel, top, data=data)
-    with extend_sys_path(paths):
+    with extend_sys_path(paths, use_env_default=True):
         makolator.inplace(template_filepaths, filepath=inplacefile, ignore_unknown=ignore_unknown)
 
 
