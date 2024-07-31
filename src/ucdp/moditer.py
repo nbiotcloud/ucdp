@@ -34,6 +34,7 @@ Module Iteration Strategies:
 from abc import abstractmethod
 from collections.abc import Callable, Iterable, Iterator
 from itertools import chain
+from typing import TypeAlias
 
 import uniquer
 
@@ -41,9 +42,9 @@ from .iterutil import Names, namefilter
 from .modbase import BaseMod
 from .object import Object
 
-FilterFunc = Callable[[BaseMod], bool]
-StopFunc = Callable[[BaseMod], bool]
-MaxLevel = int
+FilterFunc: TypeAlias = Callable[[BaseMod], bool]
+StopFunc: TypeAlias = Callable[[BaseMod], bool]
+MaxLevel: TypeAlias = int
 
 
 def _no_filter(mod: BaseMod):
@@ -93,7 +94,7 @@ class ModPreIter(BaseModIter):
 
     Yield top module **before** the child-modules.
 
-    Keyword Args:
+    Attributes:
         filter_: function called with every `mod` as argument, `mod` is returned if `True`.
         stop: stop iteration at `mod` if `stop` function returns `True` for `mod`.
         maxlevel (int): maximum descending in the mod hierarchy.
@@ -180,9 +181,9 @@ class ModPostIter(BaseModIter):
 
     Yield top module **after** the child-modules.
 
-    Keyword Args:
-        filter_: function called with every `mod` as argument, `mod` is returned if `True`.
-        stop: stop iteration at `mod` if `stop` function returns `True` for `mod`.
+    Attributes:
+        filter_ (FilterFunc): function called with every `mod` as argument, `mod` is returned if `True`.
+        stop (StopFunc): stop iteration at `mod` if `stop` function returns `True` for `mod`.
         maxlevel (int): maximum descending in the mod hierarchy.
         unique (bool): Just return module once.
 
@@ -270,7 +271,7 @@ def get_mod(topmod: BaseMod, namepats: Names, base=False) -> BaseMod:
     Args:
         topmod: Top module instance
 
-    Keyword Args:
+    Parameter:
         namepats: Iterable with name pattern (including `*` and `?`) or comma separated string.
         base: namepats must match against module `basequalnames` instead of `qual_name`.
     """

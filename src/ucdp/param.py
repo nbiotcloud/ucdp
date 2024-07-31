@@ -87,11 +87,11 @@ class Param(Ident):
 
     Args:
         type_ (AType): Type.
-        name (Name()): Name.
+        name (Name): Name.
 
     Keyword Args:
         doc (Doc): Documentation Container
-        value: Value.
+        value (Any): Value.
 
 
     Note:

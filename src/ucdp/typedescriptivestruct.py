@@ -40,70 +40,70 @@ class DescriptiveStructType(AStructType):
     """
     Struct with constants describing `type_`.
 
-    Args:
-        type_(Type): Type to be described
+    Attributes:
+        type_: Type to be described
 
     Bit:
 
-    >>> import ucdp as u
-    >>> for item in u.DescriptiveStructType(u.BitType(default=1)).values():
-    ...     repr(item)
-    "StructItem('default_p', BitType(default=1), doc=Doc(title='Default Value'))"
+        >>> import ucdp as u
+        >>> for item in u.DescriptiveStructType(u.BitType(default=1)).values():
+        ...     repr(item)
+        "StructItem('default_p', BitType(default=1), doc=Doc(title='Default Value'))"
 
     Unsigned Integer:
 
-    >>> for item in u.DescriptiveStructType(u.UintType(16, default=3),
-    ...                                   filter_=lambda item: item.name in ("default_p", "max_p")).values():
-    ...     item
-    StructItem('max_p', UintType(16, default=65535), doc=Doc(title='Maximal Value'))
-    StructItem('default_p', UintType(16, default=3), doc=Doc(title='Default Value'))
+        >>> for item in u.DescriptiveStructType(u.UintType(16, default=3),
+        ...                                   filter_=lambda item: item.name in ("default_p", "max_p")).values():
+        ...     item
+        StructItem('max_p', UintType(16, default=65535), doc=Doc(title='Maximal Value'))
+        StructItem('default_p', UintType(16, default=3), doc=Doc(title='Default Value'))
 
     Signed Integer:
 
-    >>> for item in u.DescriptiveStructType(u.SintType(8, default=-3)).values():
-    ...     repr(item)
-    "StructItem('width_p', IntegerType(default=8), doc=Doc(title='Width in Bits'))"
-    "StructItem('min_p', SintType(8, default=-128), doc=Doc(title='Minimal Value'))"
-    "StructItem('max_p', SintType(8, default=127), doc=Doc(title='Maximal Value'))"
-    "StructItem('default_p', SintType(8, default=-3), doc=Doc(title='Default Value'))"
+        >>> for item in u.DescriptiveStructType(u.SintType(8, default=-3)).values():
+        ...     repr(item)
+        "StructItem('width_p', IntegerType(default=8), doc=Doc(title='Width in Bits'))"
+        "StructItem('min_p', SintType(8, default=-128), doc=Doc(title='Minimal Value'))"
+        "StructItem('max_p', SintType(8, default=127), doc=Doc(title='Maximal Value'))"
+        "StructItem('default_p', SintType(8, default=-3), doc=Doc(title='Default Value'))"
 
     Enum:
 
-    >>> class MyEnumType(u.AEnumType):
-    ...     keytype: u.AScalarType = u.UintType(2, default=0)
-    ...     def _build(self) -> None:
-    ...         self._add(0, "Forward")
-    ...         self._add(1, 8)
-    ...         self._add(2, "Bi-Dir")
-    >>> for item in u.DescriptiveStructType(MyEnumType()).values():
-    ...     repr(item)
-    "StructItem('width_p', IntegerType(default=2), doc=Doc(title='Width in Bits'))"
-    "StructItem('min_p', MyEnumType(default=0), doc=Doc(title='Minimal Value'))"
-    "StructItem('max_p', MyEnumType(default=3), doc=Doc(title='Maximal Value'))"
-    "StructItem('forward_e', UintType(2))"
-    "StructItem('v8_e', UintType(2, default=1))"
-    "StructItem('bi_dir_e', UintType(2, default=2))"
-    "StructItem('default_p', MyEnumType(), doc=Doc(title='Default Value'))"
+        >>> class MyEnumType(u.AEnumType):
+        ...     keytype: u.AScalarType = u.UintType(2, default=0)
+        ...     def _build(self) -> None:
+        ...         self._add(0, "Forward")
+        ...         self._add(1, 8)
+        ...         self._add(2, "Bi-Dir")
+        >>> for item in u.DescriptiveStructType(MyEnumType()).values():
+        ...     repr(item)
+        "StructItem('width_p', IntegerType(default=2), doc=Doc(title='Width in Bits'))"
+        "StructItem('min_p', MyEnumType(default=0), doc=Doc(title='Minimal Value'))"
+        "StructItem('max_p', MyEnumType(default=3), doc=Doc(title='Maximal Value'))"
+        "StructItem('forward_e', UintType(2))"
+        "StructItem('v8_e', UintType(2, default=1))"
+        "StructItem('bi_dir_e', UintType(2, default=2))"
+        "StructItem('default_p', MyEnumType(), doc=Doc(title='Default Value'))"
 
     Struct:
 
-    >>> class SubStructType(u.AStructType):
-    ...     def _build(self) -> None:
-    ...         self._add('a', u.UintType(2))
-    ...         self._add('b', u.UintType(3), u.BWD)
-    >>> class MyStructType(u.AStructType):
-    ...     def _build(self) -> None:
-    ...         self._add('ctrl', u.UintType(4), title='Control')
-    ...         self._add('data', u.ArrayType(u.SintType(16, default=5), 8), u.FWD, descr='Data to be handled')
-    ...         self._add('resp', u.BitType(), u.BWD, comment='Sink response')
-    ...         self._add('mode', MyEnumType(), u.BWD, comment='Enum')
-    ...         self._add('sub', SubStructType(), u.BWD)
-    >>> for item in u.DescriptiveStructType(MyStructType()).values():
-    ...     repr(item)
-    "StructItem('bits_p', IntegerType(default=140), doc=Doc(title='Size in Bits'))"
-    "StructItem('fwdbits_p', IntegerType(default=135), doc=Doc(title='Forward Size in Bits'))"
-    "StructItem('bwdbits_p', IntegerType(default=5), doc=Doc(title='Backward Size in Bits'))"
-    "StructItem('bibits_p', IntegerType(), doc=Doc(title='Bi-Directional Size in Bits'))"
+        >>> class SubStructType(u.AStructType):
+        ...     def _build(self) -> None:
+        ...         self._add('a', u.UintType(2))
+        ...         self._add('b', u.UintType(3), u.BWD)
+        >>> class MyStructType(u.AStructType):
+        ...     def _build(self) -> None:
+        ...         self._add('ctrl', u.UintType(4), title='Control')
+        ...         self._add('data', u.ArrayType(u.SintType(16, default=5), 8), u.FWD, descr='Data to be handled')
+        ...         self._add('resp', u.BitType(), u.BWD, comment='Sink response')
+        ...         self._add('mode', MyEnumType(), u.BWD, comment='Enum')
+        ...         self._add('sub', SubStructType(), u.BWD)
+        >>> for item in u.DescriptiveStructType(MyStructType()).values():
+        ...     repr(item)
+        "StructItem('bits_p', IntegerType(default=140), doc=Doc(title='Size in Bits'))"
+        "StructItem('fwdbits_p', IntegerType(default=135), doc=Doc(title='Forward Size in Bits'))"
+        "StructItem('bwdbits_p', IntegerType(default=5), doc=Doc(title='Backward Size in Bits'))"
+        "StructItem('bibits_p', IntegerType(), doc=Doc(title='Bi-Directional Size in Bits'))"
 
     """
 

@@ -50,5 +50,5 @@ Next to that, there are some temporary files ignored by version control system.
 | `htmlcov/` | Test Execution Code Coverage Report in HTML format. |
 | `report.xml` | Test Execution Report. |
 | `.*_cache/` | Cache Directory. |
-| `.nox/` | [NOX][nox] directory. |
+| `.nox/` | [nox](https://nox.thea.codes/en/stable/) directory. |
 | `.venv*` | Virtual Environments |

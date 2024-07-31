@@ -29,13 +29,14 @@ Module Utilities.
 from collections.abc import Iterator
 from inspect import getfile
 from pathlib import Path
+from typing import Any
 
 from caseconverter import snakecase
 
 from .baseclassinfo import BaseClassInfo, get_baseclassinfos
 
 
-def get_modbaseinfos(cls_or_inst) -> Iterator[BaseClassInfo]:
+def get_modbaseinfos(cls_or_inst: Any) -> Iterator[BaseClassInfo]:
     """
     Get Base Classes of `mod`.
 

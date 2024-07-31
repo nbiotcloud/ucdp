@@ -319,7 +319,7 @@ class BaseMod(NamedObject):
         self.namespace.add(const, exist_ok=exist_ok)
         return const
 
-    def add_type_consts(self, type_, exist_ok=False, only=None, name=None, item_suffix="e"):
+    def add_type_consts(self, type_: BaseType, exist_ok: bool = False, only=None, name=None, item_suffix="e"):
         """
         Add description of `type_` as local parameters.
 

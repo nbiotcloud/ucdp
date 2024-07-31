@@ -58,7 +58,7 @@ def get_template_paths(paths: Iterable[Path] | None = None) -> list[Path]:
     return uniquelist(template_paths)
 
 
-def get_makolator(show_diff: bool = False, verbose=True, paths: Iterable[Path] | None = None) -> Makolator:
+def get_makolator(show_diff: bool = False, verbose: bool = True, paths: Iterable[Path] | None = None) -> Makolator:
     """
     Create Makolator.
 

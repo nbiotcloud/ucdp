@@ -43,10 +43,8 @@ class RoutePath(LightObject):
     """
     Routing Path.
 
-    Args:
+    Attributes:
         expr: Expression
-
-    Keyword Args:
         path: Module Path
         create: Create signal/port referenced by `expr`
         cast: `True` (required), `None` (optional) or `False` (forbidden) type casting.
