@@ -38,6 +38,7 @@ from .logging import LOGGER
 from .modbase import BaseMod
 from .moditer import get_mod
 from .modref import ModRef
+from .modrefinfo import get_modbasecls, is_top
 from .modtb import AGenericTbMod
 from .modtopref import TopModRef
 from .nameutil import didyoumean
@@ -74,6 +75,9 @@ def _load_topmod(ref: TopModRef) -> BaseMod:
     LOGGER.info("Loading %r", str(ref))
 
     modcls = _load_modcls(ref.top)
+    if not is_top(modcls):
+        modbasecls = get_modbasecls(modcls)
+        raise ValueError(f"{ref.top} is not a top module as it bases on {modbasecls}")
     mod = _build_top(modcls)
     if ref.sub:
         mod = get_mod(mod, ref.sub)
