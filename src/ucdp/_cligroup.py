@@ -49,7 +49,7 @@ def __find_commands(paths: Paths):  # pragma: no cover
     for entry_point in entry_points(group="ucdp.cli"):
         yield entry_point.name, entry_point.value
     if paths:
-        with extend_sys_path(paths):
+        with extend_sys_path(paths, use_env_default=True):
             for path in paths:
                 for clifile in path.glob("*/cli.py"):
                     libname, modname = clifile.parts[-2], clifile.stem

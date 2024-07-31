@@ -36,9 +36,12 @@ from rich.pretty import pprint
 from rich.table import Table
 
 from ._cligroup import MainGroup
-from ._cliutil import (
+from .cliutil import (
+    PathType,
     arg_filelist,
+    arg_template_filepaths,
     arg_top,
+    auto_path,
     defines2data,
     opt_defines,
     opt_dry_run,
@@ -92,7 +95,7 @@ def ucdp(ctx, verbose=0):
 pass_ctx = click.make_pass_decorator(Ctx)
 
 
-def get_group(help=None):
+def get_group(help=None):  # pragma: no cover
     """Create Command Group."""
 
     @click.group(help=help)
@@ -174,8 +177,8 @@ GENFILE: Generated File.
 )
 @arg_top
 @opt_path
-@click.argument("template_filepaths", type=click.Path(path_type=Path), nargs=-1, envvar="UCDP_TEMPLATE_FILEPATHS")
-@click.argument("genfile", type=click.Path(path_type=Path), nargs=1)
+@arg_template_filepaths
+@click.argument("genfile", type=PathType, shell_complete=auto_path, nargs=1)
 @opt_show_diff
 @opt_defines
 @pass_ctx
@@ -201,8 +204,8 @@ INPLACEFILE: Inplace File.
 )
 @arg_top
 @opt_path
-@click.argument("template_filepaths", type=click.Path(path_type=Path), nargs=-1, envvar="UCDP_TEMPLATE_FILEPATHS")
-@click.argument("inplacefile", type=click.Path(path_type=Path), nargs=1)
+@arg_template_filepaths
+@click.argument("inplacefile", type=PathType, shell_complete=auto_path, nargs=1)
 @opt_show_diff
 @opt_defines
 @click.option("--ignore_unknown", "-i", default=False, is_flag=True, help="Ignore Unknown Placeholder.")
