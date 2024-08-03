@@ -3,7 +3,7 @@
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━┩
 │ glbl_lib.clk_gate[.ClkGateMod] │  X  │     │          AMod │      │
 │ glbl_lib.regf[.RegfMod]        │     │     │  ATailoredMod │ bus  │
-│ glbl_lib.regf_tb[.RegfTbMod]   │  X  │  X  │ AGenericTbMod │      │
+│ glbl_lib.regf_tb[.RegfTbMod]   │     │  X  │ AGenericTbMod │      │
 │ tests.test_mods.SomeMod        │  X  │     │          AMod │      │
 │ tests.test_mods.SomeSomeMod    │  X  │     │          AMod │      │
 └────────────────────────────────┴─────┴─────┴───────────────┴──────┘

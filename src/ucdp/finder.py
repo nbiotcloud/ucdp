@@ -23,9 +23,7 @@
 #
 
 """
-Loader.
-
-* [load()][ucdp.loader.load] is one and only method to pickup and instantiate the topmost hardware module.
+Finder.
 """
 
 import re

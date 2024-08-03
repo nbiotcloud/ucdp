@@ -78,7 +78,7 @@ def get_modbasecls(modcls: ModCls) -> type[BaseMod] | None:
 def is_top(modcls: ModCls) -> bool:
     """Module is Direct Loadable."""
     if issubclass(modcls, AGenericTbMod):
-        return modcls.build_dut is not AGenericTbMod.build_dut
+        return modcls.build_dut.__qualname__ != AGenericTbMod.build_dut.__qualname__
     if issubclass(modcls, (AConfigurableMod, AMod, ATbMod)):
         return True
     return False
