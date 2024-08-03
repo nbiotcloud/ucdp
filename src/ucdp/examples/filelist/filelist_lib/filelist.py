@@ -23,15 +23,13 @@
 #
 """Example Module With Filelist."""
 
-from typing import ClassVar
-
 import ucdp as u
 
 
 class FilelistMod(u.AMod):
     """Module With Filelist."""
 
-    filelists: ClassVar[u.ModFileLists] = (
+    filelists: u.ClassVar[u.ModFileLists] = (
         u.ModFileList(
             name="hdl",
             filepaths=("-f mod.f",),

@@ -24,7 +24,6 @@
 """Test Module File Information."""
 
 from pathlib import Path
-from typing import ClassVar
 
 import ucdp as u
 
@@ -84,7 +83,7 @@ def test_filelistparser(example_filelist):
 class MultiMod(u.AMod):
     """Just An Example Module."""
 
-    filelists: ClassVar[u.ModFileLists] = (
+    filelists: u.ClassVar[u.ModFileLists] = (
         u.ModFileList(name="drvhpp", gen="full", filepaths=("drv.hpp",), template_filepaths=("drv.hpp.mako",)),
         u.ModFileList(name="drvcpp", gen="full", filepaths=("drv.cpp",), template_filepaths=("drv.cpp.mako",)),
     )

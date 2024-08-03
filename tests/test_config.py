@@ -23,8 +23,6 @@
 #
 """Test Configuration."""
 
-from typing import ClassVar
-
 import ucdp as u
 from pytest import raises
 from uniquer import uniquelist
@@ -33,7 +31,7 @@ from uniquer import uniquelist
 class MyConfig(u.AConfig):
     """My Configuration."""
 
-    _hash_excludes: ClassVar[set[str]] = {
+    _hash_excludes: u.ClassVar[set[str]] = {
         "ignored",
     }
 
@@ -88,7 +86,7 @@ def test_default_config():
 class ParentConfig(u.AConfig):
     """My Configuration."""
 
-    _hash_excludes: ClassVar[set[str]] = {
+    _hash_excludes: u.ClassVar[set[str]] = {
         "ignored",
     }
 

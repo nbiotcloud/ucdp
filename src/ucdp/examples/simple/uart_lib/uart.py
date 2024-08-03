@@ -24,7 +24,6 @@
 """UART Example."""
 
 import logging
-from typing import ClassVar
 
 import ucdp as u  # (1)
 from fileliststandard import HdlFileList
@@ -47,7 +46,7 @@ class UartIoType(u.AStructType):
 class UartMod(u.AMod):
     """A Simple UART."""
 
-    filelists: ClassVar[u.ModFileLists] = (
+    filelists: u.ClassVar[u.ModFileLists] = (
         HdlFileList(gen="full"),
         u.ModFileList(
             name="header",
@@ -56,7 +55,7 @@ class UartMod(u.AMod):
         ),
     )
 
-    tags: ClassVar[u.ModTags] = ("intf",)
+    tags: u.ClassVar[u.ModTags] = ("intf",)
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
@@ -88,4 +87,4 @@ class UartMod(u.AMod):
 class UartCoreMod(u.ACoreMod):
     """A Simple UART."""
 
-    filelists: ClassVar[u.ModFileLists] = (HdlFileList(gen="inplace"),)
+    filelists: u.ClassVar[u.ModFileLists] = (HdlFileList(gen="inplace"),)

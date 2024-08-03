@@ -24,6 +24,8 @@
 
 """Unified Chip Design Platform."""
 
+from typing import ClassVar
+
 from pydantic import ValidationError
 
 from . import cli
@@ -175,6 +177,7 @@ __all__ = [
     "Bytesize",
     "cast_booltype",
     "Casting",
+    "ClassVar",
     "clean",
     "cli",
     "ClkRstAnType",
