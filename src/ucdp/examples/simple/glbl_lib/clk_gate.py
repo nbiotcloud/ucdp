@@ -23,8 +23,6 @@
 #
 """Clock Gate."""
 
-from typing import ClassVar
-
 import ucdp as u  # (1)
 from fileliststandard import HdlFileList
 
@@ -33,7 +31,7 @@ class ClkGateMod(u.AMod):
     """Clock Gate."""
 
     # File Lists
-    filelists: ClassVar[u.ModFileLists] = (  # (2)
+    filelists: u.ClassVar[u.ModFileLists] = (  # (2)
         HdlFileList(),
     )
 

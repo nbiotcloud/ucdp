@@ -24,8 +24,6 @@
 
 """A Simplified Register File."""
 
-from typing import ClassVar
-
 import ucdp as u
 from fileliststandard import HdlFileList
 from tabulate import tabulate
@@ -67,11 +65,11 @@ class Word(u.NamedObject):
 class RegfMod(u.ATailoredMod):
     """Register File."""
 
-    filelists: ClassVar[u.ModFileLists] = (HdlFileList(gen="full"),)
+    filelists: u.ClassVar[u.ModFileLists] = (HdlFileList(gen="full"),)
     words: u.Namespace = u.Field(default_factory=u.Namespace)
 
     iotype: u.DynamicStructType = u.Field(default_factory=u.DynamicStructType, init=False)
-    tags: ClassVar[u.ModTags] = ("bus",)
+    tags: u.ClassVar[u.ModTags] = ("bus",)
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")

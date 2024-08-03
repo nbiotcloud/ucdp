@@ -24,7 +24,7 @@
 """Test Module File Information."""
 
 import re
-from typing import Any, ClassVar
+from typing import Any
 
 import ucdp as u
 from pytest import raises
@@ -65,7 +65,7 @@ class TbMod(u.ATbMod):
 class GenTbMod(u.AGenericTbMod):
     """A Testbench Module."""
 
-    dut_mods: ClassVar[tuple[Any, ...]] = (DutMod,)
+    dut_mods: u.ClassVar[tuple[Any, ...]] = (DutMod,)
 
     @classmethod
     def build_dut(cls, **kwargs) -> u.BaseMod:
@@ -80,7 +80,7 @@ class GenTbMod(u.AGenericTbMod):
 class TopTbMod(u.ATbMod):
     """A Top Testbench Module."""
 
-    dut_mods: ClassVar[tuple[Any, ...]] = (TopMod,)
+    dut_mods: u.ClassVar[tuple[Any, ...]] = (TopMod,)
 
     @classmethod
     def build_dut(cls, **kwargs) -> u.BaseMod:

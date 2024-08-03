@@ -173,6 +173,8 @@ ignore = [
     'UP038',
     # Assert
     'S101',
+    # ClassVar
+    'RUF012',
 ]
 [tool.ruff.lint.per-file-ignores]
 "test_*" = [

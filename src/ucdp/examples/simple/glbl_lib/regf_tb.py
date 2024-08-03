@@ -24,15 +24,13 @@
 
 """A Simplified Register File Testbench."""
 
-from typing import ClassVar
-
 import ucdp as u
 
 
 class RegfTbMod(u.AGenericTbMod):
     """Register File Testbench."""
 
-    filelists: ClassVar[u.ModFileLists] = (u.ModFileList(name="hdl", gen="inplace"),)
+    filelists: u.ClassVar[u.ModFileLists] = (u.ModFileList(name="hdl", gen="inplace"),)
 
     def _build(self):
         pass
