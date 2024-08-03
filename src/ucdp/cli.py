@@ -364,7 +364,7 @@ def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=Fal
                 "X" if info.is_top else "",
                 "X" if info.tb else "",
                 info.modbasecls.__name__,
-                ",".join(info.modcls.tags),
+                ",".join(sorted(info.modcls.tags)),
             )
         ctx.console.print(table)
 

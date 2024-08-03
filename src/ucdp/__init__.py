@@ -67,7 +67,7 @@ from .ident import Ident, IdentFilter, Idents, IdentStop, get_expridents, get_id
 from .iterutil import Names, namefilter, split
 from .loader import load
 from .mod import AMod
-from .modbase import BaseMod, ModTags
+from .modbase import BaseMod, ModClss, ModTags
 from .modbasetop import BaseTopMod
 from .modconfigurable import AConfigurableMod
 from .modcore import ACoreMod
@@ -252,6 +252,7 @@ __all__ = [
     "Log2Expr",
     "MaximumExpr",
     "MinimumExpr",
+    "ModClss",
     "ModFileList",
     "ModFileLists",
     "ModPostIter",

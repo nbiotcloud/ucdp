@@ -32,7 +32,7 @@ from typing import Any, ClassVar
 from caseconverter import snakecase
 
 from ._modbuilder import build
-from .modbase import BaseMod
+from .modbase import BaseMod, ModClss
 from .modfilelist import ModFileLists
 from .moditer import ModPreIter
 from .modtopref import TopModRef
@@ -47,7 +47,7 @@ class ATbMod(BaseMod):
 
     Attributes:
         filelists: File Lists.
-        dut_mods: Testbench is limited to these kind of modules.
+        dut_modclss: Testbench is limited to these kind of modules.
         title: Title.
         dut: Module Under Test.
         parent: Parent.
@@ -131,7 +131,7 @@ class AGenericTbMod(ATbMod):
     allow pairing of testbench and dut on command line and in configuration files.
     """
 
-    dut_mods: ClassVar[tuple[type[BaseMod], ...]] = ()
+    dut_modclss: ClassVar[ModClss] = set()
     """Testbench is limited to these kind of modules."""
     dut: BaseMod
 
@@ -142,9 +142,10 @@ class AGenericTbMod(ATbMod):
         if not name:
             basename = snakecase(cls.__name__.removesuffix("Mod"))
             name = f"{basename}_{dut.modname}"
-        if cls.dut_mods:
-            if not isinstance(dut, cls.dut_mods):
-                raise TypeError(f"{cls} can only test {cls.dut_mods} modules, but not {dut.__class__} module")
+        dut_modclss: tuple[type[BaseMod], ...] = tuple(cls.dut_modclss)
+        if dut_modclss:
+            if not isinstance(dut, dut_modclss):
+                raise TypeError(f"{cls} can only test {dut_modclss} modules, but not {dut.__class__} module")
         super().__init__(parent=None, name=name, dut=dut, **kwargs)  # type: ignore[call-arg]
 
     @property
@@ -158,7 +159,7 @@ class AGenericTbMod(ATbMod):
         """
         Iterate over `topmod` and return modules which can be tested by this testbench.
         """
-        yield from ModPreIter(mod, filter_=lambda mod: isinstance(mod, cls.dut_mods), unique=True)
+        yield from ModPreIter(mod, filter_=lambda mod: isinstance(mod, tuple(cls.dut_modclss)), unique=True)
 
     @classmethod
     def search_dut_topmodrefs(cls, mod) -> Iterator[TopModRef]:

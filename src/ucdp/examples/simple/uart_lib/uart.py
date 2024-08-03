@@ -55,7 +55,7 @@ class UartMod(u.AMod):
         ),
     )
 
-    tags: u.ClassVar[u.ModTags] = ("intf",)
+    tags: u.ClassVar[u.ModTags] = {"intf"}
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
