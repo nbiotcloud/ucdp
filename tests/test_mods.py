@@ -24,6 +24,7 @@
 """Test Module File Information."""
 
 import re
+from typing import ClassVar
 
 import ucdp as u
 from pytest import raises
@@ -32,7 +33,7 @@ from pytest import raises
 class IpMod(u.AMod):
     """IP."""
 
-    tags: u.ClassVar[u.ModTags] = ("ip",)
+    tags: ClassVar[u.ModTags] = ("ip",)
 
     def _build(self):
         pass
@@ -43,7 +44,7 @@ class SubMod(u.AMod):
 
     has_hiername: bool = False
 
-    tags: u.ClassVar[u.ModTags] = ("ip",)
+    tags: ClassVar[u.ModTags] = ("ip",)
 
     def _build(self):
         IpMod(self, "u_ip0")
@@ -53,7 +54,7 @@ class SubMod(u.AMod):
 class TopMod(u.AMod):
     """Top."""
 
-    tags: u.ClassVar[u.ModTags] = ("ippp",)
+    tags: ClassVar[u.ModTags] = ("ippp",)
 
     def _build(self):
         SubMod(self, "u_sub0")

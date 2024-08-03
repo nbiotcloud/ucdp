@@ -24,8 +24,6 @@
 
 """Unified Chip Design Platform."""
 
-from typing import ClassVar
-
 from pydantic import ValidationError
 
 from . import cli
@@ -104,6 +102,7 @@ from .orientation import (
     Direction,
     Orientation,
 )
+from .overview import get_overview_tree
 from .param import Param
 from .pathutil import improved_glob, improved_resolve, startswith_envvar, use_envvars
 from .routepath import Routeable, Routeables, RoutePath, parse_routepath, parse_routepaths
@@ -168,7 +167,6 @@ __all__ = [
     "BoolOp",
     "BoolType",
     "BuildError",
-    "ClassVar",
     "BusyType",
     "BWD",
     "bwdfilter",
@@ -206,7 +204,6 @@ __all__ = [
     "EnumItem",
     "EnumItemFilter",
     "Expr",
-    "ModTags",
     "ExprParser",
     "ExprResolver",
     "extend_sys_path",
@@ -226,6 +223,7 @@ __all__ = [
     "get_ident",
     "get_makolator",
     "get_modbaseinfos",
+    "get_overview_tree",
     "get_repr",
     "get_snakecasename",
     "Hex",
@@ -257,6 +255,7 @@ __all__ = [
     "ModPreIter",
     "ModRef",
     "ModRefInfo",
+    "ModTags",
     "MultipleDriverError",
     "Mux",
     "NamedLightObject",

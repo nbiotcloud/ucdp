@@ -386,7 +386,7 @@ def overview(ctx, top, path, minimal=False, file=None, tag=None):
     """Overview."""
     # Load quiet, otherwise stdout is messed-up
     top = load_top(ctx, top, path, quiet=True)
-    data = {"minimal": minimal, "tag": tag}
+    data = {"minimal": minimal, "tags": tag}
     render_generate(top, [PATH / "ucdp-templates" / "overview.txt.mako"], genfile=file, data=data)
 
 
