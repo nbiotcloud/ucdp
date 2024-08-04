@@ -1,7 +1,7 @@
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━┓
 ┃ Reference                             ┃ Top ┃ Tb  ┃         Bases on ┃ Tags ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━┩
-│ glbl_lib.clk_gate[.ClkGateMod]        │  X  │     │             AMod │      │
+│ glbl_lib.clk_gate                     │  X  │     │             AMod │      │
 │ tests.test_flipflops.FlipFlopMod      │  X  │     │             AMod │      │
 │ tests.test_modconfigurable.AnotherMod │  X  │     │ AConfigurableMod │      │
 │ tests.test_modconfigurable.MyMod      │  X  │     │ AConfigurableMod │      │
@@ -28,5 +28,5 @@
 │ tests.test_modtb.TopMod               │  X  │     │             AMod │      │
 │ tests.test_modtb.TopTbMod             │  X  │  X  │           ATbMod │      │
 │ tests.test_muxes.MuxMod               │  X  │     │             AMod │      │
-│ uart_lib.uart[.UartMod]               │  X  │     │             AMod │ intf │
+│ uart_lib.uart                         │  X  │     │             AMod │ intf │
 └───────────────────────────────────────┴─────┴─────┴──────────────────┴──────┘

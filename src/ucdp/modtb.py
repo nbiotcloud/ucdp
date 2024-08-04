@@ -34,8 +34,6 @@ from caseconverter import snakecase
 from ._modbuilder import build
 from .modbase import BaseMod, ModClss
 from .modfilelist import ModFileLists
-from .moditer import ModPreIter
-from .modtopref import TopModRef
 from .modutil import get_libname, get_modname, get_topmodname
 from .object import Field
 from .test import Test
@@ -153,28 +151,6 @@ class AGenericTbMod(ATbMod):
         """Module Name."""
         modbasename = get_modname(self.__class__)
         return f"{modbasename}_{self.dut.modname}"
-
-    @classmethod
-    def search_duts(cls, mod) -> Iterator[BaseMod]:
-        """
-        Iterate over `topmod` and return modules which can be tested by this testbench.
-        """
-        yield from ModPreIter(mod, filter_=lambda mod: isinstance(mod, tuple(cls.dut_modclss)), unique=True)
-
-    @classmethod
-    def search_dut_topmodrefs(cls, mod) -> Iterator[TopModRef]:
-        """
-        Iterate over `topmod` and return `TopModRef` for modules which can be tested by this testbench.
-        """
-        tbref = cls.get_modref()
-        topref = mod.get_modref()
-        topqualname = mod.qualname
-        for dut in cls.search_duts(mod):
-            dutqualname = dut.qualname
-            if dutqualname != topqualname:
-                yield TopModRef(top=topref, sub=dutqualname, tb=tbref)
-            else:
-                yield TopModRef(top=topref, tb=tbref)
 
     def get_tests(self) -> Iterator[Test]:
         """

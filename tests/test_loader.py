@@ -194,10 +194,10 @@ def test_imp_err_dep(testdata):
 
 def test_typo(example_simple):
     """Typos."""
-    with raises(NameError, match=re.escape("'glbl_li.clk_gate' not found. Did you mean 'glbl_lib.clk_gate' or '")):
+    with raises(NameError, match=re.escape("'glbl_li.clk_gate' not found. Did you mean 'glbl_lib.clk_gate'")):
         u.load("glbl_li.clk_gate", paths=None)
 
-    with raises(NameError, match=re.escape("'glbl_lib.clk_ate' not found. Did you mean 'glbl_lib.clk_gate', '")):
+    with raises(NameError, match=re.escape("'glbl_lib.clk_ate' not found. Did you mean 'glbl_lib.clk_gate'")):
         u.load("glbl_lib.clk_ate", paths=None)
 
     msg = "'glbl_lib.clk_gate' does not contain GateMod. Did you mean 'glbl_lib.clk_gate', '"

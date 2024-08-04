@@ -284,6 +284,30 @@ def test_ls_tags(runner, example_simple, testdata, prjroot):
     assert_refdata(test_ls_tags, prjroot)
 
 
+def test_ls_tb_dut(runner, example_simple, testdata, prjroot):
+    """List Testbenches DUTs."""
+    _run(runner, prjroot, ["ls", "tests.test_modtb.GenTbMod#*", "-n"])
+    assert_refdata(test_ls_tb_dut, prjroot)
+
+
+def test_ls_tb_dut_sub(runner, example_simple, testdata, prjroot):
+    """List Testbenches DUT with Subs."""
+    _run(runner, prjroot, ["ls", "glbl_lib.regf_tb#uart_lib.uart-*", "-n"])
+    assert_refdata(test_ls_tb_dut_sub, prjroot)
+
+
+def test_ls_tb_dut_sub_all(runner, example_simple, testdata, prjroot):
+    """List Testbenches DUT with Subs, glob."""
+    _run(runner, prjroot, ["ls", "*#*-*", "-n"])
+    assert_refdata(test_ls_tb_dut_sub_all, prjroot)
+
+
+def test_ls_none(runner, example_simple, testdata, prjroot):
+    """List Testbenches DUT with Subs, glob."""
+    _run(runner, prjroot, ["ls", "#"])
+    assert_refdata(test_ls_none, prjroot)
+
+
 def test_autocomplete_top(example_simple):
     """Autocompletion for Top."""
     assert len(u.cliutil.auto_top(None, None, "")) > 20

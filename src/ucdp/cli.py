@@ -42,6 +42,7 @@ from .cliutil import (
     arg_template_filepaths,
     arg_top,
     auto_path,
+    auto_top,
     defines2data,
     opt_defines,
     opt_dry_run,
@@ -88,7 +89,13 @@ class Ctx(BaseModel):
 def ucdp(ctx, verbose=0):
     """Unified Chip Design Platform."""
     level = _LOGLEVELMAP.get(verbose, logging.DEBUG)
-    handler = RichHandler(show_time=False, show_path=False, rich_tracebacks=True, tracebacks_suppress=("click",))
+    handler = RichHandler(
+        show_time=False,
+        show_path=False,
+        rich_tracebacks=True,
+        tracebacks_suppress=("click",),
+        console=Console(stderr=True),
+    )
     logging.basicConfig(level=level, format="%(message)s", handlers=[handler])
     ctx.obj = Ctx(console=Console(log_time=False, log_path=False))
 
@@ -321,7 +328,7 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, file=None):
               """
 )
 @opt_path
-@click.argument("pattern", nargs=-1)
+@click.argument("pattern", nargs=-1, shell_complete=auto_top)
 @click.option("--names", "-n", default=False, is_flag=True, help="Just print names without details")
 @click.option("--top", "-t", default=False, is_flag=True, help="List loadable top modules only.")
 @click.option("--tb", "-b", default=False, is_flag=True, help="List testbench modules only.")
@@ -331,22 +338,19 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, file=None):
 def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=False, tag=None):
     """List Modules."""
     with ctx.console.status("Searching"):
-        infos = find(path)
+        infos = find(path, patterns=pattern)
     if top:
         infos = [info for info in infos if info.is_top]
     if tb:
         infos = [info for info in infos if info.tb]
     if generic_tb:
         infos = [info for info in infos if info.tb == "Generic"]
-    if pattern:
-        filter_ = namefilter(pattern)
-        infos = [info for info in infos if filter_(str(info.modref))]
     if tag:
         filter_ = namefilter(tag)
         infos = [info for info in infos if any(filter_(tag) for tag in info.modcls.tags)]
     if names:
-        for info in find(path):
-            print(info.modref)
+        for info in infos:
+            print(info.topmodref)
     else:
         table = Table()
         table.add_column("Reference")
@@ -355,12 +359,8 @@ def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=Fal
         table.add_column("Bases on", justify="right")
         table.add_column("Tags")
         for info in infos:
-            if info.modref.modclsname:
-                ref = str(info.modref)
-            else:
-                ref = f"{info.modref}[.{info.modref.get_modclsname()}]"
             table.add_row(
-                ref,
+                str(info.topmodref),
                 "X" if info.is_top else "",
                 "X" if info.tb else "",
                 info.modbasecls.__name__,

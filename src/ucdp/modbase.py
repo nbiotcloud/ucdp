@@ -924,4 +924,5 @@ def _merge_cast(one, other):
     return False
 
 
+ModCls: TypeAlias = type[BaseMod]
 ModClss: TypeAlias = set[type[BaseMod]]
