@@ -24,6 +24,7 @@
 
 """Command Line Interface - Utilities."""
 
+from logging import FATAL, getLogger
 from pathlib import Path
 
 import click
@@ -36,8 +37,9 @@ PathType = click.Path(path_type=Path)
 
 def auto_top(ctx, param, incomplete):
     """Autocompletion for TOP."""
-    infos = find(startswith=incomplete)
-    return [str(info.modref) for info in infos if str(info.modref).startswith(incomplete)]
+    getLogger().setLevel(FATAL)
+    infos = find(patterns=[f"{incomplete}*"], glob=True)
+    return [str(info.topmodref) for info in infos]
 
 
 def auto_path(ctr, param, incomplete):

@@ -1,0 +1,6 @@
+glbl_lib.regf_tb#uart_lib.uart-uart_lib.uart_regf
+tests.test_modtb.GenTbMod#tests.test_modtb.GenTbMod-tests.dut
+tests.test_modtb.GenTbMod#tests.test_modtb.SubMod-tests.sub_dut
+tests.test_modtb.GenTbMod#tests.test_modtb.TopMod-tests.sub_dut
+tests.test_modtb.GenTbMod#tests.test_modtb.TopMod-tests.top
+tests.test_modtb.GenTbMod#tests.test_modtb.TopMod-tests.top_dut

@@ -26,28 +26,27 @@
 
 from inspect import getfile
 from pathlib import Path
-from typing import Literal, TypeAlias
+from typing import Literal
 
 from .mod import AMod
-from .modbase import BaseMod
+from .modbase import BaseMod, ModCls
 from .modconfigurable import AConfigurableMod
 from .modcore import ACoreMod
-from .modref import ModRef
 from .modtailored import ATailoredMod
 from .modtb import AGenericTbMod, ATbMod
+from .modtopref import TopModRef
 from .object import Object
 
 BASECLSS = (AConfigurableMod, ACoreMod, ATailoredMod, AMod, AGenericTbMod, ATbMod, BaseMod)
 
 
-ModCls: TypeAlias = type[BaseMod]
 TbType = Literal["Static", "Generic", ""]
 
 
-class ModRefInfo(Object):
+class TopModRefInfo(Object):
     """Module Reference Information."""
 
-    modref: ModRef
+    topmodref: TopModRef
     modcls: ModCls
     modbasecls: ModCls
     filepath: Path
@@ -55,10 +54,10 @@ class ModRefInfo(Object):
     tb: TbType
 
     @staticmethod
-    def create(modref: ModRef, modcls: ModCls) -> "ModRefInfo":
+    def create(topmodref: TopModRef, modcls: ModCls) -> "TopModRefInfo":
         """Create."""
-        return ModRefInfo(
-            modref=modref,
+        return TopModRefInfo(
+            topmodref=topmodref,
             modcls=modcls,
             modbasecls=get_modbasecls(modcls),
             filepath=Path(getfile(modcls)),
@@ -78,7 +77,7 @@ def get_modbasecls(modcls: ModCls) -> type[BaseMod] | None:
 def is_top(modcls: ModCls) -> bool:
     """Module is Direct Loadable."""
     if issubclass(modcls, AGenericTbMod):
-        return modcls.build_dut is not AGenericTbMod.build_dut
+        return modcls.build_dut.__qualname__ != AGenericTbMod.build_dut.__qualname__
     if issubclass(modcls, (AConfigurableMod, AMod, ATbMod)):
         return True
     return False

@@ -61,7 +61,7 @@ from .typebase import BaseType
 from .typedescriptivestruct import DescriptiveStructType
 from .typestruct import StructItem
 
-ModTags: TypeAlias = tuple[str, ...]
+ModTags: TypeAlias = set[str]
 
 
 class BaseMod(NamedObject):
@@ -922,3 +922,7 @@ def _merge_cast(one, other):
     if one is None or other is None:
         return None
     return False
+
+
+ModCls: TypeAlias = type[BaseMod]
+ModClss: TypeAlias = set[type[BaseMod]]

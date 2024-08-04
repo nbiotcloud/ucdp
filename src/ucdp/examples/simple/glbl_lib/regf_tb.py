@@ -26,11 +26,14 @@
 
 import ucdp as u
 
+from .regf import RegfMod
+
 
 class RegfTbMod(u.AGenericTbMod):
     """Register File Testbench."""
 
     filelists: u.ClassVar[u.ModFileLists] = (u.ModFileList(name="hdl", gen="inplace"),)
+    dut_modclss: u.ClassVar[u.ModClss] = {RegfMod}
 
     def _build(self):
         pass

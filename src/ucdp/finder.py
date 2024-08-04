@@ -23,101 +23,92 @@
 #
 
 """
-Loader.
-
-* [load()][ucdp.loader.load] is one and only method to pickup and instantiate the topmost hardware module.
+Finder.
 """
 
-import re
-import sys
-from collections.abc import Iterable, Iterator
-from importlib import import_module
-from inspect import getfile, isclass
-from pathlib import Path
-from typing import TypeAlias
+from collections.abc import Iterator
 
-from uniquer import unique
+from ._modloader import (
+    ModClsRef,
+    Paths,
+    Patterns,
+    TopModRefPat,
+    build_top,
+    find_modclsrefs,
+    get_topmodrefpats,
+    load_modcls,
+)
+from .iterutil import namefilter
+from .modbase import ModCls
+from .moditer import get_mods
+from .modref import ModRef
+from .modtb import AGenericTbMod
+from .modtopref import TopModRef
+from .modtoprefinfo import TopModRefInfo, is_top
+from .util import extend_sys_path
 
-from .modbase import BaseMod
-from .modref import ModRef, get_modclsname
-from .modrefinfo import ModRefInfo
-from .util import LOGGER, extend_sys_path
 
-_RE_IMPORT_UCDP = re.compile(r"^\s*class .*Mod\):")
-
-Paths: TypeAlias = Iterable[Path]
-
-
-def find(paths: Paths | None = None, variants: bool = False, startswith: str | None = None) -> Iterator[ModRefInfo]:
+def find(paths: Paths | None = None, patterns: Patterns | None = None, glob: bool = False) -> Iterator[TopModRefInfo]:
     """List All Available Module References."""
-    modrefinfos = _find(paths, variants=variants, startswith=startswith)
-    yield from sorted(modrefinfos, key=lambda modrefinfo: str(modrefinfo.modref))
+    pats = tuple(get_topmodrefpats(patterns))
+    infos = _find_infos(paths, pats, glob)
+    yield from sorted(infos, key=lambda modrefinfo: str(modrefinfo.topmodref))
 
 
-def _find(paths: Paths | None = None, variants: bool = False, startswith: str | None = None) -> Iterator[ModRefInfo]:
+def _find_infos(paths: Paths | None, pats: tuple[TopModRefPat, ...], glob: bool = False) -> Iterator[TopModRefInfo]:
     with extend_sys_path(paths, use_env_default=True):
-        for filepath, pylibname, pymodname, pymod in _find_pymods(startswith or ""):
-            yield from _find_modrefs(filepath, pylibname, pymodname, pymod, variants)
+        modclsrefs = tuple(find_modclsrefs())
+        for pat in pats:
+            if pat.tb:
+                # testbench with top
+                for tbmodcls, tbmodref in modclsrefs:
+                    # filter by name
+                    if not namefilter(pat.tb)(str(tbmodref)):
+                        continue
+                    # skip non-generic testbenches
+                    if not issubclass(tbmodcls, AGenericTbMod):
+                        continue
+                    # search tops
+                    modclss = tuple(tbmodcls.dut_modclss)
+                    yield from _find_tops(modclsrefs, pat.top, pat.sub, glob, modclss=modclss, tbmodref=tbmodref)
+            else:
+                # top only
+                yield from _find_tops(modclsrefs, pat.top, pat.sub, glob)
 
 
-def _find_pymods(startswith: str):
-    # we already evaluate 'startswith', to optimize performance
-    filepaths: list[Path] = []
-    prelib, premod = startswith.split(".", 1) if "." in startswith else (startswith, "")
-    for syspathstr in sys.path:
-        filepaths.extend(Path(syspathstr).resolve().glob("*/*.py"))
-    for filepath in sorted(unique(filepaths)):
-        pylibname = filepath.parent.name
-        pymodname = filepath.stem
-
-        # skip private
-        if pylibname.startswith("_") or pymodname.startswith("_") or pylibname == "ucdp":
+def _find_tops(
+    modclsrefs: tuple[ModClsRef, ...],
+    toppat: str,
+    subpat: str | None,
+    glob: bool,
+    modclss: tuple[ModCls, ...] | None = None,
+    tbmodref: ModRef | None = None,
+) -> Iterator[TopModRefInfo]:
+    for topmodcls, topmodref in modclsrefs:
+        # filter by name
+        if not namefilter(toppat)(str(topmodref)):
             continue
-
-        # skip non-matching
-        if prelib and not pylibname.startswith(prelib):
-            continue
-        if premod and not pymodname.startswith(premod):
-            continue
-
-        # skip non-ucdp files
-        with filepath.open(encoding="utf-8") as file:
-            try:
-                for line in file:
-                    if _RE_IMPORT_UCDP.match(line):
-                        break
-                else:
-                    continue
-            except Exception as exc:
-                LOGGER.info(f"Skipping {str(filepath)!r} ({exc})")
+        if subpat:
+            # skip non-top
+            if not is_top(topmodcls):
                 continue
+            # sub
+            try:
+                topmod = build_top(topmodcls)
+            except Exception:  # noqa: S112
+                continue
+            for inst in get_mods(topmod, subpat):
+                # skip modules, which should not be tested
+                if modclss and not isinstance(inst, modclss):
+                    continue
+                yield _create(TopModRef(tb=tbmodref, top=topmodref, sub=inst.qualname))
+        else:
+            # skip modules, which should not be tested
+            if not glob and modclss and not issubclass(topmodcls, modclss):
+                continue
+            yield _create(TopModRef(tb=tbmodref, top=topmodref))
 
-        # import module
-        try:
-            pymod = import_module(f"{pylibname}.{pymodname}")
-        except Exception as exc:
-            LOGGER.info(f"Skipping {str(filepath)!r} ({exc})")
-            continue
 
-        yield filepath, pylibname, pymodname, pymod
-
-
-def _find_modrefs(filepath, pylibname, pymodname, pymod, variants) -> Iterator[ModRefInfo]:
-    for name in dir(pymod):
-        # Load Class
-        modcls = getattr(pymod, name)
-        if not isclass(modcls) or not issubclass(modcls, BaseMod):
-            continue
-
-        # Ignore imported
-        if filepath != Path(getfile(modcls)):
-            continue
-
-        # Create ModRefInfo
-        modclsname = get_modclsname(pymodname)
-        if modclsname == name:
-            modref = ModRef(libname=pylibname, modname=pymodname)
-            yield ModRefInfo.create(modref, modcls)
-        if variants or modclsname != name:
-            modref = ModRef(libname=pylibname, modname=pymodname, modclsname=name)
-            yield ModRefInfo.create(modref, modcls)
+def _create(topmodref: TopModRef) -> TopModRefInfo:
+    modcls = load_modcls(topmodref.tb or topmodref.top)
+    return TopModRefInfo.create(topmodref, modcls)

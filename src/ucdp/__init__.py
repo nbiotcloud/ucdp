@@ -67,7 +67,7 @@ from .ident import Ident, IdentFilter, Idents, IdentStop, get_expridents, get_id
 from .iterutil import Names, namefilter, split
 from .loader import load
 from .mod import AMod
-from .modbase import BaseMod, ModTags
+from .modbase import BaseMod, ModCls, ModClss, ModTags
 from .modbasetop import BaseTopMod
 from .modconfigurable import AConfigurableMod
 from .modcore import ACoreMod
@@ -84,10 +84,10 @@ from .modfilelist import (
 )
 from .moditer import ModPostIter, ModPreIter, uniquemods
 from .modref import ModRef
-from .modrefinfo import ModRefInfo
 from .modtailored import ATailoredMod
 from .modtb import AGenericTbMod, ATbMod
 from .modtopref import TopModRef
+from .modtoprefinfo import TopModRefInfo
 from .modutil import get_modbaseinfos, is_tb_from_modname
 from .mux import Mux
 from .namespace import Namespace
@@ -252,12 +252,13 @@ __all__ = [
     "Log2Expr",
     "MaximumExpr",
     "MinimumExpr",
+    "ModCls",
+    "ModClss",
     "ModFileList",
     "ModFileLists",
     "ModPostIter",
     "ModPreIter",
     "ModRef",
-    "ModRefInfo",
     "ModTags",
     "MultipleDriverError",
     "Mux",
@@ -318,6 +319,7 @@ __all__ = [
     "Top",
     "ToPaths",
     "TopModRef",
+    "TopModRefInfo",
     "UintType",
     "uniquemods",
     "UP",

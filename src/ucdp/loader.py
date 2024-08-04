@@ -29,18 +29,16 @@ Loader.
 """
 
 from collections.abc import Iterable
-from functools import lru_cache
 from pathlib import Path
 
-from ._modclsloader import _load_modcls as _load
-from .finder import find
+from ._modloader import build_top, find_modclsrefs, load_modcls
 from .logging import LOGGER
 from .modbase import BaseMod
 from .moditer import get_mod
 from .modref import ModRef
-from .modrefinfo import get_modbasecls, is_top
 from .modtb import AGenericTbMod
 from .modtopref import TopModRef
+from .modtoprefinfo import get_modbasecls, is_top
 from .nameutil import didyoumean
 from .top import Top
 from .util import extend_sys_path
@@ -70,36 +68,29 @@ def load(topmodref: TopModRef | str, paths: Iterable[Path] | None = None) -> Top
         return Top(ref=topmodref, mod=mod)
 
 
-@lru_cache
 def _load_topmod(ref: TopModRef) -> BaseMod:
     LOGGER.info("Loading %r", str(ref))
 
-    modcls = _load_modcls(ref.top)
+    modcls = _load_modcls_dym(ref.top)
     if not is_top(modcls):
         modbasecls = get_modbasecls(modcls)
         raise ValueError(f"{ref.top} is not a top module as it bases on {modbasecls}")
-    mod = _build_top(modcls)
+    mod = build_top(modcls)
     if ref.sub:
         mod = get_mod(mod, ref.sub)
     if ref.tb:
-        tbcls = _load_modcls(ref.tb)
+        tbcls = _load_modcls_dym(ref.tb)
         if not issubclass(tbcls, AGenericTbMod):
             raise ValueError(f"{tbcls} is not a testbench module aka child of <class ucdp.AGenericTbMod>.")
         return tbcls.build_tb(mod)
     return mod
 
 
-@lru_cache
-def _build_top(modcls, **kwargs):
-    return modcls.build_top(**kwargs)
-
-
-@lru_cache
-def _load_modcls(modref: ModRef) -> type[BaseMod]:
+def _load_modcls_dym(modref: ModRef) -> type[BaseMod]:
     """Load Module Class."""
     try:
-        return _load(modref)
+        return load_modcls(modref)
     except NameError as exc:
-        modrefs = [str(info.modref) for info in find(variants=True)]
+        modrefs = [str(modref) for _, modref in find_modclsrefs()]
         dym = didyoumean(str(modref), modrefs)
         raise NameError(f"{exc!s}{dym}") from None
