@@ -378,3 +378,25 @@ def _check_direction(left: Any, right: Any, direction: SliceDirection | None):
         req = direction.name.lower()
         act = slicedirection.name.lower()
         raise ValueError(f"Slice must be {req}wards but is {act}wards")
+
+
+def mask_to_slices(mask: int) -> tuple[Slice, ...]:
+    """
+    Convert `mask` to tuple of :any:`Slice` instances.
+
+    >>> mask_to_slices(0x0FFFFFF0)
+    (Slice('27:4'),)
+    >>> mask_to_slices(0x0FFF0FF0)
+    (Slice('11:4'), Slice('27:16'))
+    """
+    slices = []
+    right = None
+    for idx, bit in enumerate(reversed("0" + bin(mask)[2:])):
+        if bit == "1":
+            if right is None:
+                right = idx
+        elif right is not None:
+            left = idx - 1
+            slices.append(Slice(left=left, right=right))
+            right = None
+    return tuple(slices)
