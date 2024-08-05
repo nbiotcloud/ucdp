@@ -24,7 +24,7 @@
 
 [project]
 name = "ucdp"
-version = "0.14.0"
+version = "0.15.0"
 description = "Unified Chip Design Platform"
 readme = "README.md"
 authors = [
