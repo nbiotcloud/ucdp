@@ -386,3 +386,8 @@ def cast_booltype(expr):
 
 _PARSER = ExprParser()
 const = _PARSER.const
+concat = _PARSER.concat
+ternary = _PARSER.ternary
+log2 = _PARSER.log2
+minimum = _PARSER.minimum
+maximum = _PARSER.minimum

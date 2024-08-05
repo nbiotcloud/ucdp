@@ -55,7 +55,7 @@ from .expr import (
     SOp,
     TernaryExpr,
 )
-from .exprparser import ExprParser, cast_booltype, const
+from .exprparser import ExprParser, cast_booltype, concat, const, log2, maximum, minimum, ternary
 from .exprresolver import ExprResolver
 from .filelistparser import FileListParser
 from .fileset import FileSet, LibPath
@@ -182,6 +182,7 @@ __all__ = [
     "cli",
     "ClkRstAnType",
     "ClkType",
+    "concat",
     "ConcatExpr",
     "const",
     "Const",
@@ -249,8 +250,11 @@ __all__ = [
     "LightObject",
     "load",
     "LockError",
+    "log2",
     "Log2Expr",
+    "maximum",
     "MaximumExpr",
+    "minimum",
     "MinimumExpr",
     "ModCls",
     "ModClss",

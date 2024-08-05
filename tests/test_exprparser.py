@@ -136,6 +136,8 @@ def test_const():
     assert u.const(u.IntegerType.min_ - 1) is u.ConstExpr(u.SintType(33, default=u.IntegerType.min_ - 1))
     assert u.const(u.IntegerType.max_ + 1) is u.ConstExpr(u.UintType(32, default=u.IntegerType.max_ + 1))
 
+    assert u.const(4) == u.ConstExpr(u.IntegerType(default=4))
+
 
 def test_concat(parser):
     """Test Concat."""
@@ -164,6 +166,14 @@ def test_concat(parser):
         ),
     )
 
+    assert u.concat((4, 3, 4)) == u.ConcatExpr(
+        (
+            u.ConstExpr(u.IntegerType(default=4)),
+            u.ConstExpr(u.IntegerType(default=3)),
+            u.ConstExpr(u.IntegerType(default=4)),
+        )
+    )
+
 
 def test_ternary(parser):
     """Ternary."""
@@ -187,6 +197,10 @@ def test_ternary(parser):
         u.Signal(u.UintType(16, default=20), "other_s"),
     )
     assert int(expr) == 20
+
+    a = u.const(4)
+    b = u.const(5)
+    assert u.ternary(a == b, 4, 5) == u.TernaryExpr(u.BoolOp(a, "==", b), a, b)
 
 
 def test_note(parser):
@@ -233,3 +247,9 @@ def test_type_error():
     msg = "'faf' / 5"
     with raises(u.InvalidExpr, match=re.escape(msg)):
         parser("'faf' / 5")
+
+
+def test_log2():
+    """Log 2."""
+    a = u.const(67)
+    assert u.log2(a) == u.Log2Expr(a)
