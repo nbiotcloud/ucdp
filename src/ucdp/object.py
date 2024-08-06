@@ -43,6 +43,8 @@ from typing import Any, ClassVar, TypeAlias
 import pydantic as pyd
 from pydantic._internal._model_construction import ModelMetaclass
 
+from .consts import PAT_IDENTIFIER
+
 _cache: dict[tuple[Any, ...], Any] = {}
 
 PosArgs: TypeAlias = tuple[str, ...]
@@ -144,6 +146,25 @@ class NamedObject(Object):
 
 class NamedLightObject(NamedObject, Light):
     """Cacheable NamedObject.
+
+    Attributes:
+        name: Name.
+    """
+
+
+class IdentObject(NamedObject):
+    """
+    Identifier Object.
+
+    Attributes:
+        name: Name.
+    """
+
+    name: str = Field(pattern=PAT_IDENTIFIER)
+
+
+class IdentLightObject(IdentObject, Light):
+    """Cacheable IdentObject.
 
     Attributes:
         name: Name.

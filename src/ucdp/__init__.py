@@ -93,7 +93,19 @@ from .mux import Mux
 from .namespace import Namespace
 from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix, str2identifier
 from .note import OPEN, TODO, Note
-from .object import Field, Light, LightObject, NamedLightObject, NamedObject, Object, PosArgs, PrivateField, get_repr
+from .object import (
+    Field,
+    IdentLightObject,
+    IdentObject,
+    Light,
+    LightObject,
+    NamedLightObject,
+    NamedObject,
+    Object,
+    PosArgs,
+    PrivateField,
+    get_repr,
+)
 from .orientation import (
     BWD,
     FWD,
@@ -233,6 +245,8 @@ __all__ = [
     "Hex",
     "Ident",
     "IdentFilter",
+    "IdentLightObject",
+    "IdentObject",
     "Idents",
     "IdentStop",
     "improved_glob",
