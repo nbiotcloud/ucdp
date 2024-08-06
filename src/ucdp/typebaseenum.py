@@ -36,7 +36,7 @@ An enumeration is a normal base type with a specific mapping of values to a anot
 
 from abc import abstractmethod
 from collections.abc import Callable
-from typing import Any
+from typing import Any, ClassVar
 
 from humanfriendly.text import concatenate
 from pydantic import model_validator
@@ -46,7 +46,7 @@ from .consts import AUTO
 from .dict import Dict
 from .doc import Doc
 from .exceptions import LockError
-from .object import Field, Object, PrivateField
+from .object import Field, Object, PosArgs, PrivateField
 from .typebase import AScalarType, BaseScalarType, BaseType
 
 
@@ -68,7 +68,7 @@ class EnumItem(Object):
     value: Any
     doc: Doc = Doc()
 
-    _posargs: tuple[str, ...] = ("key", "value")
+    _posargs: ClassVar[PosArgs] = ("key", "value")
 
     def __init__(self, key, value, **kwargs):
         super().__init__(key=key, value=value, **kwargs)

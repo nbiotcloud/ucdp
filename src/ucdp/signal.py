@@ -93,8 +93,11 @@ A [Port][ucdp.signal.Port] is a module interface signal with a direction IN, OUT
 
 """
 
+from typing import ClassVar
+
 from .casting import Casting
 from .ident import Ident
+from .object import PosArgs
 from .orientation import FWD, AOrientation, Direction
 from .typebase import BaseType
 
@@ -209,7 +212,7 @@ class Port(BaseSignal):
     """
 
     direction: Direction
-    _posargs: tuple[str, ...] = ("type_", "name")
+    _posargs: ClassVar[PosArgs] = ("type_", "name")
 
     def __init__(self, type_: BaseType, name: str, **kwargs):
         if "direction" not in kwargs:

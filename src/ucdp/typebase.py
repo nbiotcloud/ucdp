@@ -34,13 +34,13 @@ DOCME
 """
 
 from abc import abstractmethod
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import model_validator
 
 from .casting import Casting
 from .doc import Doc
-from .object import Light, Object
+from .object import Light, Object, PosArgs
 from .slices import DOWN, Slice
 
 
@@ -186,7 +186,7 @@ class AVecType(AScalarType):
     logic: bool = True
     """Include X and Z states, not just numeric values."""
 
-    _posargs: tuple[str, ...] = ("width",)
+    _posargs: ClassVar[PosArgs] = ("width",)
 
     def __init__(self, width, **kwargs):
         super().__init__(width=width, **kwargs)

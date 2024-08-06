@@ -140,7 +140,7 @@ class NotHashableArg(u.LightObject):
 
     arg: list[str]
 
-    _posargs: tuple[str, ...] = ("arg",)
+    _posargs: u.PosArgs = ("arg",)
 
     def __init__(self, arg: list[str]):
         super().__init__(arg=arg)  # type: ignore[call-arg]

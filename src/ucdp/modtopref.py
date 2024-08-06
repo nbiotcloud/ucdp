@@ -25,10 +25,10 @@
 """Top Reference."""
 
 import re
-from typing import Union
+from typing import ClassVar, Union
 
 from .modref import ModRef
-from .object import Field, LightObject
+from .object import Field, LightObject, PosArgs
 
 RE_TOPMODREF = re.compile(
     # [tb]#
@@ -78,7 +78,7 @@ class TopModRef(LightObject):
     sub: str | None = Field(default=None, pattern=RE_MODREF)
     tb: ModRef | None = None
 
-    _posargs: tuple[str, ...] = ("top",)
+    _posargs: ClassVar[PosArgs] = ("top",)
 
     def __init__(self, top: ModRef, sub: str | None = None, tb: ModRef | None = None):
         super().__init__(top=top, sub=sub, tb=tb)  # type: ignore[call-arg]

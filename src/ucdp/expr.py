@@ -29,12 +29,13 @@ import math
 import operator
 import re
 from collections.abc import Callable, Iterator
+from typing import ClassVar
 
 from icdutil.num import calc_signed_width, calc_unsigned_width, unsigned_to_signed
 from pydantic import ValidationError
 
 from .exceptions import InvalidExpr
-from .object import Field, Light, Object, model_validator
+from .object import Field, Light, Object, PosArgs, model_validator
 from .slices import Slice
 from .typebase import BaseScalarType, BaseType
 from .typehelper import BaseScalarTypes
@@ -320,7 +321,7 @@ class Op(Expr, Light):
     sign: str
     right: Expr
 
-    _posargs: tuple[str, ...] = ("left", "sign", "right")
+    _posargs: ClassVar[PosArgs] = ("left", "sign", "right")
 
     def __init__(self, left: Expr, sign: str, right: Expr, type_: BaseType | None = None):
         oper = _OPERMAP[sign]
@@ -377,7 +378,7 @@ class SOp(Expr, Light):
     one: Expr
     postsign: str = ""
 
-    _posargs: tuple[str, ...] = ("sign", "one")
+    _posargs: ClassVar[PosArgs] = ("sign", "one")
 
     def __init__(self, sign: str, one: Expr):
         oper = _SOPERMAP[sign]
@@ -405,7 +406,7 @@ class SliceOp(Expr, Light):
     one: Expr
     slice_: Slice
 
-    _posargs: tuple[str, ...] = ("one", "slice_")
+    _posargs: ClassVar[PosArgs] = ("one", "slice_")
 
     def __init__(self, one: Expr, slice_: Slice):
         super().__init__(one=one, slice_=slice_, type_=one.type_[slice_])  # type: ignore[call-arg]
@@ -436,7 +437,7 @@ class ConstExpr(Expr, Light):
 
     type_: BaseType
 
-    _posargs: tuple[str, ...] = ("type_",)
+    _posargs: ClassVar[PosArgs] = ("type_",)
 
     def __init__(self, type_: BaseType):
         super().__init__(type_=type_)  # type: ignore[call-arg]
@@ -480,7 +481,7 @@ class ConcatExpr(Expr, Light):
 
     items: tuple[Expr, ...]
 
-    _posargs: tuple[str, ...] = ("items",)
+    _posargs: ClassVar[PosArgs] = ("items",)
 
     def __init__(self, items: tuple[Expr, ...]):
         for item in items:
@@ -538,7 +539,7 @@ class TernaryExpr(Expr, Light):
     one: Expr
     other: Expr
 
-    _posargs: tuple[str, ...] = ("cond", "one", "other")
+    _posargs: ClassVar[PosArgs] = ("cond", "one", "other")
 
     def __init__(self, cond: BoolOp, one: Expr, other: Expr):
         super().__init__(cond=cond, one=one, other=other, type_=one.type_)  # type: ignore[call-arg]
@@ -575,7 +576,7 @@ class Log2Expr(Expr, Light):
     type_: BaseScalarTypes = Field(repr=False)
     expr: Expr
 
-    _posargs: tuple[str, ...] = ("expr",)
+    _posargs: ClassVar[PosArgs] = ("expr",)
 
     def __init__(self, expr: Expr):
         super().__init__(expr=expr, type_=expr.type_)  # type: ignore[call-arg]
@@ -614,7 +615,7 @@ class MinimumExpr(Expr, Light):
     type_: BaseScalarTypes = Field(repr=False)
     items: tuple[Expr, ...]
 
-    _posargs: tuple[str, ...] = ("items",)
+    _posargs: ClassVar[PosArgs] = ("items",)
 
     def __init__(self, items: tuple[Expr, ...]):
         super().__init__(items=items, type_=items[0].type_)  # type: ignore[call-arg]
@@ -653,7 +654,7 @@ class MaximumExpr(Expr, Light):
     type_: BaseScalarTypes = Field(repr=False)
     items: tuple[Expr, ...]
 
-    _posargs: tuple[str, ...] = ("items",)
+    _posargs: ClassVar[PosArgs] = ("items",)
 
     def __init__(self, items: tuple[Expr, ...]):
         super().__init__(items=items, type_=items[0].type_)  # type: ignore[call-arg]

@@ -28,7 +28,7 @@ import hashlib
 from typing import ClassVar
 
 from .consts import PAT_OPT_IDENTIFIER
-from .object import Field, LightObject
+from .object import Field, LightObject, PosArgs
 
 
 class AConfig(LightObject):
@@ -120,7 +120,7 @@ class AConfig(LightObject):
 
     name: str = Field(pattern=PAT_OPT_IDENTIFIER, default="")
 
-    _posargs: tuple[str, ...] = ("name",)
+    _posargs: ClassVar[PosArgs] = ("name",)
     _hash_excludes: ClassVar[set[str]] = set()
 
     def __init__(self, name: str = "", **kwargs):
