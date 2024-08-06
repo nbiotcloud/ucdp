@@ -27,12 +27,12 @@
 # DOCME: pkg vs lib
 
 import re
-from typing import Union
+from typing import ClassVar, Union
 
 from caseconverter import pascalcase
 
 from .consts import PAT_IDENTIFIER
-from .object import Field, Object
+from .object import Field, Object, PosArgs
 
 RE_MODREF = re.compile(
     # lib
@@ -92,7 +92,7 @@ class ModRef(Object):
     modname: str = Field(pattern=PAT_IDENTIFIER)
     modclsname: str | None = Field(pattern=PAT_IDENTIFIER, default=None)
 
-    _posargs: tuple[str, ...] = ("libname", "modname")
+    _posargs: ClassVar[PosArgs] = ("libname", "modname")
 
     def __init__(self, libname: str, modname: str, modclsname: str | None = None):
         super().__init__(libname=libname, modname=modname, modclsname=modclsname)  # type: ignore[call-arg]

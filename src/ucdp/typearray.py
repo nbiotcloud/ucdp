@@ -26,9 +26,9 @@
 Array Type.
 """
 
-from typing import Any
+from typing import Any, ClassVar
 
-from .object import Light
+from .object import Light, PosArgs
 from .slices import UP, Slice
 from .typebase import ACompositeType, BaseType
 
@@ -75,7 +75,7 @@ class ArrayType(ACompositeType, Light):
     depth: Any
     left: Any = 0
 
-    _posargs: tuple[str, ...] = ("itemtype", "depth")
+    _posargs: ClassVar[PosArgs] = ("itemtype", "depth")
 
     def __init__(self, itemtype: BaseType, depth: Any, left=0):
         super().__init__(itemtype=itemtype, depth=depth, left=left)  # type: ignore[call-arg]

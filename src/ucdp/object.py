@@ -38,12 +38,14 @@ DOCME: use examples
 DOCME: caching
 """
 
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TypeAlias
 
 import pydantic as pyd
 from pydantic._internal._model_construction import ModelMetaclass
 
 _cache: dict[tuple[Any, ...], Any] = {}
+
+PosArgs: TypeAlias = tuple[str, ...]
 
 Field = pyd.Field
 PrivateField = pyd.PrivateAttr
@@ -66,7 +68,7 @@ class Object(pyd.BaseModel):
         arbitrary_types_allowed=True,
     )
 
-    _posargs: tuple[str, ...] = ()
+    _posargs: ClassVar[PosArgs] = ()
 
     def new(self, **kwargs):
         """Return A Copy With Updated Attributes."""

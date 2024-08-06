@@ -35,14 +35,14 @@ A structure assembles multiple type, name, orientation pairs.
 
 from abc import abstractmethod
 from collections.abc import Callable
-from typing import Any
+from typing import Any, ClassVar
 
 from .consts import PAT_IDENTIFIER
 from .dict import Dict
 from .doc import Doc
 from .docutil import doc_from_type
 from .exceptions import LockError
-from .object import Field, Light, Object, PrivateField
+from .object import Field, Light, Object, PosArgs, PrivateField
 from .orientation import BWD, FWD, Orientation
 from .typebase import ACompositeType, BaseType
 
@@ -65,7 +65,7 @@ class StructItem(Object):
     doc: Doc = Doc()
     ifdef: str | None = None
 
-    _posargs: tuple[str, ...] = ("name", "type_")
+    _posargs: ClassVar[PosArgs] = ("name", "type_")
 
     def __init__(self, name, type_, **kwargs):
         super().__init__(name=name, type_=type_, **kwargs)

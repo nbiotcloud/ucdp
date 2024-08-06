@@ -102,7 +102,7 @@ Identifier are itself part of an expression and therefore a child of [Expr][ucdp
 
 from collections import deque
 from collections.abc import Callable, Iterable, Iterator
-from typing import Any
+from typing import Any, ClassVar
 
 from .casting import Casting
 from .consts import PAT_IDENTIFIER
@@ -110,7 +110,7 @@ from .doc import Doc
 from .expr import ConcatExpr, ConstExpr, Expr, Log2Expr, MaximumExpr, MinimumExpr, Op, SliceOp, SOp, TernaryExpr
 from .namespace import Namespace
 from .nameutil import join_names, split_suffix
-from .object import Field, Light, NamedObject
+from .object import Field, Light, NamedObject, PosArgs
 from .orientation import AOrientation
 from .typearray import ArrayType
 from .typebase import BaseType
@@ -156,7 +156,7 @@ class Ident(Expr, NamedObject, Light):
     doc: Doc = Doc()
     ifdef: str | None = None
 
-    _posargs: tuple[str, ...] = ("type_", "name")
+    _posargs: ClassVar[PosArgs] = ("type_", "name")
 
     def __init__(self, type_: BaseType, name: str, **kwargs):
         super().__init__(type_=type_, name=name, **kwargs)  # type: ignore[call-arg]
