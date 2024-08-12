@@ -297,16 +297,17 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 @arg_filelist
 @opt_target
 @opt_maxlevel
+@click.option("--minimal", "-m", default=False, is_flag=True, help="Skip defaults.")
 @opt_file
 @pass_ctx
-def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, file=None):
+def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, minimal=False, file=None):
     """File List."""
     # Load quiet, otherwise stdout is messed-up
     top = load_top(ctx, top, path, quiet=True)
     console = Console(file=file) if file else ctx.console
     for item in filelist or ["*"]:
         data = {
-            str(mod): modfilelist
+            str(mod): modfilelist.model_dump(exclude_defaults=minimal)
             for mod, modfilelist in iter_modfilelists(top.mod, item, target=target, maxlevel=maxlevel)
         }
         pprint(data, indent_guides=False, console=console)
