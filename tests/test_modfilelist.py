@@ -109,3 +109,41 @@ def test_multi():
             template_filepaths=(TESTS_PATH / "drv.cpp.mako",),
         ),
     )
+
+
+class FlavorMod(u.AMod):
+    """Just An Example Module."""
+
+    filelists: u.ClassVar[u.ModFileLists] = (
+        u.ModFileList(
+            name="hdl",
+            gen="full",
+            filepaths=("{mod.modname}_{flavor}.sv",),
+            template_filepaths=("{flavor}.sv",),
+            flavors=("one", "two"),
+        ),
+    )
+
+    def _build(self) -> None:
+        pass
+
+
+def test_flavor():
+    """Flavor Module."""
+    mod = FlavorMod()
+    assert tuple(u.resolve_modfilelists(mod, "*")) == (
+        u.ModFileList(
+            name="hdl",
+            gen="full",
+            filepaths=(TESTS_PATH / "flavor_one.sv",),
+            template_filepaths=(TESTS_PATH / "one.sv",),
+            flavors=("one",),
+        ),
+        u.ModFileList(
+            name="hdl",
+            gen="full",
+            filepaths=(TESTS_PATH / "flavor_two.sv",),
+            template_filepaths=(TESTS_PATH / "two.sv",),
+            flavors=("two",),
+        ),
+    )

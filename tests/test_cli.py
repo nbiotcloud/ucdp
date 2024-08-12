@@ -154,6 +154,13 @@ def test_fileinfo_default(runner, example_simple, prjroot):
     assert_refdata(test_fileinfo_default, prjroot)
 
 
+def test_fileinfo_minimal(runner, example_simple, prjroot):
+    """Fileinfo Command Minimal."""
+    cmd = ["fileinfo", "uart_lib.uart", "-m"]
+    _run(runner, prjroot, cmd)
+    assert_refdata(test_fileinfo_minimal, prjroot)
+
+
 def test_fileinfo_maxlevel(runner, example_simple, prjroot):
     """Fileinfo Command with Maxlevel."""
     cmd = ["fileinfo", "uart_lib.uart", "hdl", "--maxlevel=1"]

@@ -9,6 +9,7 @@
 │ tests.test_modconfigurable.RootMod    │  X  │     │             AMod │      │
 │ tests.test_modconfigurable.SubMod     │  X  │     │ AConfigurableMod │      │
 │ tests.test_modconfigurable.TopMod     │  X  │     │             AMod │      │
+│ tests.test_modfilelist.FlavorMod      │  X  │     │             AMod │      │
 │ tests.test_modfilelist.MultiMod       │  X  │     │             AMod │      │
 │ tests.test_mods.DeclMod               │  X  │     │             AMod │      │
 │ tests.test_mods.DocMod                │  X  │     │             AMod │      │
