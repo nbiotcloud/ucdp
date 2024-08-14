@@ -31,12 +31,11 @@ from collections.abc import Iterator
 from uniquer import unique
 
 from ._modloader import (
-    ModClsRef,
     Paths,
     Patterns,
     TopModRefPat,
     build_top,
-    find_modclsrefs,
+    find_modrefs,
     get_topmodrefpats,
     load_modcls,
 )
@@ -60,14 +59,17 @@ def find(paths: Paths | None = None, patterns: Patterns | None = None, glob: boo
 
 def _find_infos(paths: Paths | None, pats: tuple[TopModRefPat, ...], glob: bool = False) -> Iterator[TopModRefInfo]:
     with extend_sys_path(paths, use_env_default=True):
-        modclsrefs = tuple(find_modclsrefs())
+        modclsrefs = tuple(find_modrefs())
         for pat in pats:
             if pat.tb:
                 # testbench with top
-                for tbmodcls, tbmodref in modclsrefs:
+                tbfilter = namefilter(pat.tb)
+                for tbmodref in modclsrefs:
                     # filter by name
-                    if not namefilter(pat.tb)(str(tbmodref)):
+                    if not tbfilter(str(tbmodref)):
                         continue
+                    # load tbmodcls
+                    tbmodcls = load_modcls(tbmodref)
                     # skip non-generic testbenches
                     if not issubclass(tbmodcls, AGenericTbMod):
                         continue
@@ -80,17 +82,19 @@ def _find_infos(paths: Paths | None, pats: tuple[TopModRefPat, ...], glob: bool 
 
 
 def _find_tops(
-    modclsrefs: tuple[ModClsRef, ...],
+    modclsrefs: tuple[ModRef, ...],
     toppat: str,
     subpat: str | None,
     glob: bool,
     modclss: tuple[ModCls, ...] | None = None,
     tbmodref: ModRef | None = None,
 ) -> Iterator[TopModRefInfo]:
-    for topmodcls, topmodref in modclsrefs:
+    topfilter = namefilter(toppat)
+    for topmodref in modclsrefs:
         # filter by name
-        if not namefilter(toppat)(str(topmodref)):
+        if not topfilter(str(topmodref)):
             continue
+        topmodcls = load_modcls(topmodref)
         if subpat:
             # skip non-top
             if not is_top(topmodcls):

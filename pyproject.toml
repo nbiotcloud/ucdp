@@ -48,6 +48,7 @@ dependencies = [
     "rich>=13.7.1",
     "uniquer>=1.0.2",
     "click-bash4-2-completion>=0.1.0",
+    "anycache>=2.1.0",
 ]
 
 [project.scripts]
