@@ -33,10 +33,9 @@ from functools import lru_cache
 from importlib import import_module
 from inspect import getfile, isclass
 from pathlib import Path
-from typing import Any, TypeAlias
+from typing import TypeAlias
 
-from uniquer import unique
-
+from .cache import CACHE
 from .modbase import BaseMod
 from .modref import ModRef, get_modclsname
 from .object import Object
@@ -44,7 +43,6 @@ from .util import LOGGER
 
 Patterns: TypeAlias = Iterable[str]
 Paths: TypeAlias = Iterable[Path]
-ModClsRef: TypeAlias = tuple[type[BaseMod], ModRef]
 
 _RE_IMPORT_UCDP = re.compile(r"^\s*class .*Mod\):")
 
@@ -56,15 +54,6 @@ _RE_TOPMODREFPAT = re.compile(
     # [-sub]
     r"(-(?P<sub>[a-zA-Z_0-9_\.\*]+))?"
 )
-
-
-class PyModRef(Object):
-    """Python Module Reference."""
-
-    filepath: Path
-    libname: str
-    modname: str
-    mod: Any
 
 
 class TopModRefPat(Object):
@@ -100,18 +89,28 @@ def load_modcls(modref: ModRef) -> type[BaseMod]:
     return modcls
 
 
-def _find_pymodrefs() -> Iterator[PyModRef]:
-    filepaths: list[Path] = []
+def find_modrefs() -> Iterator[ModRef]:
+    # determine directories with python files
+    dirpaths: set[Path] = set()
     for syspathstr in sys.path:
-        filepaths.extend(Path(syspathstr).resolve().glob("*/*.py"))
-    for filepath in sorted(unique(filepaths)):
-        libname = filepath.parent.name
-        modname = filepath.stem
+        for filepath in Path(syspathstr).resolve().glob("*/*.py"):
+            dirpath = filepath.parent
+            if dirpath.name.startswith("_") or dirpath.name == "ucdp":
+                continue
+            dirpaths.add(dirpath)
 
-        # skip private
-        if libname.startswith("_") or modname.startswith("_") or libname == "ucdp":
+    for dirpath in sorted(dirpaths):
+        yield from _find_modrefs(sys.path, dirpath)
+
+
+@CACHE.loader_cache.anycache()
+def _find_modrefs(envpath, dirpath: Path) -> tuple[ModRef, ...]:  # noqa: C901
+    modrefs = []
+    for filepath in sorted(dirpath.glob("*.py")):
+        pylibname = filepath.parent.name
+        pymodname = filepath.stem
+        if pymodname.startswith("_"):
             continue
-
         # skip non-ucdp files
         with filepath.open(encoding="utf-8") as file:
             try:
@@ -126,39 +125,31 @@ def _find_pymodrefs() -> Iterator[PyModRef]:
 
         # import module
         try:
-            pymod = import_module(f"{libname}.{modname}")
+            pymod = import_module(f"{pylibname}.{pymodname}")
         except Exception as exc:
             LOGGER.info(f"Skipping {str(filepath)!r} ({exc})")
             continue
-        yield PyModRef(filepath=filepath, libname=libname, modname=modname, mod=pymod)
 
+        # Inspect Module
+        for name in dir(pymod):
+            # Load Class
+            modcls = getattr(pymod, name)
+            if not isclass(modcls) or not issubclass(modcls, BaseMod):
+                continue
 
-def _find_modclsrefs(pymodref: PyModRef) -> Iterator[ModClsRef]:
-    pymod = pymodref.mod
-    for name in dir(pymod):
-        # Load Class
-        modcls = getattr(pymod, name)
-        if not isclass(modcls) or not issubclass(modcls, BaseMod):
-            continue
+            # Ignore imported
+            if filepath != Path(getfile(modcls)):
+                continue
 
-        # Ignore imported
-        if pymodref.filepath != Path(getfile(modcls)):
-            continue
+            # Create ModRefInfo
+            modclsname = get_modclsname(pymodname)
+            if modclsname == name:
+                modref = ModRef(libname=pylibname, modname=pymodname)
+            else:
+                modref = ModRef(libname=pylibname, modname=pymodname, modclsname=name)
+            modrefs.append(modref)
 
-        # Create ModRefInfo
-        libname = pymodref.libname
-        modname = pymodref.modname
-        modclsname = get_modclsname(modname)
-        if modclsname == name:
-            modref = ModRef(libname=libname, modname=modname)
-        else:
-            modref = ModRef(libname=libname, modname=modname, modclsname=name)
-        yield modcls, modref
-
-
-def find_modclsrefs() -> Iterator[ModClsRef]:
-    for pymodref in _find_pymodrefs():
-        yield from _find_modclsrefs(pymodref)
+    return tuple(modrefs)
 
 
 def get_topmodrefpats(patterns: Patterns | None) -> Iterator[TopModRefPat]:

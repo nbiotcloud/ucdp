@@ -29,7 +29,7 @@ from pathlib import Path
 from typing import Literal
 
 from .mod import AMod
-from .modbase import BaseMod, ModCls
+from .modbase import BaseMod, ModCls, ModTags
 from .modconfigurable import AConfigurableMod
 from .modcore import ACoreMod
 from .modtailored import ATailoredMod
@@ -47,7 +47,7 @@ class TopModRefInfo(Object):
     """Module Reference Information."""
 
     topmodref: TopModRef
-    modcls: ModCls
+    tags: ModTags
     modbasecls: ModCls
     filepath: Path
     is_top: bool
@@ -58,7 +58,7 @@ class TopModRefInfo(Object):
         """Create."""
         return TopModRefInfo(
             topmodref=topmodref,
-            modcls=modcls,
+            tags=modcls.tags,
             modbasecls=get_modbasecls(modcls),
             filepath=Path(getfile(modcls)),
             is_top=is_top(modcls),
