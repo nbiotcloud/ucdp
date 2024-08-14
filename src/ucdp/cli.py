@@ -29,6 +29,7 @@ from collections.abc import Iterable
 from pathlib import Path
 
 import click
+from click_bash42_completion import patch
 from pydantic import BaseModel, ConfigDict
 from rich.console import Console
 from rich.logging import RichHandler
@@ -64,6 +65,9 @@ from .loader import load
 from .modfilelist import iter_modfilelists
 from .modtopref import PAT_TOPMODREF
 from .top import Top
+
+patch()
+
 
 _LOGLEVELMAP = {
     0: logging.WARNING,
