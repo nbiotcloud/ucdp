@@ -28,6 +28,8 @@ Finder.
 
 from collections.abc import Iterator
 
+from uniquer import unique
+
 from ._modloader import (
     ModClsRef,
     Paths,
@@ -51,7 +53,8 @@ from .util import extend_sys_path
 def find(paths: Paths | None = None, patterns: Patterns | None = None, glob: bool = False) -> Iterator[TopModRefInfo]:
     """List All Available Module References."""
     pats = tuple(get_topmodrefpats(patterns))
-    infos = _find_infos(paths, pats, glob)
+    infos = unique(_find_infos(paths, pats, glob), key=lambda modrefinfo: str(modrefinfo.topmodref))
+
     yield from sorted(infos, key=lambda modrefinfo: str(modrefinfo.topmodref))
 
 
