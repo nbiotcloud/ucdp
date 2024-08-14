@@ -25,7 +25,7 @@
 """Module File List."""
 
 from collections.abc import Iterable, Iterator
-from inspect import getfile, getmro
+from inspect import getfile
 from pathlib import Path
 from typing import Annotated, Any, TypeAlias
 
@@ -35,7 +35,7 @@ from pydantic.functional_validators import BeforeValidator
 from .consts import Gen
 from .filelistparser import FileListParser
 from .iterutil import namefilter
-from .modbase import BaseMod
+from .modbase import BaseMod, get_modbaseclss
 from .moditer import ModPostIter
 from .object import Field, NamedLightObject
 from .pathutil import improved_resolve
@@ -222,7 +222,7 @@ def resolve_modfilelists(
             # template_filepaths
             template_filepaths: list[Path] = []
             inc_template_filepaths: list[Path] = []
-            baseclss = _get_baseclss(mod.__class__)
+            baseclss = get_modbaseclss(mod.__class__)
             for basecls in reversed(baseclss):
                 for basemodfilelist in search_modfilelists(basecls.filelists, modfilelist.name, target=target):
                     cls_placeholder = basemodfilelist.get_cls_placeholder(basecls, flavor=flavor)
@@ -342,12 +342,3 @@ def _resolve_template_filepaths(
                 filepath = add_filepath
             if filepath not in filepaths:
                 filepaths.insert(0, filepath)
-
-
-def _get_baseclss(cls):
-    clss = []
-    for basecls in getmro(cls):
-        if basecls is BaseMod:
-            break
-        clss.append(basecls)
-    return clss

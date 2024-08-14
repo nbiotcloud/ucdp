@@ -29,6 +29,7 @@ Base Hardware Module.
 
 from abc import abstractmethod
 from functools import cached_property
+from inspect import getmro
 from typing import Any, ClassVar, Optional, TypeAlias, Union, no_type_check
 
 from caseconverter import snakecase
@@ -926,3 +927,13 @@ def _merge_cast(one, other):
 
 ModCls: TypeAlias = type[BaseMod]
 ModClss: TypeAlias = set[type[BaseMod]]
+
+
+def get_modbaseclss(cls):
+    """Get Module Base Classes."""
+    clss = []
+    for basecls in getmro(cls):
+        if basecls is BaseMod:
+            break
+        clss.append(basecls)
+    return clss
