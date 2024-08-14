@@ -1,31 +1,50 @@
 {
-    "<glbl_lib.clk_gate.ClkGateMod(inst='uart/u_clk_gate', libname='glbl_lib', modname='clk_gate')>": {
-        'filepaths': (
-            PosixPath('$PRJROOT/glbl_lib/clk_gate/rtl/clk_gate.sv'),
-        ),
-        'template_filepaths': (
-            PosixPath('$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako'),
-        )
-    },
-    "<glbl_lib.regf.RegfMod(inst='uart/u_regf', libname='uart_lib', modname='uart_regf')>": {
-        'gen': 'full',
-        'filepaths': (PosixPath('$PRJROOT/uart_lib/uart/rtl/uart_regf.sv'),),
-        'template_filepaths': (
-            PosixPath('$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako'),
-        )
-    },
-    "<uart_lib.uart.UartCoreMod(inst='uart/u_core', libname='uart_lib', modname='uart_core')>": {
-        'gen': 'inplace',
-        'filepaths': (PosixPath('$PRJROOT/uart_lib/uart/rtl/uart_core.sv'),),
-        'template_filepaths': (
-            PosixPath('$PRJ/src/ucdp/examples/simple/uart_lib/main.mako'),
-        )
-    },
-    "<uart_lib.uart.UartMod(inst='uart', libname='uart_lib', modname='uart')>": {
-        'name': 'header',
-        'filepaths': (PosixPath('$PRJROOT/uart.hpp'),),
-        'template_filepaths': (
-            PosixPath('$PRJ/src/ucdp/examples/simple/uart_lib/hpp.mako'),
-        )
-    }
+    "<glbl_lib.clk_gate.ClkGateMod(inst='uart/u_clk_gate', libname='glbl_lib', modname='clk_gate')>": [
+        {
+            'filepaths': (
+                PosixPath('$PRJROOT/glbl_lib/clk_gate/rtl/clk_gate.sv'),
+            ),
+            'template_filepaths': (
+                PosixPath('$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako'),
+            )
+        }
+    ],
+    "<glbl_lib.regf.RegfMod(inst='uart/u_regf', libname='uart_lib', modname='uart_regf')>": [
+        {
+            'gen': 'full',
+            'filepaths': (
+                PosixPath('$PRJROOT/uart_lib/uart/rtl/uart_regf.sv'),
+            ),
+            'template_filepaths': (
+                PosixPath('$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako'),
+            )
+        }
+    ],
+    "<uart_lib.uart.UartCoreMod(inst='uart/u_core', libname='uart_lib', modname='uart_core')>": [
+        {
+            'gen': 'inplace',
+            'filepaths': (
+                PosixPath('$PRJROOT/uart_lib/uart/rtl/uart_core.sv'),
+            ),
+            'template_filepaths': (
+                PosixPath('$PRJ/src/ucdp/examples/simple/uart_lib/main.mako'),
+            )
+        }
+    ],
+    "<uart_lib.uart.UartMod(inst='uart', libname='uart_lib', modname='uart')>": [
+        {
+            'gen': 'full',
+            'filepaths': (PosixPath('$PRJROOT/uart_lib/uart/rtl/uart.sv'),),
+            'template_filepaths': (
+                PosixPath('$PRJ/src/ucdp/examples/simple/uart_lib/main.mako'),
+            )
+        },
+        {
+            'name': 'header',
+            'filepaths': (PosixPath('$PRJROOT/uart.hpp'),),
+            'template_filepaths': (
+                PosixPath('$PRJ/src/ucdp/examples/simple/uart_lib/hpp.mako'),
+            )
+        }
+    ]
 }

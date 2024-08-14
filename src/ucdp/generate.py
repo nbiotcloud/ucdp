@@ -118,28 +118,33 @@ def generate(
         replace_envvars=True,
         maxlevel=maxlevel,
     )
+
+    def _inplace(template_filepaths, filepath, context):
+        if not filepath.exists():
+            LOGGER.error("Inplace file %r missing", str(filepath))
+        else:
+            makolator.gen(template_filepaths, filepath, context=context)
+
+    def _gen(template_filepaths, filepath, context):
+        makolator.gen(template_filepaths, filepath, context=context)
+
     with extend_sys_path(paths, use_env_default=True):
-        with ThreadPoolExecutor(max_workers=maxworkers) as executor:
-            jobs = []
+        with ThreadPoolExecutor(max_workers=maxworkers) as exe:
+            jobs = []  # type: ignore [var-annotated]
             for mod, modfilelist in modfilelists:
                 if modfilelist.gen == "no":
                     continue
                 filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
                 template_filepaths: tuple[Path, ...] = modfilelist.template_filepaths or ()  # type: ignore[assignment]
+                inc_filepaths: tuple[Path, ...] = modfilelist.inc_filepaths or ()  # type: ignore[assignment]
+                inc_template_filepaths: tuple[Path, ...] = modfilelist.inc_template_filepaths or ()  # type: ignore[assignment]
                 context = {"mod": mod, "modfilelist": modfilelist}
                 if modfilelist.gen == "inplace":
-                    for filepath in filepaths:
-                        if not filepath.exists():
-                            LOGGER.error("Inplace file %r missing", str(filepath))
-                            continue
-                        jobs.append(executor.submit(makolator.inplace, template_filepaths, filepath, context=context))
-                elif template_filepaths:
-                    jobs.extend(
-                        executor.submit(makolator.gen, template_filepaths, filepath, context=context)
-                        for filepath in filepaths
-                    )
+                    jobs.extend(exe.submit(_inplace, inc_template_filepaths, path, context) for path in inc_filepaths)
+                    jobs.extend(exe.submit(_inplace, template_filepaths, path, context) for path in filepaths)
                 else:
-                    LOGGER.error(f"No 'template_filepaths' defined for {mod}")
+                    jobs.extend(exe.submit(_gen, inc_template_filepaths, path, context) for path in inc_filepaths)
+                    jobs.extend(exe.submit(_gen, template_filepaths, path, context) for path in filepaths)
             for job in jobs:
                 job.result()
 
