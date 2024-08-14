@@ -49,7 +49,8 @@ class TopMod(u.AMod):
     """A Top Module."""
 
     def _build(self):
-        SubMod(self, "u_sub")
+        SubMod(self, "u_sub0")
+        SubMod(self, "u_sub1")
         DutMod(self, "u_dut")
 
 
