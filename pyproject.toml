@@ -47,6 +47,7 @@ dependencies = [
     "python-Levenshtein>=0.25.1",
     "rich>=13.7.1",
     "uniquer>=1.0.2",
+    "click-bash4-2-completion>=0.1.0",
 ]
 
 [project.scripts]
