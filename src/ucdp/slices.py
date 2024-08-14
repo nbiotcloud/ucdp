@@ -39,6 +39,9 @@ class SliceDirection(enum.Enum):
     DOWN = 0
     UP = 1
 
+    def __repr__(self):
+        return self.name
+
 
 DOWN = SliceDirection.DOWN
 UP = SliceDirection.UP
@@ -62,7 +65,7 @@ class Slice(LightObject):
     >>> s.mask
     960
     >>> s.direction
-    <SliceDirection.DOWN: 0>
+    DOWN
     >>> s.slice
     slice(9, 6, -1)
     >>> tuple(s)
@@ -86,7 +89,7 @@ class Slice(LightObject):
     >>> s.mask
     960
     >>> s.direction
-    <SliceDirection.UP: 1>
+    UP
     >>> s.slice
     slice(6, 9, 1)
     >>> tuple(s)
@@ -321,9 +324,9 @@ class Slice(LightObject):
         Direction.
 
         >>> Slice(left=4, right=8).direction
-        <SliceDirection.UP: 1>
+        UP
         >>> Slice(left=8, right=4).direction
-        <SliceDirection.DOWN: 0>
+        DOWN
         >>> Slice(left=4).direction
         >>> Slice(right=4).direction
         """

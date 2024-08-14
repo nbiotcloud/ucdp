@@ -29,7 +29,7 @@ Array Type.
 from typing import Any, ClassVar
 
 from .object import Light, PosArgs
-from .slices import UP, Slice
+from .slices import UP, Slice, SliceDirection
 from .typebase import ACompositeType, BaseType
 
 
@@ -73,17 +73,24 @@ class ArrayType(ACompositeType, Light):
 
     itemtype: BaseType
     depth: Any
-    left: Any = 0
+    left: Any = None
+    right: Any = None
+    direction: SliceDirection = UP
 
     _posargs: ClassVar[PosArgs] = ("itemtype", "depth")
 
-    def __init__(self, itemtype: BaseType, depth: Any, left=0):
-        super().__init__(itemtype=itemtype, depth=depth, left=left)  # type: ignore[call-arg]
+    def __init__(self, itemtype: BaseType, depth: Any, left=None, right=None, direction: SliceDirection = UP):
+        if direction is UP:
+            if (left == 0) and (right == depth - 1):
+                left, right = None, None
+        elif (right == 0) and (left == depth - 1):
+            left, right = None, None
+        super().__init__(itemtype=itemtype, depth=depth, left=left, right=right, direction=direction)  # type: ignore[call-arg]
 
     @property
     def slice_(self):
         """Get Slice of Matrix."""
-        return Slice(left=self.left, width=self.depth, direction=UP)
+        return Slice(left=self.left, right=self.right, width=self.depth, direction=self.direction)
 
     def is_connectable(self, other) -> bool:
         """
@@ -104,10 +111,10 @@ class ArrayType(ACompositeType, Light):
         )
 
     def __getitem__(self, slice_):
-        slice_ = Slice.cast(slice_, direction=UP)
+        slice_ = Slice.cast(slice_)
         if slice_.width == 1:
             return self.itemtype
-        return ArrayType(self.itemtype, slice_.width, left=slice_.left)
+        return self.new(depth=slice_.width, left=slice_.left, right=slice_.right)
 
     @property
     def bits(self):
