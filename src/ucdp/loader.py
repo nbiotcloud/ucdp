@@ -31,7 +31,7 @@ Loader.
 from collections.abc import Iterable
 from pathlib import Path
 
-from ._modloader import build_top, find_modclsrefs, load_modcls
+from ._modloader import build_top, find_modrefs, load_modcls
 from .logging import LOGGER
 from .modbase import BaseMod
 from .moditer import get_mod
@@ -91,6 +91,6 @@ def _load_modcls_dym(modref: ModRef) -> type[BaseMod]:
     try:
         return load_modcls(modref)
     except NameError as exc:
-        modrefs = [str(modref) for _, modref in find_modclsrefs()]
+        modrefs = [str(modref) for modref in find_modrefs()]
         dym = didyoumean(str(modref), modrefs)
         raise NameError(f"{exc!s}{dym}") from None
