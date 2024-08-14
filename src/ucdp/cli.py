@@ -25,6 +25,7 @@
 """Command Line Interface."""
 
 import logging
+from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 
@@ -310,11 +311,10 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, minimal=False
     top = load_top(ctx, top, path, quiet=True)
     console = Console(file=file) if file else ctx.console
     for item in filelist or ["*"]:
-        data = {
-            str(mod): modfilelist.model_dump(exclude_defaults=minimal)
-            for mod, modfilelist in iter_modfilelists(top.mod, item, target=target, maxlevel=maxlevel)
-        }
-        pprint(data, indent_guides=False, console=console)
+        data = defaultdict(list)
+        for mod, modfilelist in iter_modfilelists(top.mod, item, target=target, maxlevel=maxlevel):
+            data[str(mod)].append(modfilelist.model_dump(exclude_defaults=minimal))
+        pprint(dict(data), indent_guides=False, console=console)
 
 
 @ucdp.command(
