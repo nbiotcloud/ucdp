@@ -36,7 +36,7 @@ from pathlib import Path
 from typing import TypeAlias
 
 from .cache import CACHE
-from .modbase import BaseMod
+from .modbase import BaseMod, get_modbaseclss
 from .modref import ModRef, get_modclsname
 from .object import Object
 from .util import LOGGER
@@ -103,8 +103,17 @@ def find_modrefs() -> Iterator[ModRef]:
         yield from _find_modrefs(sys.path, dirpath)
 
 
-@CACHE.loader_cache.anycache()
-def _find_modrefs(envpath, dirpath: Path) -> tuple[ModRef, ...]:  # noqa: C901
+def _find_modrefs_files(modrefs: tuple[ModRef, ...], envpath: list[str], dirpath: Path) -> list[Path]:
+    paths: set[Path] = set()
+    for modref in modrefs:
+        modcls = load_modcls(modref)
+        for basecls in get_modbaseclss(modcls):
+            paths.add(Path(getfile(basecls)))
+    return sorted(paths)
+
+
+@CACHE.loader_cache.anycache(depfilefunc=_find_modrefs_files)
+def _find_modrefs(envpath: list[str], dirpath: Path) -> tuple[ModRef, ...]:  # noqa: C901
     modrefs = []
     for filepath in sorted(dirpath.glob("*.py")):
         pylibname = filepath.parent.name
