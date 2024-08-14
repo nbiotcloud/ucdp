@@ -352,7 +352,7 @@ def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=Fal
         infos = [info for info in infos if info.tb == "Generic"]
     if tag:
         filter_ = namefilter(tag)
-        infos = [info for info in infos if any(filter_(tag) for tag in info.modcls.tags)]
+        infos = [info for info in infos if any(filter_(tag) for tag in info.tags)]
     if names:
         for info in infos:
             print(info.topmodref)
@@ -369,7 +369,7 @@ def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=Fal
                 "X" if info.is_top else "",
                 "X" if info.tb else "",
                 info.modbasecls.__name__,
-                ",".join(sorted(info.modcls.tags)),
+                ",".join(sorted(info.tags)),
             )
         ctx.console.print(table)
 

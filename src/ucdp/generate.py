@@ -33,6 +33,7 @@ from typing import Any
 from makolator import Config, Datamodel, Makolator
 from uniquer import uniquelist
 
+from .cache import CACHE
 from .filelistparser import FileListParser
 from .logging import LOGGER
 from .modbase import BaseMod
@@ -69,7 +70,13 @@ def get_makolator(show_diff: bool = False, verbose: bool = True, paths: Iterable
     """
     diffout = print if show_diff else None
     template_paths = get_template_paths(paths=paths)
-    config = Config(template_paths=template_paths, marker_linelength=80, diffout=diffout, verbose=verbose)
+    config = Config(
+        template_paths=template_paths,
+        marker_linelength=80,
+        diffout=diffout,
+        verbose=verbose,
+        cache_path=CACHE.templates_path,
+    )
     return Makolator(config=config)
 
 
