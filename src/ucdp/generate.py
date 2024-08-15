@@ -123,7 +123,7 @@ def generate(
         if not filepath.exists():
             LOGGER.error("Inplace file %r missing", str(filepath))
         else:
-            makolator.gen(template_filepaths, filepath, context=context)
+            makolator.inplace(template_filepaths, filepath, context=context)
 
     def _gen(template_filepaths, filepath, context):
         makolator.gen(template_filepaths, filepath, context=context)
