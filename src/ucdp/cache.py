@@ -31,11 +31,12 @@ from pathlib import Path
 from shutil import rmtree
 
 from anycache import AnyCache
+from pydantic import BaseModel
 
-from .object import Object
+CACHE_MAXSIZE = 10 * 1024 * 1024
 
 
-class Cache(Object):
+class Cache(BaseModel):
     """UCDP Caching System."""
 
     path: Path | None
@@ -44,6 +45,10 @@ class Cache(Object):
     def init(cls) -> "Cache":
         """Initialize."""
         return Cache(path=get_cachepath())
+
+    def disable(self):
+        """Disable Caching."""
+        self.path = None
 
     def clear(self):
         """Clear Cache."""
@@ -62,7 +67,7 @@ class Cache(Object):
         """Path for Loader."""
         if not self.path:
             return AnyCache(maxsize=0)
-        return AnyCache(cachedir=self.path / "loader", maxsize=None)
+        return AnyCache(cachedir=self.path / "loader", maxsize=CACHE_MAXSIZE)
 
 
 def get_cachepath() -> Path | None:

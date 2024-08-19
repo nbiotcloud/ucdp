@@ -78,7 +78,13 @@ opt_show_diff = click.option(
 )
 opt_maxlevel = click.option("--maxlevel", "-L", type=int, help="Limit to maximum number of hierarchy levels.")
 opt_dry_run = click.option("--dry-run", default=False, is_flag=True, help="Do nothing.")
-opt_maxworkers = click.option("--maxworkers", "-J", type=int, help="Maximum Number of Processes.")
+opt_maxworkers = click.option(
+    "--maxworkers",
+    "-J",
+    type=int,
+    help="Maximum Number of Processes.",
+    envvar="UCDP_MAXWORKERS",
+)
 opt_defines = click.option(
     "--define",
     "-D",

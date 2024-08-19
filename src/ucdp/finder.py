@@ -59,12 +59,12 @@ def find(paths: Paths | None = None, patterns: Patterns | None = None, glob: boo
 
 def _find_infos(paths: Paths | None, pats: tuple[TopModRefPat, ...], glob: bool = False) -> Iterator[TopModRefInfo]:
     with extend_sys_path(paths, use_env_default=True):
-        modclsrefs = tuple(find_modrefs())
+        modrefs = find_modrefs()
         for pat in pats:
             if pat.tb:
                 # testbench with top
                 tbfilter = namefilter(pat.tb)
-                for tbmodref in modclsrefs:
+                for tbmodref in modrefs:
                     # filter by name
                     if not tbfilter(str(tbmodref)):
                         continue
@@ -75,14 +75,14 @@ def _find_infos(paths: Paths | None, pats: tuple[TopModRefPat, ...], glob: bool 
                         continue
                     # search tops
                     modclss = tuple(tbmodcls.dut_modclss)
-                    yield from _find_tops(modclsrefs, pat.top, pat.sub, glob, modclss=modclss, tbmodref=tbmodref)
+                    yield from _find_tops(modrefs, pat.top, pat.sub, glob, modclss=modclss, tbmodref=tbmodref)
             else:
                 # top only
-                yield from _find_tops(modclsrefs, pat.top, pat.sub, glob)
+                yield from _find_tops(modrefs, pat.top, pat.sub, glob)
 
 
 def _find_tops(
-    modclsrefs: tuple[ModRef, ...],
+    modrefs: tuple[ModRef, ...],
     toppat: str,
     subpat: str | None,
     glob: bool,
@@ -90,7 +90,7 @@ def _find_tops(
     tbmodref: ModRef | None = None,
 ) -> Iterator[TopModRefInfo]:
     topfilter = namefilter(toppat)
-    for topmodref in modclsrefs:
+    for topmodref in modrefs:
         # filter by name
         if not topfilter(str(topmodref)):
             continue

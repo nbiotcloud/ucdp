@@ -80,3 +80,11 @@ def _get_copyright(path: Path) -> str:
             else:
                 break
     return "".join(lines)
+
+
+def get_maxworkers() -> int | None:
+    """Maximum Number of Workers."""
+    try:
+        return int(os.environ["UCDP_MAXWORKERS"])
+    except (KeyError, ValueError):
+        return None
