@@ -44,7 +44,7 @@ from .top import Top
 from .util import extend_sys_path
 
 
-def load(topmodref: TopModRef | str, paths: Iterable[Path] | None = None) -> Top:
+def load(topmodref: TopModRef | Path | str, paths: Iterable[Path] | None = None) -> Top:
     """
     Load Module from ``topmodref`` and return :any:`Top`.
 

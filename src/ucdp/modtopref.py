@@ -25,6 +25,7 @@
 """Top Reference."""
 
 import re
+from pathlib import Path
 from typing import ClassVar, Union
 
 from .modref import ModRef
@@ -92,10 +93,16 @@ class TopModRef(LightObject):
         return result
 
     @staticmethod
-    def cast(value: Union["TopModRef", str]) -> "TopModRef":
+    def cast(value: Union["TopModRef", Path, str]) -> "TopModRef":
         """Cast `value` to `TopModRef`."""
         if isinstance(value, TopModRef):
             return value
+
+        if isinstance(value, Path):
+            path = value.resolve()
+            modname = path.stem
+            libname = path.parent.name
+            return TopModRef(top=ModRef(libname=libname, modname=modname))
 
         mat = RE_TOPMODREF.fullmatch(value)
         if mat:

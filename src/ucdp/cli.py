@@ -46,6 +46,7 @@ from .cliutil import (
     auto_path,
     auto_top,
     defines2data,
+    guess_path,
     opt_defines,
     opt_dry_run,
     opt_file,
@@ -64,7 +65,7 @@ from .generate import clean, generate, get_makolator, render_generate, render_in
 from .iterutil import namefilter
 from .loader import load
 from .modfilelist import iter_modfilelists
-from .modtopref import PAT_TOPMODREF
+from .modtopref import PAT_TOPMODREF, TopModRef
 from .top import Top
 
 patch()
@@ -122,11 +123,13 @@ def get_group(help=None):  # pragma: no cover
 def load_top(ctx: Ctx, top: str, paths: Iterable[str | Path], quiet: bool = False) -> Top:
     """Load Top Module."""
     lpaths = [Path(path) for path in paths]
+    # Check if top seems to be some kind of file path
+    topmodref = TopModRef.cast(guess_path(top) or top)
     if quiet:
-        return load(top, paths=lpaths)
-    with ctx.console.status(f"Loading {top!r}"):
-        result = load(top, paths=lpaths)
-    ctx.console.log(f"{top!r} checked.")
+        return load(topmodref, paths=lpaths)
+    with ctx.console.status(f"Loading '{topmodref!s}'"):
+        result = load(topmodref, paths=lpaths)
+    ctx.console.log(f"'{topmodref!s}' checked.")
     return result
 
 

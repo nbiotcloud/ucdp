@@ -120,3 +120,11 @@ arg_template_filepaths = click.argument(
 def defines2data(defines: list[str]) -> dict[str, str]:
     """Convert defines to data."""
     return dict(define.split("=", 1) if "=" in define else (define, None) for define in defines)
+
+
+def guess_path(arg: str) -> Path | None:
+    """Return Path if arg seems to be a file path."""
+    path = Path(arg)
+    if path.exists() or len(path.parts) > 1:
+        return path
+    return None
