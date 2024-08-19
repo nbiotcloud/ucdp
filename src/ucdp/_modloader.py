@@ -29,6 +29,7 @@ Loading And Searching Facilty.
 import re
 import sys
 from collections.abc import Iterable, Iterator
+from concurrent.futures import ThreadPoolExecutor
 from functools import lru_cache
 from importlib import import_module
 from inspect import getfile, isclass
@@ -39,7 +40,7 @@ from .cache import CACHE
 from .modbase import BaseMod, get_modbaseclss
 from .modref import ModRef, get_modclsname
 from .object import Object
-from .util import LOGGER
+from .util import LOGGER, get_maxworkers
 
 Patterns: TypeAlias = Iterable[str]
 Paths: TypeAlias = Iterable[Path]
@@ -89,9 +90,10 @@ def load_modcls(modref: ModRef) -> type[BaseMod]:
     return modcls
 
 
-def find_modrefs() -> Iterator[ModRef]:
+def find_modrefs() -> tuple[ModRef, ...]:
     # determine directories with python files
     dirpaths: set[Path] = set()
+    modrefs: list[ModRef] = []
     for syspathstr in sys.path:
         for filepath in Path(syspathstr).resolve().glob("*/*.py"):
             dirpath = filepath.parent
@@ -99,12 +101,23 @@ def find_modrefs() -> Iterator[ModRef]:
                 continue
             dirpaths.add(dirpath)
 
-    for dirpath in sorted(dirpaths):
-        yield from _find_modrefs(sys.path, dirpath)
+    _find_modrefs_cached = CACHE.loader_cache.anycache(depfilefunc=_find_modrefs_files)(_find_modrefs)
+
+    maxworkers = get_maxworkers()
+    with ThreadPoolExecutor(max_workers=maxworkers) as exe:
+        # start
+        jobs = [
+            exe.submit(_find_modrefs_cached, sys.path, tuple(sorted(dirpath.glob("*.py"))))
+            for dirpath in sorted(dirpaths)
+        ]
+        # collect
+        for job in jobs:
+            modrefs.extend(job.result())
+    return tuple(modrefs)
 
 
-def _find_modrefs_files(modrefs: tuple[ModRef, ...], envpath: list[str], dirpath: Path) -> list[Path]:
-    paths: set[Path] = set()
+def _find_modrefs_files(modrefs: tuple[ModRef, ...], envpath: list[str], filepaths: tuple[Path, ...]) -> list[Path]:
+    paths: set[Path] = set(filepaths)
     for modref in modrefs:
         modcls = load_modcls(modref)
         for basecls in get_modbaseclss(modcls):
@@ -112,10 +125,9 @@ def _find_modrefs_files(modrefs: tuple[ModRef, ...], envpath: list[str], dirpath
     return sorted(paths)
 
 
-@CACHE.loader_cache.anycache(depfilefunc=_find_modrefs_files)
-def _find_modrefs(envpath: list[str], dirpath: Path) -> tuple[ModRef, ...]:  # noqa: C901
+def _find_modrefs(envpath: list[str], filepaths: tuple[Path, ...]) -> tuple[ModRef, ...]:  # noqa: C901
     modrefs = []
-    for filepath in sorted(dirpath.glob("*.py")):
+    for filepath in filepaths:
         pylibname = filepath.parent.name
         pymodname = filepath.stem
         if pymodname.startswith("_"):
@@ -136,7 +148,7 @@ def _find_modrefs(envpath: list[str], dirpath: Path) -> tuple[ModRef, ...]:  # n
         try:
             pymod = import_module(f"{pylibname}.{pymodname}")
         except Exception as exc:
-            LOGGER.info(f"Skipping {str(filepath)!r} ({exc})")
+            LOGGER.warning(f"Skipping {str(filepath)!r} ({exc})")
             continue
 
         # Inspect Module

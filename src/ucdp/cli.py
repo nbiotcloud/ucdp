@@ -38,6 +38,7 @@ from rich.pretty import pprint
 from rich.table import Table
 
 from ._cligroup import MainGroup
+from .cache import CACHE
 from .cliutil import (
     PathType,
     arg_filelist,
@@ -89,9 +90,10 @@ class Ctx(BaseModel):
 
 @click.group(cls=MainGroup, context_settings={"help_option_names": ["-h", "--help"]})
 @click.option("-v", "--verbose", count=True, help="Increase Verbosity.")
+@click.option("-C", "--no-cache", is_flag=True, help="Disable Caching.")
 @click.version_option()
 @click.pass_context
-def ucdp(ctx, verbose=0):
+def ucdp(ctx, verbose=0, no_cache=False):
     """Unified Chip Design Platform."""
     level = _LOGLEVELMAP.get(verbose, logging.DEBUG)
     handler = RichHandler(
@@ -102,6 +104,8 @@ def ucdp(ctx, verbose=0):
         console=Console(stderr=True),
     )
     logging.basicConfig(level=level, format="%(message)s", handlers=[handler])
+    if no_cache:
+        CACHE.disable()
     ctx.obj = Ctx(console=Console(log_time=False, log_path=False))
 
 
