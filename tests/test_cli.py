@@ -52,12 +52,7 @@ def test_check(runner, example_simple):
     """Check Command."""
     result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart"])
     assert result.exit_code == 0
-    _assert_output(
-        result,
-        [
-            "'uart_lib.uart' checked.",
-        ],
-    )
+    _assert_output(result, ["'uart_lib.uart' checked."])
 
     result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart2"])
     assert result.exit_code == 1
@@ -339,3 +334,10 @@ def test_autocomplete_path(tmp_path):
         assert u.cliutil.auto_path(None, None, "a") == ["aaa.txt", "aab.txt", "ac.txt"]
         assert u.cliutil.auto_path(None, None, "aa") == ["aaa.txt", "aab.txt"]
         assert u.cliutil.auto_path(None, None, "b") == []
+
+
+def test_toppath(runner, example_simple):
+    """Check Command."""
+    result = runner.invoke(u.cli.ucdp, ["check", str(example_simple / "uart_lib" / "uart.py")])
+    assert result.exit_code == 0
+    _assert_output(result, ["'uart_lib.uart' checked."])
