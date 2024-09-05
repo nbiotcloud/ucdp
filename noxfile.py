@@ -41,6 +41,7 @@ os.environ.update(
     }
 )
 nox.options.sessions = ["format", "test", "checkdeps", "checktypes", "doc"]
+nox.options.reuse_existing_virtualenvs = True
 
 
 @nox.session()
