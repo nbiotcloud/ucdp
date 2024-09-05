@@ -28,6 +28,8 @@ from inspect import getfile
 from pathlib import Path
 from typing import Literal
 
+from pydantic_core import PydanticUndefined
+
 from .mod import AMod
 from .modbase import BaseMod, ModCls, ModTags
 from .modconfigurable import AConfigurableMod
@@ -78,7 +80,10 @@ def is_top(modcls: ModCls) -> bool:
     """Module is Direct Loadable."""
     if issubclass(modcls, AGenericTbMod):
         return modcls.build_dut.__qualname__ != AGenericTbMod.build_dut.__qualname__
-    if issubclass(modcls, (AConfigurableMod, AMod, ATbMod)):
+    if issubclass(modcls, AConfigurableMod):
+        config_field = modcls.model_fields["config"]
+        return config_field.default is not PydanticUndefined
+    if issubclass(modcls, (AMod, ATbMod)):
         return True
     return False
 

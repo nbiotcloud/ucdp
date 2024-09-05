@@ -4,10 +4,8 @@
 │ glbl_lib.clk_gate                     │  X  │     │             AMod │      │
 │ tests.test_flipflops.FlipFlopMod      │  X  │     │             AMod │      │
 │ tests.test_modconfigurable.AnotherMod │  X  │     │ AConfigurableMod │      │
-│ tests.test_modconfigurable.MyMod      │  X  │     │ AConfigurableMod │      │
 │ tests.test_modconfigurable.MyOtherMod │  X  │     │ AConfigurableMod │      │
 │ tests.test_modconfigurable.RootMod    │  X  │     │             AMod │      │
-│ tests.test_modconfigurable.SubMod     │  X  │     │ AConfigurableMod │      │
 │ tests.test_modconfigurable.TopMod     │  X  │     │             AMod │      │
 │ tests.test_modfilelist.FlavorMod      │  X  │     │             AMod │      │
 │ tests.test_modfilelist.MultiMod       │  X  │     │             AMod │      │
