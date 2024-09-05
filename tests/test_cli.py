@@ -250,6 +250,18 @@ def test_ls(runner, example_simple, testdata, prjroot):
     assert_refdata(test_ls, prjroot)
 
 
+def test_ls_base(runner, example_simple, testdata, prjroot):
+    """List Command with Base."""
+    _run(runner, prjroot, ["ls", "-B"])
+    assert_refdata(test_ls_base, prjroot)
+
+
+def test_ls_filepath(runner, example_simple, testdata, prjroot):
+    """List Command With Filepath."""
+    _run(runner, prjroot, ["ls", "-F"])
+    assert_refdata(test_ls_filepath, prjroot)
+
+
 def test_ls_names(runner, example_simple, testdata, prjroot):
     """List with Names Only."""
     _run(runner, prjroot, ["ls", "-n"])

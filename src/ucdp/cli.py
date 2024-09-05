@@ -67,6 +67,7 @@ from .iterutil import namefilter
 from .loader import load
 from .modfilelist import iter_modfilelists
 from .modtopref import PAT_TOPMODREF, TopModRef
+from .pathutil import relative
 from .top import Top
 
 patch()
@@ -345,9 +346,22 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, minimal=False
 @click.option("--top", "-t", default=False, is_flag=True, help="List loadable top modules only.")
 @click.option("--tb", "-b", default=False, is_flag=True, help="List testbench modules only.")
 @click.option("--generic-tb", "-g", default=False, is_flag=True, help="List Generic Testbench modules only.")
+@click.option("--base", "-B", default=False, is_flag=True, help="Show Base Classes.")
+@click.option("--filepath", "-F", default=False, is_flag=True, help="Show File Path.")
 @opt_tag
 @pass_ctx
-def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=False, tag=None):
+def ls(  # noqa: C901
+    ctx,
+    path,
+    pattern=None,
+    names=False,
+    top=False,
+    tb=False,
+    generic_tb=False,
+    tag=None,
+    base=False,
+    filepath=False,
+):
     """List Modules."""
     with ctx.console.status("Searching"):
         infos = find(path, patterns=pattern)
@@ -368,16 +382,23 @@ def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=Fal
         table.add_column("Reference")
         table.add_column("Top", justify="center")
         table.add_column("Tb ", justify="center")
-        table.add_column("Bases on", justify="right")
         table.add_column("Tags")
+        if base:
+            table.add_column("Bases on", justify="right")
+        if filepath:
+            table.add_column("Filepath")
         for info in infos:
-            table.add_row(
+            row = [
                 str(info.topmodref),
                 "X" if info.is_top else "",
                 "X" if info.tb else "",
-                info.modbasecls.__name__,
                 ",".join(sorted(info.tags)),
-            )
+            ]
+            if base:
+                row.append(info.modbasecls.__name__)
+            if filepath:
+                row.append(str(relative(info.filepath)))
+            table.add_row(*row)
         ctx.console.print(table)
 
 

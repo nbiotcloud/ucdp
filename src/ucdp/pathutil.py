@@ -118,3 +118,12 @@ def startswith_envvar(path: Path, strict: bool = False, barename: bool = False) 
 
 def _is_pattern(pattern: str) -> bool:
     return bool(_RE_PAT.match(pattern))
+
+
+def relative(path: Path, base: Path | None = None) -> Path:
+    """Relative."""
+    base = base or Path().resolve()
+    try:
+        return path.relative_to(base)
+    except ValueError:
+        return Path(os.path.relpath(str(path), str(base)))

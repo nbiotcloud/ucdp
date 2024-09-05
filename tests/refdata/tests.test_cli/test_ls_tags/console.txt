@@ -1,8 +1,8 @@
-┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━━━━━┳━━━━━━┓
-┃ Reference              ┃ Top ┃ Tb  ┃ Bases on ┃ Tags ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━━━━━╇━━━━━━┩
-│ tests.test_mods.IpMod  │  X  │     │     AMod │ ip   │
-│ tests.test_mods.SubMod │  X  │     │     AMod │ ip   │
-│ tests.test_mods.TopMod │  X  │     │     AMod │ ippp │
-│ uart_lib.uart          │  X  │     │     AMod │ intf │
-└────────────────────────┴─────┴─────┴──────────┴──────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┓
+┃ Reference              ┃ Top ┃ Tb  ┃ Tags ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━┩
+│ tests.test_mods.IpMod  │  X  │     │ ip   │
+│ tests.test_mods.SubMod │  X  │     │ ip   │
+│ tests.test_mods.TopMod │  X  │     │ ippp │
+│ uart_lib.uart          │  X  │     │ intf │
+└────────────────────────┴─────┴─────┴──────┘
