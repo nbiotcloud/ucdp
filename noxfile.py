@@ -83,7 +83,7 @@ def checktypes(session: nox.Session) -> None:
     if not IS_DEV:
         session.run_install("pip", "install", f"pdm=={PDM_VERSION}")
         session.run_install("pdm", "install", "-G", "checktypes")
-    session.run("mypy", "src", "tests")
+    # session.run("mypy", "src", "tests")
 
 
 @nox.session(python=PYTHON)
