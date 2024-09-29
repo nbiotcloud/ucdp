@@ -434,7 +434,7 @@ def overview(ctx, top, path, minimal=False, file=None, tag=None):
     # Load quiet, otherwise stdout is messed-up
     top = load_top(ctx, top, path, quiet=True)
     data = {"minimal": minimal, "tags": tag}
-    render_generate(top, [PATH / "ucdp-templates" / "overview.txt.mako"], genfile=file, data=data)
+    render_generate(top, [PATH / "ucdp-templates" / "overview.txt.mako"], genfile=file, data=data, no_stat=True)
 
 
 @ucdp.group(context_settings={"help_option_names": ["-h", "--help"]})
