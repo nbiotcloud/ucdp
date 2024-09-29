@@ -1,8 +1,8 @@
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━┓
-┃ Reference                 ┃ Top ┃ Tb  ┃      Bases on ┃ Tags ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━┩
-│ glbl_lib.regf_tb          │     │  X  │ AGenericTbMod │      │
-│ tests.test_modtb.GenTbMod │  X  │  X  │ AGenericTbMod │      │
-│ tests.test_modtb.TbMod    │  X  │  X  │        ATbMod │      │
-│ tests.test_modtb.TopTbMod │  X  │  X  │        ATbMod │      │
-└───────────────────────────┴─────┴─────┴───────────────┴──────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┓
+┃ Reference                 ┃ Top ┃ Tb  ┃ Tags ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━┩
+│ glbl_lib.regf_tb          │     │  X  │      │
+│ tests.test_modtb.GenTbMod │  X  │  X  │      │
+│ tests.test_modtb.TbMod    │  X  │  X  │      │
+│ tests.test_modtb.TopTbMod │  X  │  X  │      │
+└───────────────────────────┴─────┴─────┴──────┘

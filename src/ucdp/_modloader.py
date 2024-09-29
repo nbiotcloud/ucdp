@@ -37,6 +37,7 @@ from pathlib import Path
 from typing import TypeAlias
 
 from .cache import CACHE
+from .consts import PKG_PATHS
 from .modbase import BaseMod, get_modbaseclss
 from .modref import ModRef, get_modclsname
 from .object import Object
@@ -90,12 +91,15 @@ def load_modcls(modref: ModRef) -> type[BaseMod]:
     return modcls
 
 
-def find_modrefs() -> tuple[ModRef, ...]:
+def find_modrefs(local: bool | None = None) -> tuple[ModRef, ...]:
     # determine directories with python files
     dirpaths: set[Path] = set()
     modrefs: list[ModRef] = []
     for syspathstr in sys.path:
-        for filepath in Path(syspathstr).resolve().glob("*/*.py"):
+        syspath = Path(syspathstr).resolve()
+        if local is not None and local is any(syspath.is_relative_to(pkg_path) for pkg_path in PKG_PATHS):
+            continue
+        for filepath in syspath.glob("*/*.py"):
             dirpath = filepath.parent
             if dirpath.name.startswith("_") or dirpath.name == "ucdp":
                 continue

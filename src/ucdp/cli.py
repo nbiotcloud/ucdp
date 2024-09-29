@@ -67,6 +67,7 @@ from .iterutil import namefilter
 from .loader import load
 from .modfilelist import iter_modfilelists
 from .modtopref import PAT_TOPMODREF, TopModRef
+from .pathutil import relative
 from .top import Top
 
 patch()
@@ -341,16 +342,33 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, minimal=False
 )
 @opt_path
 @click.argument("pattern", nargs=-1, shell_complete=auto_top)
-@click.option("--names", "-n", default=False, is_flag=True, help="Just print names without details")
+@click.option("--names", "-n", default=False, is_flag=True, help="Just print names")
 @click.option("--top", "-t", default=False, is_flag=True, help="List loadable top modules only.")
 @click.option("--tb", "-b", default=False, is_flag=True, help="List testbench modules only.")
 @click.option("--generic-tb", "-g", default=False, is_flag=True, help="List Generic Testbench modules only.")
+@click.option("--local/--no-local", "-l/-L", default=None, is_flag=True, help="List local/non-local modules only.")
+@click.option("--base", "-B", default=False, is_flag=True, help="Show Base Classes.")
+@click.option("--filepath", "-f", default=False, is_flag=True, help="Show File Path.")
+@click.option("--abs-filepath", "-F", default=False, is_flag=True, help="Show Absolute File Path.")
 @opt_tag
 @pass_ctx
-def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=False, tag=None):
+def ls(  # noqa: C901
+    ctx,
+    path,
+    pattern=None,
+    names=False,
+    top=False,
+    tb=False,
+    local=None,
+    generic_tb=False,
+    tag=None,
+    base=False,
+    filepath=False,
+    abs_filepath=False,
+):
     """List Modules."""
     with ctx.console.status("Searching"):
-        infos = find(path, patterns=pattern)
+        infos = find(path, patterns=pattern, local=local)
     if top:
         infos = [info for info in infos if info.is_top]
     if tb:
@@ -360,24 +378,41 @@ def ls(ctx, path, pattern=None, names=False, top=False, tb=False, generic_tb=Fal
     if tag:
         filter_ = namefilter(tag)
         infos = [info for info in infos if any(filter_(tag) for tag in info.tags)]
+
+    def fill_row(row, info):
+        if base:
+            row.append(info.modbasecls.__name__)
+        if filepath:
+            row.append(str(relative(info.filepath)))
+        if abs_filepath:
+            row.append(str(info.filepath))
+
     if names:
         for info in infos:
-            print(info.topmodref)
+            row = [info.topmodref]
+            fill_row(row, info)
+            print(*row)
     else:
-        table = Table()
+        table = Table(expand=filepath or abs_filepath)
         table.add_column("Reference")
         table.add_column("Top", justify="center")
         table.add_column("Tb ", justify="center")
-        table.add_column("Bases on", justify="right")
         table.add_column("Tags")
+        if base:
+            table.add_column("Bases on", justify="right")
+        if filepath:
+            table.add_column("Filepath")
+        if abs_filepath:
+            table.add_column("Absolute Filepath")
         for info in infos:
-            table.add_row(
+            row = [
                 str(info.topmodref),
                 "X" if info.is_top else "",
                 "X" if info.tb else "",
-                info.modbasecls.__name__,
                 ",".join(sorted(info.tags)),
-            )
+            ]
+            fill_row(row, info)
+            table.add_row(*row)
         ctx.console.print(table)
 
 
