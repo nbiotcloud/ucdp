@@ -49,17 +49,24 @@ from .modtoprefinfo import TopModRefInfo, is_top
 from .util import extend_sys_path
 
 
-def find(paths: Paths | None = None, patterns: Patterns | None = None, glob: bool = False) -> Iterator[TopModRefInfo]:
+def find(
+    paths: Paths | None = None,
+    patterns: Patterns | None = None,
+    glob: bool = False,
+    local: bool | None = None,
+) -> Iterator[TopModRefInfo]:
     """List All Available Module References."""
     pats = tuple(get_topmodrefpats(patterns))
-    infos = unique(_find_infos(paths, pats, glob), key=lambda modrefinfo: str(modrefinfo.topmodref))
+    infos = unique(_find_infos(paths, pats, glob, local=local), key=lambda modrefinfo: str(modrefinfo.topmodref))
 
     yield from sorted(infos, key=lambda modrefinfo: str(modrefinfo.topmodref))
 
 
-def _find_infos(paths: Paths | None, pats: tuple[TopModRefPat, ...], glob: bool = False) -> Iterator[TopModRefInfo]:
+def _find_infos(
+    paths: Paths | None, pats: tuple[TopModRefPat, ...], glob: bool = False, local: bool | None = None
+) -> Iterator[TopModRefInfo]:
     with extend_sys_path(paths, use_env_default=True):
-        modrefs = find_modrefs()
+        modrefs = find_modrefs(local=local)
         for pat in pats:
             if pat.tb:
                 # testbench with top

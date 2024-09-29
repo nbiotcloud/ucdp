@@ -30,6 +30,7 @@ from typing import Literal
 
 from pydantic_core import PydanticUndefined
 
+from .consts import PKG_PATHS
 from .mod import AMod
 from .modbase import BaseMod, ModCls, ModTags
 from .modconfigurable import AConfigurableMod
@@ -53,17 +54,20 @@ class TopModRefInfo(Object):
     modbasecls: ModCls
     filepath: Path
     is_top: bool
+    is_local: bool
     tb: TbType
 
     @staticmethod
     def create(topmodref: TopModRef, modcls: ModCls) -> "TopModRefInfo":
         """Create."""
+        filepath = Path(getfile(modcls))
         return TopModRefInfo(
             topmodref=topmodref,
             tags=modcls.tags,
             modbasecls=get_modbasecls(modcls),
-            filepath=Path(getfile(modcls)),
+            filepath=filepath,
             is_top=is_top(modcls),
+            is_local=is_local(filepath),
             tb=get_tb(modcls),
         )
 
@@ -74,6 +78,11 @@ def get_modbasecls(modcls: ModCls) -> type[BaseMod] | None:
         if issubclass(modcls, basecls):
             return basecls
     return None  # pragma: no cover
+
+
+def is_local(filepath: Path) -> bool:
+    """Determine If Module Is From Local Environment And Not Installed Through A Package."""
+    return not any(filepath.is_relative_to(pkg_path) for pkg_path in PKG_PATHS)
 
 
 def is_top(modcls: ModCls) -> bool:

@@ -256,10 +256,28 @@ def test_ls_base(runner, example_simple, testdata, prjroot):
     assert_refdata(test_ls_base, prjroot)
 
 
+def test_ls_local(runner, example_simple, testdata, prjroot):
+    """List Command - Local Only."""
+    _run(runner, prjroot, ["ls", "--local"])
+    assert_refdata(test_ls_local, prjroot)
+
+
+def test_ls_nonlocal(runner, example_simple, testdata, prjroot):
+    """List Command - Non-Local Only."""
+    _run(runner, prjroot, ["ls", "--no-local"])
+    assert_refdata(test_ls_nonlocal, prjroot)
+
+
 def test_ls_filepath(runner, example_simple, testdata, prjroot):
     """List Command With Filepath."""
-    _run(runner, prjroot, ["ls", "-F"])
+    _run(runner, prjroot, ["ls", "-fn"])
     assert_refdata(test_ls_filepath, prjroot)
+
+
+def test_ls_filepath_abs(runner, example_simple, testdata, prjroot):
+    """List Command With Filepath."""
+    _run(runner, prjroot, ["ls", "-Fn"])
+    assert_refdata(test_ls_filepath_abs, prjroot)
 
 
 def test_ls_names(runner, example_simple, testdata, prjroot):

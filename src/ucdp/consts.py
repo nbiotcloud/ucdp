@@ -25,6 +25,7 @@
 """Constants."""
 
 import re
+import sys
 from pathlib import Path
 from typing import Literal
 
@@ -48,3 +49,5 @@ Gen = Literal["no", "inplace", "full"]
 """Gen."""
 
 PATH = Path(__file__).parent
+
+PKG_PATHS = {sys.prefix, sys.base_prefix}

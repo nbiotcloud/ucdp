@@ -1,38 +1,34 @@
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Reference                   ┃ Top ┃ Tb  ┃ Tags ┃ Filepath                    ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ glbl_lib.clk_gate           │  X  │     │      │ src/ucdp/examples/simple/g… │
-│ glbl_lib.regf               │     │     │ bus  │ src/ucdp/examples/simple/g… │
-│ glbl_lib.regf_tb            │     │  X  │      │ src/ucdp/examples/simple/g… │
-│ tests.test_flipflops.FlipF… │  X  │     │      │ tests/test_flipflops.py     │
-│ tests.test_modconfigurable… │  X  │     │      │ tests/test_modconfigurable… │
-│ tests.test_modconfigurable… │     │     │      │ tests/test_modconfigurable… │
-│ tests.test_modconfigurable… │  X  │     │      │ tests/test_modconfigurable… │
-│ tests.test_modconfigurable… │  X  │     │      │ tests/test_modconfigurable… │
-│ tests.test_modconfigurable… │     │     │      │ tests/test_modconfigurable… │
-│ tests.test_modconfigurable… │  X  │     │      │ tests/test_modconfigurable… │
-│ tests.test_modfilelist.Fla… │  X  │     │      │ tests/test_modfilelist.py   │
-│ tests.test_modfilelist.Mul… │  X  │     │      │ tests/test_modfilelist.py   │
-│ tests.test_mods.DeclMod     │  X  │     │      │ tests/test_mods.py          │
-│ tests.test_mods.DocMod      │  X  │     │      │ tests/test_mods.py          │
-│ tests.test_mods.IpMod       │  X  │     │ ip   │ tests/test_mods.py          │
-│ tests.test_mods.NoBuildMod  │  X  │     │      │ tests/test_mods.py          │
-│ tests.test_mods.NoNameMod   │  X  │     │      │ tests/test_mods.py          │
-│ tests.test_mods.ParamMod    │  X  │     │      │ tests/test_mods.py          │
-│ tests.test_mods.SomeMod     │  X  │     │      │ tests/test_mods.py          │
-│ tests.test_mods.SomeSomeMod │  X  │     │      │ tests/test_mods.py          │
-│ tests.test_mods.SubMod      │  X  │     │ ip   │ tests/test_mods.py          │
-│ tests.test_mods.TopMod      │  X  │     │ ippp │ tests/test_mods.py          │
-│ tests.test_mods.WrongName   │  X  │     │      │ tests/test_mods.py          │
-│ tests.test_modtailored.Tai… │     │     │      │ tests/test_modtailored.py   │
-│ tests.test_modtailored.Top… │  X  │     │      │ tests/test_modtailored.py   │
-│ tests.test_modtb.DutMod     │     │     │      │ tests/test_modtb.py         │
-│ tests.test_modtb.GenTbMod   │  X  │  X  │      │ tests/test_modtb.py         │
-│ tests.test_modtb.SubMod     │  X  │     │      │ tests/test_modtb.py         │
-│ tests.test_modtb.TbMod      │  X  │  X  │      │ tests/test_modtb.py         │
-│ tests.test_modtb.TopMod     │  X  │     │      │ tests/test_modtb.py         │
-│ tests.test_modtb.TopTbMod   │  X  │  X  │      │ tests/test_modtb.py         │
-│ tests.test_muxes.MuxMod     │  X  │     │      │ tests/test_muxes.py         │
-│ uart_lib.uart               │  X  │     │ intf │ src/ucdp/examples/simple/u… │
-│ uart_lib.uart.UartCoreMod   │     │     │      │ src/ucdp/examples/simple/u… │
-└─────────────────────────────┴─────┴─────┴──────┴─────────────────────────────┘
+glbl_lib.clk_gate src/ucdp/examples/simple/glbl_lib/clk_gate.py
+glbl_lib.regf src/ucdp/examples/simple/glbl_lib/regf.py
+glbl_lib.regf_tb src/ucdp/examples/simple/glbl_lib/regf_tb.py
+tests.test_flipflops.FlipFlopMod tests/test_flipflops.py
+tests.test_modconfigurable.AnotherMod tests/test_modconfigurable.py
+tests.test_modconfigurable.MyMod tests/test_modconfigurable.py
+tests.test_modconfigurable.MyOtherMod tests/test_modconfigurable.py
+tests.test_modconfigurable.RootMod tests/test_modconfigurable.py
+tests.test_modconfigurable.SubMod tests/test_modconfigurable.py
+tests.test_modconfigurable.TopMod tests/test_modconfigurable.py
+tests.test_modfilelist.FlavorMod tests/test_modfilelist.py
+tests.test_modfilelist.MultiMod tests/test_modfilelist.py
+tests.test_mods.DeclMod tests/test_mods.py
+tests.test_mods.DocMod tests/test_mods.py
+tests.test_mods.IpMod tests/test_mods.py
+tests.test_mods.NoBuildMod tests/test_mods.py
+tests.test_mods.NoNameMod tests/test_mods.py
+tests.test_mods.ParamMod tests/test_mods.py
+tests.test_mods.SomeMod tests/test_mods.py
+tests.test_mods.SomeSomeMod tests/test_mods.py
+tests.test_mods.SubMod tests/test_mods.py
+tests.test_mods.TopMod tests/test_mods.py
+tests.test_mods.WrongName tests/test_mods.py
+tests.test_modtailored.TailMod tests/test_modtailored.py
+tests.test_modtailored.TopMod tests/test_modtailored.py
+tests.test_modtb.DutMod tests/test_modtb.py
+tests.test_modtb.GenTbMod tests/test_modtb.py
+tests.test_modtb.SubMod tests/test_modtb.py
+tests.test_modtb.TbMod tests/test_modtb.py
+tests.test_modtb.TopMod tests/test_modtb.py
+tests.test_modtb.TopTbMod tests/test_modtb.py
+tests.test_muxes.MuxMod tests/test_muxes.py
+uart_lib.uart src/ucdp/examples/simple/uart_lib/uart.py
+uart_lib.uart.UartCoreMod src/ucdp/examples/simple/uart_lib/uart.py
