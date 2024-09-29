@@ -37,7 +37,7 @@ from .filelistparser import FileListParser
 from .iterutil import namefilter
 from .modbase import BaseMod, get_modbaseclss
 from .moditer import ModPostIter
-from .object import Field, NamedLightObject
+from .object import Field, IdentLightObject
 from .pathutil import improved_resolve
 
 Paths = tuple[Path, ...]
@@ -66,7 +66,7 @@ These placeholder are filled during `resolve`.
 Flavors: TypeAlias = tuple[str, ...]
 
 
-class ModFileList(NamedLightObject):
+class ModFileList(IdentLightObject):
     """
     Module File List.
 
