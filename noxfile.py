@@ -42,46 +42,55 @@ os.environ.update(
 )
 nox.options.sessions = ["format", "test", "checkdeps", "checktypes", "doc"]
 
+IS_DEV = bool(int(os.environ.get("DEV", "0")))
+PYTHON = False if IS_DEV else None
+PDM_VERSION = "2.18.1"
 
-@nox.session()
+
+@nox.session(python=PYTHON)
 def format(session: nox.Session) -> None:
     """Run Code Formatter and Checks."""
-    _init(session)
-    session.run_always("pdm", "install", "-G", "format")
+    if not IS_DEV:
+        session.run_install("pip", "install", f"pdm=={PDM_VERSION}")
+        session.run_install("pdm", "install", "-G", "format")
     session.run("pre-commit", "run", "--all-files")
 
 
-@nox.session()
+@nox.session(python=PYTHON)
 def test(session: nox.Session) -> None:
     """Run Test - Additional Arguments are forwarded to `pytest`."""
-    _init(session)
-    session.run_always("pdm", "install", "-G", "test")
+    if not IS_DEV:
+        session.run_install("pip", "install", f"pdm=={PDM_VERSION}")
+        session.run_install("pdm", "install", "-G", "test")
     session.run("pytest", "-vv", *session.posargs)
     htmlcovfile = pathlib.Path().resolve() / "htmlcov" / "index.html"
     print(f"Coverage report:\n\n    file://{htmlcovfile!s}\n")
 
 
-@nox.session()
+@nox.session(python=PYTHON)
 def checkdeps(session: nox.Session) -> None:
     """Check Dependencies."""
-    _init(session)
-    session.run_always("pdm", "install")
+    if not IS_DEV:
+        session.run_install("pip", "install", f"pdm=={PDM_VERSION}")
+        session.run_install("pdm", "install")
     session.run("python", "-c", "import ucdp")
 
 
-@nox.session()
+@nox.session(python=PYTHON)
 def checktypes(session: nox.Session) -> None:
     """Run Type Checks."""
-    _init(session)
-    session.run_always("pdm", "install", "-G", "checktypes")
+    if not IS_DEV:
+        session.run_install("pip", "install", f"pdm=={PDM_VERSION}")
+        session.run_install("pdm", "install", "-G", "checktypes")
     session.run("mypy", "src", "tests")
 
 
-@nox.session()
+@nox.session(python=PYTHON)
 def doc(session: nox.Session) -> None:
     """Build Documentation."""
-    _init(session)
-    session.run_always("pdm", "install", "-G", "doc")
+    if not IS_DEV:
+        session.run_install("pip", "install", f"pdm=={PDM_VERSION}")
+        session.run_install("pdm", "install", "-G", "doc")
     session.run("mkdocs", "build")
     shutil.make_archive("docs", "zip", "site")
     docindexfile = pathlib.Path().resolve() / "site" / "index.html"
@@ -91,24 +100,17 @@ def doc(session: nox.Session) -> None:
 @nox.session(name="doc-serve")
 def doc_serve(session: nox.Session) -> None:
     """Build Documentation and serve via HTTP."""
-    _init(session)
-    session.run_always("pdm", "install", "-G", "doc")
+    if not IS_DEV:
+        session.run_install("pip", "install", f"pdm=={PDM_VERSION}")
+        session.run_install("pdm", "install", "-G", "doc")
     session.run("mkdocs", "serve", "--no-strict")
 
 
 @nox.session()
 def dev(session: nox.Session) -> None:
     """Development Environment  - Additional Arguments Are Executed."""
-    _init(session)
-    session.run_always("pdm", "install", "-G", ":all")
+    session.run_install("pip", "install", f"pdm=={PDM_VERSION}")
+    session.run_install("pdm", "install", "-G", ":all")
     session.run("pip", "install", "-e", ".")
     if session.posargs:
-        session.run(*session.posargs, external=True)
-
-
-def _init(session: nox.Session):
-    session.install("pdm")
-    lockfile = pathlib.Path("pdm.lock")
-
-    if not lockfile.exists():
-        session.run("pdm", "lock")
+        session.run(*session.posargs, external=True, env={"DEV": "1"})
