@@ -41,7 +41,6 @@ from ._cligroup import MainGroup
 from .cache import CACHE
 from .cliutil import (
     PathType,
-    arg_filelist,
     arg_template_filepaths,
     arg_top,
     auto_path,
@@ -51,6 +50,7 @@ from .cliutil import (
     opt_defines,
     opt_dry_run,
     opt_file,
+    opt_filelist,
     opt_filepath,
     opt_maxlevel,
     opt_maxworkers,
@@ -169,7 +169,7 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 )
 @arg_top
 @opt_path
-@arg_filelist
+@opt_filelist
 @opt_target
 @opt_show_diff
 @opt_maxworkers
@@ -257,7 +257,7 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 )
 @arg_top
 @opt_path
-@arg_filelist
+@opt_filelist
 @opt_target
 @opt_show_diff
 @opt_dry_run
@@ -282,7 +282,7 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 )
 @arg_top
 @opt_path
-@arg_filelist
+@opt_filelist
 @opt_target
 @opt_file
 @pass_ctx
@@ -307,7 +307,7 @@ FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 )
 @arg_top
 @opt_path
-@arg_filelist
+@opt_filelist
 @opt_target
 @opt_maxlevel
 @click.option("--minimal", "-m", default=False, is_flag=True, help="Skip defaults.")
