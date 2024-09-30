@@ -40,6 +40,7 @@ from ._modloader import (
     load_modcls,
 )
 from .iterutil import namefilter
+from .logging import LOGGER
 from .modbase import ModCls
 from .moditer import get_mods
 from .modref import ModRef
@@ -54,21 +55,27 @@ def find(
     patterns: Patterns | None = None,
     glob: bool = False,
     local: bool | None = None,
+    is_top: bool | None = None,
 ) -> Iterator[TopModRefInfo]:
     """List All Available Module References."""
     pats = tuple(get_topmodrefpats(patterns))
     infos = unique(_find_infos(paths, pats, glob, local=local), key=lambda modrefinfo: str(modrefinfo.topmodref))
-
+    if is_top is not None:
+        infos = [info for info in infos if info.is_top == is_top]
     yield from sorted(infos, key=lambda modrefinfo: str(modrefinfo.topmodref))
 
 
 def _find_infos(
-    paths: Paths | None, pats: tuple[TopModRefPat, ...], glob: bool = False, local: bool | None = None
+    paths: Paths | None, pats: tuple[TopModRefPat | TopModRef, ...], glob: bool = False, local: bool | None = None
 ) -> Iterator[TopModRefInfo]:
     with extend_sys_path(paths, use_env_default=True):
         modrefs = find_modrefs(local=local)
         for pat in pats:
-            if pat.tb:
+            mat = False
+            if isinstance(pat, TopModRef):
+                yield _create(pat)
+                mat = True
+            elif pat.tb:
                 # testbench with top
                 tbfilter = namefilter(pat.tb)
                 for tbmodref in modrefs:
@@ -82,10 +89,16 @@ def _find_infos(
                         continue
                     # search tops
                     modclss = tuple(tbmodcls.dut_modclss)
-                    yield from _find_tops(modrefs, pat.top, pat.sub, glob, modclss=modclss, tbmodref=tbmodref)
+                    for info in _find_tops(modrefs, pat.top, pat.sub, glob, modclss=modclss, tbmodref=tbmodref):
+                        mat = True
+                        yield info
             else:
                 # top only
-                yield from _find_tops(modrefs, pat.top, pat.sub, glob)
+                for info in _find_tops(modrefs, pat.top, pat.sub, glob):
+                    mat = True
+                    yield info
+            if not mat:
+                LOGGER.warning(f"{str(pat)!r} did not match any module")
 
 
 def _find_tops(

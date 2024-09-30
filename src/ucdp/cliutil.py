@@ -24,6 +24,7 @@
 
 """Command Line Interface - Utilities."""
 
+from collections.abc import Iterator
 from logging import FATAL, getLogger
 from pathlib import Path
 
@@ -48,6 +49,15 @@ def auto_path(ctr, param, incomplete):
 
 
 arg_top = click.argument("top", envvar="UCDP_TOP", shell_complete=auto_top)
+arg_tops = click.argument("tops", nargs=-1, envvar="UCDP_TOP", shell_complete=auto_top)
+opt_topsfile = click.option(
+    "--tops-file",
+    type=click.Path(path_type=Path),
+    default=[],
+    multiple=True,
+    help="File with Top Module References",
+)
+
 opt_path = click.option(
     "--path",
     "-p",
@@ -127,6 +137,19 @@ arg_template_filepaths = click.argument(
     nargs=-1,
     envvar="UCDP_TEMPLATE_FILEPATHS",
 )
+opt_local = click.option(
+    "--local/--no-local",
+    "-l/-L",
+    default=None,
+    is_flag=True,
+    help="List local/non-local modules only.",
+)
+opt_check = click.option(
+    "--check",
+    default=False,
+    is_flag=True,
+    help="Report an error if any file changes.",
+)
 
 
 def defines2data(defines: list[str]) -> dict[str, str]:
@@ -134,9 +157,12 @@ def defines2data(defines: list[str]) -> dict[str, str]:
     return dict(define.split("=", 1) if "=" in define else (define, None) for define in defines)
 
 
-def guess_path(arg: str) -> Path | None:
-    """Return Path if arg seems to be a file path."""
-    path = Path(arg)
-    if path.exists() or len(path.parts) > 1:
-        return path
-    return None
+def read_file(filepath: Path) -> Iterator[str]:
+    """Read File."""
+    with filepath.open() as file:
+        for line in file:
+            line = line.strip()  # noqa: PLW2901
+            if line.startswith("#"):
+                continue
+            if line:
+                yield line

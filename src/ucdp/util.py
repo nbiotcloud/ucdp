@@ -88,3 +88,11 @@ def get_maxworkers() -> int | None:
         return int(os.environ["UCDP_MAXWORKERS"])
     except (KeyError, ValueError):
         return None
+
+
+def guess_path(arg: str) -> Path | None:
+    """Return Path if arg seems to be a file path."""
+    path = Path(arg)
+    if path.exists() or len(path.parts) > 1:
+        return path
+    return None

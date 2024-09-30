@@ -55,7 +55,7 @@ def test_check(runner, example_simple):
     _assert_output(result, ["'uart_lib.uart' checked."])
 
     result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart2"])
-    assert result.exit_code == 1
+    assert result.exit_code == 0
     assert result.output == ""
 
     result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart", "--stat"])
@@ -70,6 +70,19 @@ def test_check(runner, example_simple):
             "  LightObjects: 10",
         ],
     )
+
+
+def test_check_topsfile(runner, example_simple, prjroot):
+    """Generate with --tops-file."""
+    topfile = prjroot / "tops.txt"
+    topfile.write_text("""
+# comment
+  uart_lib.uart
+
+""")
+    result = runner.invoke(u.cli.ucdp, ["check", "--tops-file", str(topfile)])
+    assert result.exit_code == 0
+    _assert_output(result, ["'uart_lib.uart' checked."])
 
 
 def test_gen(runner, example_simple, prjroot):
@@ -92,6 +105,36 @@ def test_gen(runner, example_simple, prjroot):
 
     (prjroot / "console.txt").write_text(result.output)
     assert_refdata(test_gen, prjroot)
+
+
+def test_gen_check(runner, example_simple, prjroot):
+    """Generate with Check."""
+    uartfile = prjroot / "uart_lib" / "uart" / "rtl" / "uart.sv"
+
+    assert not uartfile.exists()
+
+    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "--check"])
+    assert result.exit_code == 1
+    assert result.output.splitlines()[-1] == "2 files. 2 CREATED."
+
+    assert uartfile.exists()
+
+    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "--check"])
+    assert result.exit_code == 0
+    assert result.output.splitlines()[-1] == "2 files. 2 identical. untouched."
+
+
+def test_gen_topsfile(runner, example_simple, prjroot):
+    """Generate with --tops-file."""
+    topfile = prjroot / "tops.txt"
+    topfile.write_text("""
+# comment
+  uart_lib.uart
+
+""")
+    result = runner.invoke(u.cli.ucdp, ["gen", "--tops-file", str(topfile)])
+    assert result.exit_code == 0
+    assert result.output.splitlines()[-1] == "2 files. 2 CREATED."
 
 
 def test_gen_default(runner, example_simple, prjroot):

@@ -31,7 +31,7 @@ from contextlib import AbstractContextManager, contextmanager
 from pathlib import Path
 from typing import Any
 
-from makolator import Config, Makolator
+from makolator import Config, Datamodel, Makolator
 from uniquer import uniquelist
 
 from .cache import CACHE
@@ -39,6 +39,7 @@ from .filelistparser import FileListParser
 from .logging import LOGGER
 from .modbase import BaseMod
 from .modfilelist import iter_modfilelists
+from .object import Object
 from .top import Top
 from .util import extend_sys_path
 
@@ -82,23 +83,118 @@ def get_makolator(show_diff: bool = False, verbose: bool = True, paths: Iterable
     return Makolator(config=config)
 
 
-@contextmanager
-def context(
-    makolator: Makolator,
-    top: Top | BaseMod,
-    data: Data | None = None,
-    no_stat: bool = False,
-) -> AbstractContextManager[Top]:
-    """Initialize Data Model."""
-    datamodel = makolator.datamodel
+def get_datamodel(top: Top | BaseMod, data: Data | None = None) -> Datamodel:
+    """Create Data Model."""
+    datamodel = Datamodel()
     if isinstance(top, BaseMod):
         top = Top.from_mod(top)
-    datamodel.top = top
     if data:
         datamodel.__dict__.update(data)
-    yield top
-    if not no_stat and makolator.config.verbose and makolator.config.track:
-        print(makolator.tracker.stat)
+    datamodel.top = top
+    return datamodel
+
+
+class Generator(Object):
+    """Generator."""
+
+    makolator: Makolator
+    maxworkers: int | None = None
+    check: bool = False
+    no_stat: bool = False
+
+    def __enter__(self) -> "Generator":
+        LOGGER.debug("%s", self.makolator.config)
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        makolator = self.makolator
+        config = makolator.config
+        tracker = makolator.tracker
+        if not self.no_stat and config.verbose and config.track:
+            print(tracker.stat)
+        if self.check:
+            assert config.track
+            if tracker.total != tracker.identical:
+                modified = tracker.total - tracker.identical
+                raise RuntimeError(f"{modified} files modified")
+
+    @contextmanager
+    def top(
+        self,
+        top: Top | BaseMod,
+        data: Data | None = None,
+    ) -> AbstractContextManager[Top]:
+        """Initialize Data Model."""
+        makolator = self.makolator
+        makolator.datamodel = datamodel = get_datamodel(top, data=data)
+        yield datamodel.top
+
+    def generate(
+        self,
+        top: Top | BaseMod,
+        name: str,
+        target: str | None = None,
+        paths: Iterable[Path] | None = None,
+        filelistparser: FileListParser | None = None,
+        maxlevel: int | None = None,
+        data: Data | None = None,
+    ):
+        """
+        Generate for Top-Module.
+
+        Args:
+            top: Top
+            name: Filelist Name
+
+        Keyword Args:
+            target: Target Filter
+            paths: Search Path For Data Model And Template Files.
+            filelistparser: Specific File List Parser
+            maxlevel: Stop Generation on given hierarchy level.
+            data: Data added to the datamodel.
+        """
+        with self.top(top, data=data) as top:
+            modfilelists = iter_modfilelists(
+                top.mod,
+                name,
+                target=target,
+                filelistparser=filelistparser,
+                replace_envvars=True,
+                maxlevel=maxlevel,
+            )
+            with extend_sys_path(paths, use_env_default=True):
+                self._generate(modfilelists)
+
+    def _generate(self, modfilelists) -> None:
+        makolator = self.makolator
+
+        def _inplace(template_filepaths, filepath, context):
+            if not filepath.exists():
+                LOGGER.error("Inplace file %r missing", str(filepath))
+            else:
+                makolator.inplace(template_filepaths, filepath, context=context)
+
+        def _gen(template_filepaths, filepath, context):
+            makolator.gen(template_filepaths, filepath, context=context)
+
+        with ThreadPoolExecutor(max_workers=self.maxworkers) as exe:
+            jobs = []  # type: ignore [var-annotated]
+            for mod, modfilelist in modfilelists:
+                if modfilelist.gen == "no":
+                    continue
+                filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
+                template_filepaths: tuple[Path, ...] = modfilelist.template_filepaths or ()  # type: ignore[assignment]
+                inc_filepaths: tuple[Path, ...] = modfilelist.inc_filepaths or ()  # type: ignore[assignment]
+                inc_template_filepaths: tuple[Path, ...] = modfilelist.inc_template_filepaths or ()  # type: ignore[assignment]
+                ctx = {"mod": mod, "modfilelist": modfilelist}
+                if modfilelist.gen == "inplace":
+                    jobs.extend(exe.submit(_inplace, inc_template_filepaths, path, ctx) for path in inc_filepaths)
+                    jobs.extend(exe.submit(_inplace, template_filepaths, path, ctx) for path in filepaths)
+                else:
+                    jobs.extend(exe.submit(_gen, inc_template_filepaths, path, ctx) for path in inc_filepaths)
+                    jobs.extend(exe.submit(_gen, template_filepaths, path, ctx) for path in filepaths)
+            for job in jobs:
+                job.result()
 
 
 def generate(
@@ -129,45 +225,15 @@ def generate(
         data: Data added to the datamodel.
     """
     makolator = makolator or get_makolator(paths=paths)
-    LOGGER.debug("%s", makolator.config)
-    with context(makolator, top, data=data) as top:
-        modfilelists = iter_modfilelists(
-            top.mod,
-            name,
+    with Generator(makolator=makolator, maxworkers=maxworkers, paths=paths) as generator:
+        generator.generate(
+            top=top,
+            name=name,
             target=target,
             filelistparser=filelistparser,
-            replace_envvars=True,
             maxlevel=maxlevel,
+            data=data,
         )
-
-        def _inplace(template_filepaths, filepath, context):
-            if not filepath.exists():
-                LOGGER.error("Inplace file %r missing", str(filepath))
-            else:
-                makolator.inplace(template_filepaths, filepath, context=context)
-
-        def _gen(template_filepaths, filepath, context):
-            makolator.gen(template_filepaths, filepath, context=context)
-
-        with extend_sys_path(paths, use_env_default=True):
-            with ThreadPoolExecutor(max_workers=maxworkers) as exe:
-                jobs = []  # type: ignore [var-annotated]
-                for mod, modfilelist in modfilelists:
-                    if modfilelist.gen == "no":
-                        continue
-                    filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
-                    template_filepaths: tuple[Path, ...] = modfilelist.template_filepaths or ()  # type: ignore[assignment]
-                    inc_filepaths: tuple[Path, ...] = modfilelist.inc_filepaths or ()  # type: ignore[assignment]
-                    inc_template_filepaths: tuple[Path, ...] = modfilelist.inc_template_filepaths or ()  # type: ignore[assignment]
-                    ctx = {"mod": mod, "modfilelist": modfilelist}
-                    if modfilelist.gen == "inplace":
-                        jobs.extend(exe.submit(_inplace, inc_template_filepaths, path, ctx) for path in inc_filepaths)
-                        jobs.extend(exe.submit(_inplace, template_filepaths, path, ctx) for path in filepaths)
-                    else:
-                        jobs.extend(exe.submit(_gen, inc_template_filepaths, path, ctx) for path in inc_filepaths)
-                        jobs.extend(exe.submit(_gen, template_filepaths, path, ctx) for path in filepaths)
-                for job in jobs:
-                    job.result()
 
 
 def clean(
@@ -200,30 +266,30 @@ def clean(
         data: Data added to the datamodel.
     """
     makolator = makolator or get_makolator(paths=paths)
-    LOGGER.debug("%s", makolator.config)
-    with context(makolator, top, data=data, no_stat=True) as top:
-        modfilelists = iter_modfilelists(
-            top.mod,
-            name,
-            target=target,
-            filelistparser=filelistparser,
-            replace_envvars=True,
-            maxlevel=maxlevel,
-        )
-        with extend_sys_path(paths, use_env_default=True):
-            with ThreadPoolExecutor(max_workers=maxworkers) as executor:
-                jobs = []
-                for _, modfilelist in modfilelists:
-                    filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
-                    if modfilelist.gen == "full":
-                        for filepath in filepaths:
-                            print(f"Removing '{filepath!s}'")
-                            if not dry_run:
-                                jobs.append(executor.submit(filepath.unlink, missing_ok=True))
-                for job in jobs:
-                    job.result()
-            if dry_run:
-                print("DRY RUN. Nothing done.")
+    with Generator(makolator=makolator, no_stat=True) as generator:
+        with generator.top(top, data=data) as top:
+            modfilelists = iter_modfilelists(
+                top.mod,
+                name,
+                target=target,
+                filelistparser=filelistparser,
+                replace_envvars=True,
+                maxlevel=maxlevel,
+            )
+            with extend_sys_path(paths, use_env_default=True):
+                with ThreadPoolExecutor(max_workers=maxworkers) as executor:
+                    jobs = []
+                    for _, modfilelist in modfilelists:
+                        filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
+                        if modfilelist.gen == "full":
+                            for filepath in filepaths:
+                                print(f"Removing '{filepath!s}'")
+                                if not dry_run:
+                                    jobs.append(executor.submit(filepath.unlink, missing_ok=True))
+                    for job in jobs:
+                        job.result()
+                if dry_run:
+                    print("DRY RUN. Nothing done.")
 
 
 def render_generate(
@@ -250,10 +316,10 @@ def render_generate(
         no_stat: Skip Statistics
     """
     makolator = makolator or get_makolator(paths=paths)
-    LOGGER.debug("%s", makolator.config)
-    with context(makolator, top, data=data, no_stat=no_stat):
-        with extend_sys_path(paths, use_env_default=True):
-            makolator.gen(template_filepaths, dest=genfile)
+    with Generator(makolator=makolator, no_stat=no_stat) as generator:
+        with generator.top(top, data=data):
+            with extend_sys_path(paths, use_env_default=True):
+                makolator.gen(template_filepaths, dest=genfile)
 
 
 def render_inplace(
@@ -282,7 +348,7 @@ def render_inplace(
         no_stat: Skip Statistics
     """
     makolator = makolator or get_makolator(paths=paths)
-    LOGGER.debug("%s", makolator.config)
-    with context(makolator, top, data=data, no_stat=no_stat):
-        with extend_sys_path(paths, use_env_default=True):
-            makolator.inplace(template_filepaths, filepath=inplacefile, ignore_unknown=ignore_unknown)
+    with Generator(makolator=makolator, no_stat=no_stat) as generator:
+        with generator.top(top, data=data):
+            with extend_sys_path(paths, use_env_default=True):
+                makolator.inplace(template_filepaths, filepath=inplacefile, ignore_unknown=ignore_unknown)
