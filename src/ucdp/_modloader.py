@@ -40,8 +40,9 @@ from .cache import CACHE
 from .consts import PKG_PATHS
 from .modbase import BaseMod, get_modbaseclss
 from .modref import ModRef, get_modclsname
+from .modtopref import TopModRef
 from .object import Object
-from .util import LOGGER, get_maxworkers
+from .util import LOGGER, get_maxworkers, guess_path
 
 Patterns: TypeAlias = Iterable[str]
 Paths: TypeAlias = Iterable[Path]
@@ -64,6 +65,14 @@ class TopModRefPat(Object):
     top: str
     sub: str | None = None
     tb: str | None = None
+
+    def __str__(self):
+        result = self.top
+        if self.sub:
+            result = f"{result}-{self.sub}"
+        if self.tb:
+            result = f"{self.tb}#{result}"
+        return result
 
 
 @lru_cache
@@ -177,10 +186,14 @@ def _find_modrefs(envpath: list[str], filepaths: tuple[Path, ...]) -> tuple[ModR
     return tuple(modrefs)
 
 
-def get_topmodrefpats(patterns: Patterns | None) -> Iterator[TopModRefPat]:
-    for pattern in patterns or ["*"]:
-        mat = _RE_TOPMODREFPAT.fullmatch(pattern)
-        if mat:
-            yield TopModRefPat(**mat.groupdict())
+def get_topmodrefpats(patterns: Patterns | None) -> Iterator[TopModRefPat | TopModRef]:
+    for pattern in patterns or []:
+        path = guess_path(pattern)
+        if path:
+            yield TopModRef.cast(path)
         else:
-            yield TopModRefPat(top=".")  # never matching
+            mat = _RE_TOPMODREFPAT.fullmatch(pattern)
+            if mat:
+                yield TopModRefPat(**mat.groupdict())
+            else:
+                yield TopModRefPat(top=".")  # never matching

@@ -36,39 +36,48 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.pretty import pprint
 from rich.table import Table
+from rich.traceback import install
+
+import ucdp
 
 from ._cligroup import MainGroup
 from .cache import CACHE
 from .cliutil import (
     PathType,
-    arg_filelist,
     arg_template_filepaths,
     arg_top,
+    arg_tops,
     auto_path,
-    auto_top,
     defines2data,
-    guess_path,
+    opt_check,
     opt_defines,
     opt_dry_run,
     opt_file,
+    opt_filelist,
     opt_filepath,
+    opt_local,
     opt_maxlevel,
     opt_maxworkers,
     opt_path,
     opt_show_diff,
     opt_tag,
     opt_target,
+    opt_topsfile,
+    read_file,
 )
 from .consts import PATH
 from .fileset import FileSet
 from .finder import find
-from .generate import clean, generate, get_makolator, render_generate, render_inplace
+from .generate import Generator, clean, get_makolator, render_generate, render_inplace
 from .iterutil import namefilter
 from .loader import load
 from .modfilelist import iter_modfilelists
 from .modtopref import PAT_TOPMODREF, TopModRef
 from .pathutil import relative
 from .top import Top
+from .util import guess_path
+
+install(suppress=[click, ucdp], show_locals=True)
 
 patch()
 
@@ -102,7 +111,6 @@ def ucdp(ctx, verbose=0, no_cache=False):
         show_time=False,
         show_path=False,
         rich_tracebacks=True,
-        tracebacks_suppress=("click",),
         console=Console(stderr=True),
     )
     logging.basicConfig(level=level, format="%(message)s", handlers=[handler])
@@ -125,11 +133,11 @@ def get_group(help=None):  # pragma: no cover
     return group
 
 
-def load_top(ctx: Ctx, top: str, paths: Iterable[str | Path], quiet: bool = False) -> Top:
+def load_top(ctx: Ctx, top: str | TopModRef, paths: Iterable[str | Path], quiet: bool = False) -> Top:
     """Load Top Module."""
     lpaths = [Path(path) for path in paths]
     # Check if top seems to be some kind of file path
-    topmodref = TopModRef.cast(guess_path(top) or top)
+    topmodref = TopModRef.cast(guess_path(top) or top) if isinstance(top, str) else top
     if quiet:
         return load(topmodref, paths=lpaths)
     with ctx.console.status(f"Loading '{topmodref!s}'"):
@@ -145,17 +153,23 @@ Load Data Model and Check.
 TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 """
 )
-@arg_top
+@arg_tops
 @opt_path
+@opt_local
 @click.option("--stat", default=False, is_flag=True, help="Show Statistics.")
+@opt_topsfile
 @pass_ctx
-def check(ctx, top, path, stat=False):
+def check(ctx, tops, path, local=None, stat=False, tops_file=None):
     """Check."""
-    top = load_top(ctx, top, path)
-    if stat:
-        print("Statistics:")
-        for name, value in top.get_stat().items():
-            print(f"  {name}: {value}")
+    tops = list(tops)
+    for filepath in tops_file or []:
+        tops.extend(read_file(filepath))
+    for info in find(path, patterns=tuple(tops), local=local, is_top=True):
+        top = load_top(ctx, info.topmodref, path)
+        if stat:
+            print("Statistics:")
+            for name, value in top.get_stat().items():
+                print(f"  {name}: {value}")
 
 
 @ucdp.command(
@@ -163,25 +177,44 @@ def check(ctx, top, path, stat=False):
 Load Data Model and Generate Files.
 
 TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
-
-FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 """
 )
-@arg_top
+@arg_tops
 @opt_path
-@arg_filelist
+@opt_filelist
 @opt_target
 @opt_show_diff
 @opt_maxworkers
 @opt_defines
+@opt_local
+@opt_topsfile
+@opt_check
 @pass_ctx
-def gen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=None, define=None):
+def gen(
+    ctx,
+    tops,
+    path,
+    filelist,
+    target=None,
+    show_diff=False,
+    maxworkers=None,
+    define=None,
+    local=None,
+    check=False,
+    tops_file=None,
+):
     """Generate."""
-    top = load_top(ctx, top, path)
+    tops = list(tops)
+    for filepath in tops_file or []:
+        tops.extend(read_file(filepath))
     makolator = get_makolator(show_diff=show_diff, paths=path)
     data = defines2data(define)
-    for item in filelist or ["*"]:
-        generate(top, item, target=target, makolator=makolator, maxworkers=maxworkers, data=data)
+    filelist = filelist or ["*"]
+    with Generator(makolator=makolator, maxworkers=maxworkers, check=check) as generator:
+        for info in find(path, patterns=tuple(tops), local=local, is_top=True):
+            top = load_top(ctx, info.topmodref, path)
+            for item in filelist:
+                generator.generate(top, item, target=target, data=data)
 
 
 @ucdp.command(
@@ -251,13 +284,11 @@ def renderinplace(ctx, top, path, template_filepaths, inplacefile, show_diff=Fal
 Load Data Model and REMOVE Generated Files.
 
 TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
-
-FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 """
 )
 @arg_top
 @opt_path
-@arg_filelist
+@opt_filelist
 @opt_target
 @opt_show_diff
 @opt_dry_run
@@ -276,13 +307,11 @@ def cleangen(ctx, top, path, filelist, target=None, show_diff=False, maxworkers=
 Load Data Model and Generate File List.
 
 TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
-
-FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 """
 )
 @arg_top
 @opt_path
-@arg_filelist
+@opt_filelist
 @opt_target
 @opt_file
 @pass_ctx
@@ -301,13 +330,11 @@ def filelist(ctx, top, path, filelist, target=None, file=None):
 Load Data Model and Show File Information
 
 TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
-
-FILELIST: Filelist name to render. Environment Variable 'UCDP_FILELIST'
 """
 )
 @arg_top
 @opt_path
-@arg_filelist
+@opt_filelist
 @opt_target
 @opt_maxlevel
 @click.option("--minimal", "-m", default=False, is_flag=True, help="Skip defaults.")
@@ -340,13 +367,13 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, minimal=False
                 ucdp ls glbl_lib*
               """
 )
+@arg_tops
 @opt_path
-@click.argument("pattern", nargs=-1, shell_complete=auto_top)
 @click.option("--names", "-n", default=False, is_flag=True, help="Just print names")
 @click.option("--top", "-t", default=False, is_flag=True, help="List loadable top modules only.")
 @click.option("--tb", "-b", default=False, is_flag=True, help="List testbench modules only.")
 @click.option("--generic-tb", "-g", default=False, is_flag=True, help="List Generic Testbench modules only.")
-@click.option("--local/--no-local", "-l/-L", default=None, is_flag=True, help="List local/non-local modules only.")
+@opt_local
 @click.option("--base", "-B", default=False, is_flag=True, help="Show Base Classes.")
 @click.option("--filepath", "-f", default=False, is_flag=True, help="Show File Path.")
 @click.option("--abs-filepath", "-F", default=False, is_flag=True, help="Show Absolute File Path.")
@@ -354,8 +381,8 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, minimal=False
 @pass_ctx
 def ls(  # noqa: C901
     ctx,
-    path,
-    pattern=None,
+    path=None,
+    tops=None,
     names=False,
     top=False,
     tb=False,
@@ -368,7 +395,7 @@ def ls(  # noqa: C901
 ):
     """List Modules."""
     with ctx.console.status("Searching"):
-        infos = find(path, patterns=pattern, local=local)
+        infos = find(path, patterns=tops or ["*"], local=local)
     if top:
         infos = [info for info in infos if info.is_top]
     if tb:

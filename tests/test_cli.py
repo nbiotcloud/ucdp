@@ -55,7 +55,7 @@ def test_check(runner, example_simple):
     _assert_output(result, ["'uart_lib.uart' checked."])
 
     result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart2"])
-    assert result.exit_code == 1
+    assert result.exit_code == 0
     assert result.output == ""
 
     result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart", "--stat"])
@@ -72,19 +72,32 @@ def test_check(runner, example_simple):
     )
 
 
+def test_check_topsfile(runner, example_simple, prjroot):
+    """Generate with --tops-file."""
+    topfile = prjroot / "tops.txt"
+    topfile.write_text("""
+# comment
+  uart_lib.uart
+
+""")
+    result = runner.invoke(u.cli.ucdp, ["check", "--tops-file", str(topfile)])
+    assert result.exit_code == 0
+    _assert_output(result, ["'uart_lib.uart' checked."])
+
+
 def test_gen(runner, example_simple, prjroot):
     """Generate and Clean Command."""
     uartfile = prjroot / "uart_lib" / "uart" / "rtl" / "uart.sv"
 
     assert not uartfile.exists()
 
-    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "hdl", "--maxworkers", "1"])
+    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "-l", "hdl", "--maxworkers", "1"])
     assert result.exit_code == 0
     (prjroot / "gen.txt").write_text(result.output)
 
     assert uartfile.exists()
 
-    result = runner.invoke(u.cli.ucdp, ["cleangen", "uart_lib.uart", "hdl", "--maxworkers", "1"])
+    result = runner.invoke(u.cli.ucdp, ["cleangen", "uart_lib.uart", "-l", "hdl", "--maxworkers", "1"])
     assert result.exit_code == 0
     (prjroot / "cleangen.txt").write_text(result.output)
 
@@ -92,6 +105,36 @@ def test_gen(runner, example_simple, prjroot):
 
     (prjroot / "console.txt").write_text(result.output)
     assert_refdata(test_gen, prjroot)
+
+
+def test_gen_check(runner, example_simple, prjroot):
+    """Generate with Check."""
+    uartfile = prjroot / "uart_lib" / "uart" / "rtl" / "uart.sv"
+
+    assert not uartfile.exists()
+
+    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "--check"])
+    assert result.exit_code == 1
+    assert result.output.splitlines()[-1] == "2 files. 2 CREATED."
+
+    assert uartfile.exists()
+
+    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "--check"])
+    assert result.exit_code == 0
+    assert result.output.splitlines()[-1] == "2 files. 2 identical. untouched."
+
+
+def test_gen_topsfile(runner, example_simple, prjroot):
+    """Generate with --tops-file."""
+    topfile = prjroot / "tops.txt"
+    topfile.write_text("""
+# comment
+  uart_lib.uart
+
+""")
+    result = runner.invoke(u.cli.ucdp, ["gen", "--tops-file", str(topfile)])
+    assert result.exit_code == 0
+    assert result.output.splitlines()[-1] == "2 files. 2 CREATED."
 
 
 def test_gen_default(runner, example_simple, prjroot):
@@ -108,7 +151,7 @@ def test_gen_default(runner, example_simple, prjroot):
 
 def test_filelist(runner, example_simple, prjroot):
     """Filelist Command."""
-    cmd = ["filelist", "uart_lib.uart", "hdl"]
+    cmd = ["filelist", "uart_lib.uart", "-l", "hdl"]
     _run(runner, prjroot, cmd)
     assert_refdata(test_filelist, prjroot)
 
@@ -123,21 +166,21 @@ def test_filelist_default(runner, example_simple, prjroot):
 def test_filelist_file(runner, example_simple, prjroot):
     """Filelist Command."""
     filepath = prjroot / "file.txt"
-    cmd = ["filelist", "uart_lib.uart", "hdl", "--file", str(filepath)]
+    cmd = ["filelist", "uart_lib.uart", "-l", "hdl", "--file", str(filepath)]
     _run(runner, prjroot, cmd)
     assert_refdata(test_filelist_file, prjroot)
 
 
 def test_filelist_other(runner, prjroot, example_filelist):
     """Filelist Command."""
-    cmd = ["filelist", "filelist_lib.filelist", "hdl"]
+    cmd = ["filelist", "filelist_lib.filelist", "-l", "hdl"]
     _run(runner, prjroot, cmd)
     assert_refdata(test_filelist_other, prjroot)
 
 
 def test_fileinfo(runner, example_simple, prjroot):
     """Fileinfo Command."""
-    cmd = ["fileinfo", "uart_lib.uart", "hdl"]
+    cmd = ["fileinfo", "uart_lib.uart", "-l", "hdl"]
     _run(runner, prjroot, cmd)
     assert_refdata(test_fileinfo, prjroot)
 
@@ -158,7 +201,7 @@ def test_fileinfo_minimal(runner, example_simple, prjroot):
 
 def test_fileinfo_maxlevel(runner, example_simple, prjroot):
     """Fileinfo Command with Maxlevel."""
-    cmd = ["fileinfo", "uart_lib.uart", "hdl", "--maxlevel=1"]
+    cmd = ["fileinfo", "uart_lib.uart", "-l", "hdl", "--maxlevel=1"]
     _run(runner, prjroot, cmd)
     assert_refdata(test_fileinfo_maxlevel, prjroot)
 
@@ -166,7 +209,7 @@ def test_fileinfo_maxlevel(runner, example_simple, prjroot):
 def test_fileinfo_file(runner, example_simple, prjroot):
     """Fileinfo Command with File."""
     filepath = prjroot / "file.txt"
-    cmd = ["fileinfo", "uart_lib.uart", "hdl", "--file", str(filepath)]
+    cmd = ["fileinfo", "uart_lib.uart", "-l", "hdl", "--file", str(filepath)]
     _run(runner, prjroot, cmd)
     assert_refdata(test_fileinfo_file, prjroot)
 
