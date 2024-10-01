@@ -58,17 +58,18 @@ class TopModRefInfo(Object):
     tb: TbType
 
     @staticmethod
-    def create(topmodref: TopModRef, modcls: ModCls) -> "TopModRefInfo":
+    def create(topmodref: TopModRef, modcls: ModCls, tbmodcls: ModCls | None = None) -> "TopModRefInfo":
         """Create."""
-        filepath = Path(getfile(modcls))
+        topmodcls = tbmodcls or modcls
+        modfilepath = Path(getfile(modcls))
         return TopModRefInfo(
             topmodref=topmodref,
-            tags=modcls.tags,
-            modbasecls=get_modbasecls(modcls),
-            filepath=filepath,
-            is_top=is_top(modcls),
-            is_local=is_local(filepath),
-            tb=get_tb(modcls),
+            tags=topmodcls.tags,
+            modbasecls=get_modbasecls(topmodcls),
+            filepath=modfilepath,
+            is_top=is_top(topmodcls) or bool(tbmodcls),
+            is_local=is_local(modfilepath),
+            tb=get_tb(topmodcls),
         )
 
 

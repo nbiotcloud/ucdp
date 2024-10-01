@@ -137,5 +137,6 @@ def _find_tops(
 
 
 def _create(topmodref: TopModRef) -> TopModRefInfo:
-    modcls = load_modcls(topmodref.tb or topmodref.top)
-    return TopModRefInfo.create(topmodref, modcls)
+    tbmodcls = load_modcls(topmodref.tb) if topmodref.tb else None
+    modcls = load_modcls(topmodref.top)
+    return TopModRefInfo.create(topmodref, modcls, tbmodcls=tbmodcls)
