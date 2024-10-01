@@ -124,6 +124,12 @@ def test_gen_check(runner, example_simple, prjroot):
     assert result.output.splitlines()[-1] == "2 files. 2 identical. untouched."
 
 
+def test_gen_tb(runner, example_simple, prjroot):
+    """Generate with Check."""
+    result = runner.invoke(u.cli.ucdp, ["gen", "glbl_lib.regf_tb#uart_lib.uart-uart_lib.uart_regf"])
+    assert result.output.splitlines()[-1] == "1 files. 1 CREATED."
+
+
 def test_gen_topsfile(runner, example_simple, prjroot):
     """Generate with --tops-file."""
     topfile = prjroot / "tops.txt"
