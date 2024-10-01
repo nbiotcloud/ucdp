@@ -36,9 +36,6 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.pretty import pprint
 from rich.table import Table
-from rich.traceback import install
-
-import ucdp
 
 from ._cligroup import MainGroup
 from .cache import CACHE
@@ -76,8 +73,6 @@ from .modtopref import PAT_TOPMODREF, TopModRef
 from .pathutil import relative
 from .top import Top
 from .util import guess_path
-
-install(suppress=[click, ucdp], show_locals=True)
 
 patch()
 

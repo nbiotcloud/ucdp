@@ -225,7 +225,7 @@ def generate(
         data: Data added to the datamodel.
     """
     makolator = makolator or get_makolator(paths=paths)
-    with Generator(makolator=makolator, maxworkers=maxworkers, paths=paths) as generator:
+    with Generator(makolator=makolator, maxworkers=maxworkers) as generator:
         generator.generate(
             top=top,
             name=name,
