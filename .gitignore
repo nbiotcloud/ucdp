@@ -10,3 +10,4 @@
 /.hypothesis
 .pdm-python
 .test2ref
+.DS_Store

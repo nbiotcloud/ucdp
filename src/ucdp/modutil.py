@@ -71,6 +71,11 @@ def get_topmodname(cls):
     return snakecase(clsname.removesuffix("Mod"))
 
 
-def get_libname(cls):
+def get_libname(cls) -> str:
     """Module Library Name."""
     return Path(getfile(cls)).parts[-2]
+
+
+def get_libpath(cls) -> Path:
+    """Module Library Path."""
+    return Path(getfile(cls)).parent

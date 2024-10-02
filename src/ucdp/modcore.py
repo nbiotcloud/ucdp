@@ -66,7 +66,12 @@ class ACoreMod(BaseMod):
     @property
     def libname(self) -> str:
         """Library Name."""
-        return self.parent.libname
+        return self.libpath.name
+
+    @property
+    def libpath(self) -> str:
+        """Library Path."""
+        return self.parent.libpath
 
     @property
     def topmodname(self) -> str:

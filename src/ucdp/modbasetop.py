@@ -32,7 +32,7 @@ from typing import Any, ClassVar
 from ._modbuilder import build
 from .modbase import BaseMod
 from .modfilelist import ModFileLists
-from .modutil import get_libname, is_tb_from_modname
+from .modutil import get_libpath, is_tb_from_modname
 from .object import PrivateField
 
 
@@ -60,9 +60,9 @@ class BaseTopMod(BaseMod):
         build(self)
 
     @property
-    def libname(self) -> str:
-        """Library Name."""
-        return get_libname(self.__class__)
+    def libpath(self) -> str:
+        """Library Path."""
+        return get_libpath(self.__class__)
 
     @property
     def is_tb(self) -> bool:
