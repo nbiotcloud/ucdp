@@ -24,9 +24,10 @@
 
 """A Simplified Register File."""
 
-import ucdp as u
 from fileliststandard import HdlFileList
 from tabulate import tabulate
+
+import ucdp as u
 
 from .bus import BusType
 from .clk_gate import ClkGateMod

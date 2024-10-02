@@ -23,8 +23,9 @@
 #
 """Test :any:`BuildProduct`."""
 
-import ucdp as u
 from pytest import raises
+
+import ucdp as u
 
 
 def test_missing_build():

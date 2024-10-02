@@ -23,9 +23,10 @@
 #
 """Test Configuration."""
 
-import ucdp as u
 from pytest import raises
 from uniquer import uniquelist
+
+import ucdp as u
 
 
 class MyConfig(u.AConfig):

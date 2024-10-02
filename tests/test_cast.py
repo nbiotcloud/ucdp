@@ -23,8 +23,9 @@
 #
 """Test Assigns."""
 
-import ucdp as u
 from pytest import fixture
+
+import ucdp as u
 
 
 def _check_assigns(assigns, pairs):

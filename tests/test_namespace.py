@@ -25,10 +25,11 @@
 
 import re
 
-import ucdp
 from hypothesis import assume, given
 from hypothesis import strategies as st
 from pytest import raises
+
+import ucdp
 
 
 class MyObject(ucdp.NamedObject):

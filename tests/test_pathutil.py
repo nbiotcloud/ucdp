@@ -28,9 +28,10 @@ import re
 from pathlib import Path
 from unittest import mock
 
-import ucdp as u
 from contextlib_chdir import chdir
 from pytest import raises
+
+import ucdp as u
 
 
 def test_improved_glob(tmp_path):

@@ -25,8 +25,9 @@
 
 import re
 
-import ucdp as u
 from pytest import raises
+
+import ucdp as u
 
 
 def test_parsepath_full():
@@ -109,7 +110,7 @@ def test_parsepath_basepath():
 
 def test_create_cast():
     """Create and Casting."""
-    with raises(u.ValidationError, match=re.escape("[opt]cast() and create() are mutally exclusive")):
+    with raises(u.ValidationError, match=re.escape("[opt]cast() and create() are mutually exclusive")):
         u.RoutePath(expr="clk_i", create=True, cast=True)
 
 

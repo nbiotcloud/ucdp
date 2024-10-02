@@ -23,8 +23,9 @@
 #
 """Clock Gate."""
 
-import ucdp as u  # (1)
 from fileliststandard import HdlFileList
+
+import ucdp as u  # (1)
 
 
 class ClkGateMod(u.AMod):

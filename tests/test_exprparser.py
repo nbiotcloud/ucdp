@@ -25,8 +25,9 @@
 
 import re
 
-import ucdp as u
 from pytest import fixture, raises
+
+import ucdp as u
 
 
 @fixture

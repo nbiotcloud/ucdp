@@ -24,6 +24,7 @@
 """Command Line Command."""
 
 import click
+
 from ucdp import cli
 
 UCDP_COMMANDS = ["prjcmd"]

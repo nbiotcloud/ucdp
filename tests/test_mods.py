@@ -25,8 +25,9 @@
 
 import re
 
-import ucdp as u
 from pytest import raises
+
+import ucdp as u
 
 
 class IpMod(u.AMod):

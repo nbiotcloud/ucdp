@@ -27,8 +27,9 @@ enum Type Testing.
 
 """
 
-import ucdp as u
 from pytest import raises
+
+import ucdp as u
 
 
 def test_enum():

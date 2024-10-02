@@ -25,11 +25,12 @@
 
 from pathlib import Path
 
-import ucdp as u
 from click.testing import CliRunner
 from contextlib_chdir import chdir
 from pytest import fixture
 from test2ref import assert_refdata
+
+import ucdp as u
 
 
 @fixture

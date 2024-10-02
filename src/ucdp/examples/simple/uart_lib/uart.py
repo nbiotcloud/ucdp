@@ -25,11 +25,12 @@
 
 import logging
 
-import ucdp as u  # (1)
 from fileliststandard import HdlFileList
 from glbl_lib.bus import BusType  # (2)
 from glbl_lib.clk_gate import ClkGateMod  # (3)
 from glbl_lib.regf import RegfMod  # (4)
+
+import ucdp as u  # (1)
 
 
 class UartIoType(u.AStructType):

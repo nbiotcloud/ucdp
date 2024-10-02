@@ -23,7 +23,7 @@
 #
 
 """
-Loading And Searching Facilty.
+Loading And Searching Facility.
 """
 
 import re

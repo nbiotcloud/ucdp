@@ -153,9 +153,9 @@ class Generator(Object):
             maxlevel: Stop Generation on given hierarchy level.
             data: Data added to the datamodel.
         """
-        with self.top(top, data=data) as top:
+        with self.top(top, data=data) as top_:
             modfilelists = iter_modfilelists(
-                top.mod,
+                top_.mod,
                 name,
                 target=target,
                 filelistparser=filelistparser,
@@ -267,9 +267,9 @@ def clean(
     """
     makolator = makolator or get_makolator(paths=paths)
     with Generator(makolator=makolator, no_stat=True) as generator:
-        with generator.top(top, data=data) as top:
+        with generator.top(top, data=data) as top_:
             modfilelists = iter_modfilelists(
-                top.mod,
+                top_.mod,
                 name,
                 target=target,
                 filelistparser=filelistparser,

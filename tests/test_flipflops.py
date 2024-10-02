@@ -25,9 +25,10 @@
 
 import re
 
-import ucdp as u
 from pytest import raises
 from test2ref import assert_refdata
+
+import ucdp as u
 
 
 class FlipFlopMod(u.AMod):
