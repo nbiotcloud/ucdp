@@ -72,7 +72,7 @@ from .modfilelist import iter_modfilelists
 from .modtopref import PAT_TOPMODREF, TopModRef
 from .pathutil import relative
 from .top import Top
-from .util import guess_path
+from .util import LOGGER, guess_path
 
 patch()
 
@@ -436,6 +436,32 @@ def ls(  # noqa: C901
             fill_row(row, info)
             table.add_row(*row)
         ctx.console.print(table)
+
+
+@ucdp.command(
+    help=f"""
+Load Data Model and Module Information.
+
+TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
+"""
+)
+@arg_tops
+@opt_path
+@opt_local
+@click.option("--top", "-t", default=None, is_flag=True, help="List loadable top modules only.")
+@click.option("--sub", "-S", default=False, is_flag=True, help="Show Submodules.")
+@pass_ctx
+def modinfo(ctx, tops, path, local, top, sub):
+    """Module Information."""
+    sep = ""
+    for info in find(path, patterns=tops, local=local, is_top=top):
+        try:
+            top = load_top(ctx, info.topmodref, path, quiet=True)
+        except Exception as exc:  # noqa: PERF203
+            LOGGER.warning(str(exc))
+        else:
+            print(sep + top.mod.get_info(sub=sub))
+            sep = "\n\n"
 
 
 @ucdp.command(
