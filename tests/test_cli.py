@@ -421,3 +421,24 @@ def test_toppath(runner, example_simple):
     result = runner.invoke(u.cli.ucdp, ["check", str(example_simple / "uart_lib" / "uart.py")])
     assert result.exit_code == 0
     _assert_output(result, ["'uart_lib.uart' checked."])
+
+
+def test_modinfo(runner, example_simple, prjroot):
+    """Modinfo Command."""
+    cmd = ["modinfo", "uart_lib.uart"]
+    _run(runner, prjroot, cmd)
+    assert_refdata(test_modinfo, prjroot)
+
+
+def test_modinfos(runner, example_simple, prjroot):
+    """Modinfo Command."""
+    cmd = ["modinfo", "*", "-S"]
+    _run(runner, prjroot, cmd)
+    assert_refdata(test_modinfos, prjroot)
+
+
+def test_modinfos_param(runner, example_param, prjroot):
+    """Modinfo Command."""
+    cmd = ["modinfo", "*"]
+    _run(runner, prjroot, cmd)
+    assert_refdata(test_modinfos_param, prjroot)

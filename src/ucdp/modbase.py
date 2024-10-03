@@ -32,6 +32,7 @@ from functools import cached_property
 from inspect import getmro
 from typing import Any, ClassVar, Optional, TypeAlias, Union, no_type_check
 
+from aligntext import align
 from caseconverter import snakecase
 from uniquer import uniquetuple
 
@@ -769,8 +770,58 @@ class BaseMod(NamedObject):
         return f"<{modref}(inst={self.inst!r}, libname={self.libname!r}, modname={self.modname!r})>"
 
     def get_overview(self) -> str:
-        """Return brief module overview."""
+        """
+        Return Brief Module Overview.
+
+        This Module Overview is intended to be overwritten by the user.
+        """
         return ""
+
+    def get_info(self, sub: bool = False) -> str:
+        """Module Information."""
+        header = f"## `{self.libname}.{self.modname}` (`{self.get_modref()}`)"
+        parts = [
+            header,
+            self._get_ident_info("Parameters", self.params),
+            self._get_ident_info("Ports", self.ports),
+        ]
+        if sub:
+            parts.append(self._get_sub_info())
+        return "\n\n".join(parts)
+
+    def _get_ident_info(self, title: str, idents: Idents):
+        def entry(level, ident):
+            pre = "  " * level
+            dinfo = f" ({ident.direction})" if ident.direction else ""
+            return (
+                f"{pre}{ident.name}{dinfo}",
+                f"{pre}{ident.type_}",
+            )
+
+        parts = [
+            f"### {title}",
+            "",
+        ]
+        if idents:
+            data = [("Name ", "Type"), ("----", "----")]
+            data += [entry(level, ident) for level, ident in idents.leveliter()]
+            parts.append(align(data, seps=(" | ", " |"), sepfirst="| "))
+        else:
+            parts.append("-")
+        return "\n".join(parts)
+
+    def _get_sub_info(self) -> str:
+        parts = [
+            "### Submodules",
+            "",
+        ]
+        if self.insts:
+            data = [("Name", "Module"), ("----", "------")]
+            data += [(f"`{inst.name}`", f"`{inst.libname}.{inst.modname}`") for inst in self.insts]
+            parts.append(align(data, seps=(" | ", " |"), sepfirst="| "))
+        else:
+            parts.append("-")
+        return "\n".join(parts)
 
 
 class Router(Object):

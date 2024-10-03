@@ -178,11 +178,17 @@ class Ident(Expr, NamedObject, Light):
         return int(getattr(self.type_, "default", -1))
 
     def __iter__(self):
-        return _iters([self])
+        for _, ident in _iters([self]):
+            yield ident
 
     def iter(self, filter_=None, stop=None, value=None) -> Iterator:
         """Iterate over Hierarchy."""
-        return _iters([self], filter_=filter_, stop=stop, value=value)
+        for _, ident in _iters([self], filter_=filter_, stop=stop, value=value):
+            yield ident
+
+    def leveliter(self, filter_=None, stop=None, value=None) -> Iterator:
+        """Iterate over Hierarchy."""
+        yield from _iters([self], filter_=filter_, stop=stop, value=value)
 
     def cast(self, other: "Ident") -> Casting:
         """Cast self=cast(other)."""
@@ -228,6 +234,13 @@ class Idents(Namespace):
         for ident in self.values():
             yield from ident.iter(filter_=filter_, stop=stop)
 
+    def leveliter(
+        self, filter_: IdentFilter | None = None, stop: IdentStop | None = None
+    ) -> Iterator[tuple[int, Ident]]:
+        """Iterate over all Identifier with Level."""
+        for ident in self.values():
+            yield from ident.leveliter(filter_=filter_, stop=stop)
+
     # def iterhier(self, filter_=None, stop=None, maxlevel=None) -> Iterator:
     #    """Iterate over all Identifier and return hierarchy."""
     #     for ident in self.values():
@@ -252,14 +265,14 @@ class Idents(Namespace):
         return _get_ident(self.values(), name) is not None
 
 
-def _iters(idents: Iterable[Ident], filter_=None, stop=None, value=None) -> Iterator[Ident]:  # noqa: C901,PLR0912
+def _iters(idents: Iterable[Ident], filter_=None, stop=None, value=None, level: int = 0) -> Iterator[tuple[int, Ident]]:  # noqa: C901,PLR0912
     # highly optimized!
 
     for rootident in idents:
-        stack = deque([rootident])
+        stack = deque([(level, rootident)])
         while True:
             try:
-                ident = stack.pop()
+                identlevel, ident = stack.pop()
             except IndexError:
                 break
 
@@ -274,7 +287,7 @@ def _iters(idents: Iterable[Ident], filter_=None, stop=None, value=None) -> Iter
                 ident = ident.new(type_=type_)
 
             if not filter_ or filter_(ident):
-                yield ident
+                yield identlevel, ident
             if isinstance(type_, BaseStructType):
                 for structitem in reversed(type_.values()):
                     direction = ident.direction and ident.direction * structitem.orientation
@@ -288,17 +301,17 @@ def _iters(idents: Iterable[Ident], filter_=None, stop=None, value=None) -> Iter
                         ifdef=structitem.ifdef or ident.ifdef,
                     )
                     if not stop or not stop(child):
-                        stack.append(child)
+                        stack.append((identlevel + 1, child))
             elif isinstance(type_, ArrayType):
                 elementident = ident.new(type_=type_.itemtype)
                 # do not forward stop and filter_ as these are just intermediate identifiers
-                subidents = tuple(_iters([elementident]))
-                for subident in subidents[1:]:
+                subidents = tuple(_iters([elementident], level=identlevel + 1))
+                for sublevel, subident in subidents[1:]:
                     # create array with new element type
                     childtype = type_.new(itemtype=subident.type_)
                     child = subident.new(type_=childtype)
                     if not stop or not stop(child):
-                        stack.append(child)
+                        stack.append((sublevel, child))
 
 
 def get_ident(idents: Iterable[Ident], name: str, value=None, dym=False) -> Ident | None:
@@ -339,7 +352,7 @@ def get_subname(parent: Ident, ident: Ident):
 
 def _get_ident(idents, name) -> Ident | None:
     # TODO: optimize
-    for ident in _iters(idents):
+    for _, ident in _iters(idents):
         if ident.name == name:
             return ident
     return None

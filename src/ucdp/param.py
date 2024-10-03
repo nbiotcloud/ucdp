@@ -138,4 +138,5 @@ class Param(Ident):
         return int(value or 0)
 
     def __iter__(self):
-        return _iters([self], value=self.value)
+        for _, ident in _iters([self], value=self.value):
+            yield ident
