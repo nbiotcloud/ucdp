@@ -23,7 +23,56 @@
 #
 """Identifier."""
 
+from pytest import fixture
+
 import ucdp as u
+
+
+class ModeType(u.AEnumType):
+    """Mode."""
+
+    keytype: u.UintType = u.UintType(2)
+
+    def _build(self):
+        self._add(0, "add")
+        self._add(1, "sub")
+        self._add(2, "max")
+
+
+class StructType(u.AStructType):
+    """My."""
+
+    comment: str = "Mode"
+
+    def _build(self):
+        self._add("mode", ModeType())
+        self._add("send", u.ArrayType(u.UintType(8), 3))
+        self._add("return", u.UintType(4), u.BWD)
+
+
+class MyType(u.AStructType):
+    """A Complex Type."""
+
+    def _build(self):
+        self._add("my0", StructType())
+        self._add("my1", StructType(), u.BWD)
+        self._add("uint", u.UintType(3))
+
+
+@fixture
+def top() -> u.Idents:
+    """Top-Identifier."""
+    return u.Idents(
+        [
+            u.Port(MyType(), "port_i"),
+            u.Port(MyType(), "other_o"),
+            u.Port(StructType(), "struct_i"),
+            u.Port(StructType(), "struct_o"),
+            u.Signal(StructType(), "struct_s"),
+            u.Signal(MyType(), "sig_s"),
+            u.Port(u.UintType(8), "data_i"),
+        ]
+    )
 
 
 def test_expridents():
@@ -49,3 +98,52 @@ def test_idents():
     assert idents["main_i"] == port
     assert "main_clk_i" in idents
     assert idents["main_clk_i"] == u.Port(u.ClkType(), "main_clk_i", direction=u.IN, doc=u.Doc(title="Clock"))
+
+
+def test_leveliter(top):
+    """Top."""
+    assert tuple(f"{idx}: {name}" for idx, name in top.leveliter()) == (
+        "0: port_i",
+        "1: port_my0_i",
+        "2: port_my0_mode_i",
+        "2: port_my0_send_i",
+        "2: port_my0_return_o",
+        "1: port_my1_o",
+        "2: port_my1_mode_o",
+        "2: port_my1_send_o",
+        "2: port_my1_return_i",
+        "1: port_uint_i",
+        "0: other_o",
+        "1: other_my0_o",
+        "2: other_my0_mode_o",
+        "2: other_my0_send_o",
+        "2: other_my0_return_i",
+        "1: other_my1_i",
+        "2: other_my1_mode_i",
+        "2: other_my1_send_i",
+        "2: other_my1_return_o",
+        "1: other_uint_o",
+        "0: struct_i",
+        "1: struct_mode_i",
+        "1: struct_send_i",
+        "1: struct_return_o",
+        "0: struct_o",
+        "1: struct_mode_o",
+        "1: struct_send_o",
+        "1: struct_return_i",
+        "0: struct_s",
+        "1: struct_mode_s",
+        "1: struct_send_s",
+        "1: struct_return_s",
+        "0: sig_s",
+        "1: sig_my0_s",
+        "2: sig_my0_mode_s",
+        "2: sig_my0_send_s",
+        "2: sig_my0_return_s",
+        "1: sig_my1_s",
+        "2: sig_my1_mode_s",
+        "2: sig_my1_send_s",
+        "2: sig_my1_return_s",
+        "1: sig_uint_s",
+        "0: data_i",
+    )
