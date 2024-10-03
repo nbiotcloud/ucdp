@@ -64,11 +64,6 @@ class ACoreMod(BaseMod):
         return join_names(self.parent.modname, self.basename)
 
     @property
-    def libname(self) -> str:
-        """Library Name."""
-        return self.libpath.name
-
-    @property
     def libpath(self) -> str:
         """Library Path."""
         return self.parent.libpath
