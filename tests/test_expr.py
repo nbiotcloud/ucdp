@@ -23,8 +23,9 @@
 #
 """Expression Testing."""
 
-import ucdp as u
 from test2ref import assert_refdata
+
+import ucdp as u
 
 
 def _test_op(file, expr):

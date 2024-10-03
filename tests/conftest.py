@@ -4,8 +4,9 @@ import os
 from pathlib import Path
 from unittest import mock
 
-import ucdp as u
 from pytest import fixture
+
+import ucdp as u
 
 EXAMPLES_PATH = Path(u.__file__).parent / "examples"
 

@@ -34,7 +34,7 @@ from caseconverter import snakecase
 from ._modbuilder import build
 from .modbase import BaseMod, ModClss
 from .modfilelist import ModFileLists
-from .modutil import get_libname, get_modname, get_topmodname
+from .modutil import get_libpath, get_modname, get_topmodname
 from .object import Field
 from .test import Test
 
@@ -69,9 +69,9 @@ class ATbMod(BaseMod):
         return get_topmodname(self.__class__)
 
     @property
-    def libname(self) -> str:
-        """Library Name."""
-        return get_libname(self.__class__)
+    def libpath(self) -> str:
+        """Library Path."""
+        return get_libpath(self.__class__)
 
     @property
     def is_tb(self) -> bool:

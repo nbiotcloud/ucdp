@@ -23,11 +23,12 @@
 #
 """Test :any:`Object`."""
 
-import ucdp as u
 from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 from pytest import raises
+
+import ucdp as u
 
 
 class MyObject(u.Object):

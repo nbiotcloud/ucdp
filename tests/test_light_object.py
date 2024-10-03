@@ -25,11 +25,12 @@
 
 import re
 
-import ucdp as u
 from hypothesis import assume, given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 from pytest import raises
+
+import ucdp as u
 
 
 class MyLightObject(u.LightObject):

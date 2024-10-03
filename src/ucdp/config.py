@@ -38,7 +38,7 @@ class AConfig(LightObject):
     Args:
         name: Configuration name, used as suffix of the generated module.
 
-    A configuration is nothing more than a receipe how to assemble a module:
+    A configuration is nothing more than a recipe how to assemble a module:
 
     * if a specific option should be built-in or not
     * how many instances or which instances should be created

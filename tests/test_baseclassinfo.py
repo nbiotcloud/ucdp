@@ -24,6 +24,7 @@
 """Test Configuration."""
 
 import pydantic
+
 import ucdp as u
 
 

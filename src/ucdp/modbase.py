@@ -143,9 +143,14 @@ class BaseMod(NamedObject):
         """Top Module Name."""
 
     @property
-    @abstractmethod
     def libname(self) -> str:
         """Library Name."""
+        return self.libpath.name
+
+    @property
+    @abstractmethod
+    def libpath(self) -> str:
+        """Library Path."""
 
     @cached_property
     def qualname(self) -> str:
@@ -182,7 +187,7 @@ class BaseMod(NamedObject):
     @property
     def hiername(self) -> str:
         """Hierarchical Name."""
-        mod: "BaseMod" | None = self
+        mod: BaseMod | None = self
         names: list[str] = []
         while mod is not None:
             if mod.has_hiername:
@@ -569,7 +574,7 @@ class BaseMod(NamedObject):
         """
         if self.__is_locked:
             raise LockError(f"{self}: Cannot connect '{port}' of'{inst}' to '{expr}'.")
-        mod: "BaseMod" = self.get_inst(inst)
+        mod: BaseMod = self.get_inst(inst)
         assigns, parser = self.__instcons[mod.name]
         assigntarget: BaseSignal = parser.parse(port, only=BaseSignal)  # type: ignore[assignment]
         assignsource: Source = self.parser.parse_note(expr, only=Source)  # type: ignore[arg-type]
@@ -577,7 +582,7 @@ class BaseMod(NamedObject):
 
     def get_instcons(self, inst: Union["BaseMod", str]) -> Assigns:
         """Retrieve All Instance Connections Of `inst`."""
-        mod: "BaseMod" = self.get_inst(inst)
+        mod: BaseMod = self.get_inst(inst)
         return self.__instcons[mod.name][0]
 
     def add_flipflop(

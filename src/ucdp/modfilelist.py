@@ -101,11 +101,11 @@ class ModFileList(IdentLightObject):
         return {"mod": mod, **kwargs}
 
     @staticmethod
-    def get_cls_placeholder(cls, **kwargs) -> Placeholder:
+    def get_cls_placeholder(modcls, **kwargs) -> Placeholder:
         """Get Class Placeholder."""
         return {
-            "cls": cls,
-            "modref": cls.get_modref(),
+            "cls": modcls,
+            "modref": modcls.get_modref(),
             **kwargs,
         }
 

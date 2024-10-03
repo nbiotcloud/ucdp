@@ -23,8 +23,9 @@
 #
 """Test Flip-Flop."""
 
-import ucdp as u
 from pytest import fixture
+
+import ucdp as u
 
 
 @fixture

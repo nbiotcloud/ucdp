@@ -26,6 +26,7 @@
 import re
 
 from pytest import raises
+
 from ucdp import DOWN, UP, Const, Slice, UintType
 
 

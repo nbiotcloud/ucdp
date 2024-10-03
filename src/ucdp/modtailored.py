@@ -33,7 +33,7 @@ from typing import Any, ClassVar
 from ._modbuilder import build
 from .modbase import BaseMod
 from .modfilelist import ModFileLists
-from .modutil import get_libname, get_topmodname, is_tb_from_modname
+from .modutil import get_libpath, get_topmodname, is_tb_from_modname
 from .nameutil import join_names
 from .object import PrivateField
 
@@ -135,11 +135,11 @@ class ATailoredMod(BaseMod):
         return get_topmodname(self)
 
     @property
-    def libname(self) -> str:
-        """Library Name."""
+    def libpath(self) -> str:
+        """Library Path."""
         if self.parent:
-            return self.parent.libname
-        return get_libname(self.__class__)
+            return self.parent.libpath
+        return get_libpath(self.__class__)
 
     @property
     def is_tb(self) -> bool:

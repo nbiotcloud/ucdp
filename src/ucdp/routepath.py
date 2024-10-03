@@ -58,7 +58,7 @@ class RoutePath(LightObject):
     @model_validator(mode="after")
     def __post_init(self) -> "RoutePath":
         if not (not self.create or not self.cast):
-            raise ValueError(f"{self}: [opt]cast() and create() are mutally exclusive.")
+            raise ValueError(f"{self}: [opt]cast() and create() are mutually exclusive.")
         return self
 
     @property

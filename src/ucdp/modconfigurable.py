@@ -35,7 +35,7 @@ from .nameutil import join_names
 
 class AConfigurableMod(BaseTopMod):
     """
-    A Module Which Is Assembled According To A Receipe ([AConfig][ucdp.config.AConfig]).
+    A Module Which Is Assembled According To A Recipe ([AConfig][ucdp.config.AConfig]).
 
     See : for arguments, attributes and details.
 

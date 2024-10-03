@@ -26,9 +26,10 @@
 import re
 from pathlib import Path
 
-import ucdp as u
 from pytest import fixture, raises
 from test2ref import assert_refdata
+
+import ucdp as u
 
 
 class ModeType(u.AEnumType):
@@ -105,8 +106,8 @@ def _dump_assigns(assigns: u.Assigns, path: Path, name: str = "assigns", full: b
             if full or assign.source is not None:
                 file.write(f"ASSIGN: {assign}\n")
         if assigns.drivers:
-            for name, value in assigns.drivers:
-                file.write(f"DRIVER: {name}: {value}\n")
+            for dname, value in assigns.drivers:
+                file.write(f"DRIVER: {dname}: {value}\n")
 
 
 def test_basic(top):

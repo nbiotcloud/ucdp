@@ -28,8 +28,9 @@ Struct Type Testing.
 
 import re
 
-import ucdp as u
 from pytest import raises
+
+import ucdp as u
 
 
 def test_float():
