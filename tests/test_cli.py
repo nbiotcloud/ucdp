@@ -222,16 +222,16 @@ def test_overview_tags(prjroot, example_simple):
     assert_refdata(test_overview_tags, prjroot)
 
 
-def test_info_examples(prjroot, example_simple):
+def test_pathinfo_examples(prjroot, example_simple):
     """Info Examples Command."""
-    run2console(prjroot, "info", "examples")
-    assert_refdata(test_info_examples, prjroot)
+    run2console(prjroot, "pathinfo", "examples")
+    assert_refdata(test_pathinfo_examples, prjroot)
 
 
-def test_info_templates(prjroot, example_simple):
+def test_pathinfo_templates(prjroot, example_simple):
     """Info Templates Command."""
-    run2console(prjroot, "info", "template-paths")
-    assert_refdata(test_info_templates, prjroot)
+    run2console(prjroot, "pathinfo", "templates")
+    assert_refdata(test_pathinfo_templates, prjroot)
 
 
 def test_rendergen(prjroot, example_simple):
@@ -392,19 +392,19 @@ def test_toppath(prjroot, example_simple):
     assert_refdata(test_toppath, prjroot)
 
 
-def test_modinfo(prjroot, example_simple):
-    """Modinfo Command."""
-    run2console(prjroot, "modinfo", "uart_lib.uart")
-    assert_refdata(test_modinfo, prjroot)
+def test_info(prjroot, example_simple):
+    """Info Command."""
+    run2console(prjroot, "info", "uart_lib.uart")
+    assert_refdata(test_info, prjroot)
 
 
-def test_modinfos(prjroot, example_simple):
-    """Modinfo Command."""
-    run2console(prjroot, "modinfo", "*", "-S")
-    assert_refdata(test_modinfos, prjroot)
+def test_infos(prjroot, example_simple):
+    """Info Command."""
+    run2console(prjroot, "info", "*", "-S")
+    assert_refdata(test_infos, prjroot)
 
 
-def test_modinfos_param(example_param, prjroot):
-    """Modinfo Command."""
-    run2console(prjroot, "modinfo", "*")
-    assert_refdata(test_modinfos_param, prjroot)
+def test_infos_param(example_param, prjroot):
+    """Info Command."""
+    run2console(prjroot, "info", "*")
+    assert_refdata(test_infos_param, prjroot)

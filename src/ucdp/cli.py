@@ -493,7 +493,7 @@ TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 @click.option("--top", "-t", default=None, is_flag=True, help="List loadable top modules only.")
 @click.option("--sub", "-S", default=False, is_flag=True, help="Show Submodules.")
 @pass_ctx
-def modinfo(ctx, tops, path, local, top, sub):
+def info(ctx, tops, path, local, top, sub):
     """Module Information."""
     sep = ""
     for info in find(path, patterns=tops, local=local, is_top=top):
@@ -528,11 +528,11 @@ def overview(ctx, top, path, minimal=False, file=None, tag=None):
 
 
 @ucdp.group(context_settings={"help_option_names": ["-h", "--help"]})
-def info():
-    """Information."""
+def pathinfo():
+    """Path Information."""
 
 
-@info.command()
+@pathinfo.command()
 @pass_ctx
 def examples(ctx):
     """Path to Examples."""
@@ -540,10 +540,10 @@ def examples(ctx):
     print(str(examples_path))
 
 
-@info.command()
+@pathinfo.command()
 @opt_path
 @pass_ctx
-def template_paths(ctx, path):
+def templates(ctx, path):
     """Template Paths."""
     makolator = get_makolator(paths=path)
     for template_path in makolator.config.template_paths:
