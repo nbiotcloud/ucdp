@@ -1,7 +1,6 @@
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┓
 ┃ Reference                             ┃ Top ┃ Tb  ┃ Tags ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━┩
-│ glbl_lib.clk_gate                     │  X  │     │      │
 │ tests.test_flipflops.FlipFlopMod      │  X  │     │      │
 │ tests.test_modconfigurable.AnotherMod │  X  │     │      │
 │ tests.test_modconfigurable.MyOtherMod │  X  │     │      │
@@ -27,5 +26,4 @@
 │ tests.test_modtb.TopMod               │  X  │     │      │
 │ tests.test_modtb.TopTbMod             │  X  │  X  │      │
 │ tests.test_muxes.MuxMod               │  X  │     │      │
-│ uart_lib.uart                         │  X  │     │ intf │
 └───────────────────────────────────────┴─────┴─────┴──────┘

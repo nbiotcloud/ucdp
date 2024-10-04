@@ -116,7 +116,7 @@ class Generator(Object):
             assert config.track
             if tracker.total != tracker.identical:
                 modified = tracker.total - tracker.identical
-                raise RuntimeError(f"{modified} files modified")
+                LOGGER.error("%d files modified", modified)
 
     @contextmanager
     def top(

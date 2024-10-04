@@ -1,0 +1,3 @@
+WARNING glbl_lib.regf is not a top module as it bases on <class 'ucdp.modtailored.ATailoredMod'>
+WARNING glbl_lib.regf_tb is not a top module as it bases on <class 'ucdp.modtb.AGenericTbMod'>
+WARNING uart_lib.uart.UartCoreMod is not a top module as it bases on <class 'ucdp.modcore.ACoreMod'>

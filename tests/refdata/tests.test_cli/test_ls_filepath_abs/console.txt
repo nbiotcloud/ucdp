@@ -1,6 +1,3 @@
-glbl_lib.clk_gate $PRJ/src/ucdp/examples/simple/glbl_lib/clk_gate.py
-glbl_lib.regf $PRJ/src/ucdp/examples/simple/glbl_lib/regf.py
-glbl_lib.regf_tb $PRJ/src/ucdp/examples/simple/glbl_lib/regf_tb.py
 tests.test_flipflops.FlipFlopMod $PRJ/tests/test_flipflops.py
 tests.test_modconfigurable.AnotherMod $PRJ/tests/test_modconfigurable.py
 tests.test_modconfigurable.MyMod $PRJ/tests/test_modconfigurable.py
@@ -30,5 +27,3 @@ tests.test_modtb.TbMod $PRJ/tests/test_modtb.py
 tests.test_modtb.TopMod $PRJ/tests/test_modtb.py
 tests.test_modtb.TopTbMod $PRJ/tests/test_modtb.py
 tests.test_muxes.MuxMod $PRJ/tests/test_muxes.py
-uart_lib.uart $PRJ/src/ucdp/examples/simple/uart_lib/uart.py
-uart_lib.uart.UartCoreMod $PRJ/src/ucdp/examples/simple/uart_lib/uart.py

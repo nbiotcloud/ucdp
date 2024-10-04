@@ -5,7 +5,7 @@
 groups = ["default", "checktypes", "doc", "format", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:3e5ab225f7504942d6c2f25bcecb14c7429866f13324e6e7bb8e3caf2be66c2e"
+content_hash = "sha256:23cffb214e88f0204259afcf917b33e7fec8ea0c42abc3cf459d11fd1c5b8c50"
 
 [[metadata.targets]]
 requires_python = ">=3.10.0,<4.0"
@@ -381,6 +381,17 @@ marker = "python_version < \"3.11\""
 files = [
     {file = "exceptiongroup-1.2.2-py3-none-any.whl", hash = "sha256:3111b9d131c238bec2f8f516e123e14ba243563fb135d3fe885990585aa7795b"},
     {file = "exceptiongroup-1.2.2.tar.gz", hash = "sha256:47c2edf7c6738fafb49fd34290706d1a1a2f4d1c6df275526b62cbb4aa5393cc"},
+]
+
+[[package]]
+name = "execnet"
+version = "2.1.1"
+requires_python = ">=3.8"
+summary = "execnet: rapid multi-Python deployment"
+groups = ["test"]
+files = [
+    {file = "execnet-2.1.1-py3-none-any.whl", hash = "sha256:26dee51f1b80cebd6d0ca8e74dd8745419761d3bef34163928cbebbdc4749fdc"},
+    {file = "execnet-2.1.1.tar.gz", hash = "sha256:5189b52c6121c24feae288166ab41b32549c7e2348652736540b9e6e7d4e72e3"},
 ]
 
 [[package]]
@@ -1230,6 +1241,21 @@ dependencies = [
 files = [
     {file = "pytest-cov-5.0.0.tar.gz", hash = "sha256:5837b58e9f6ebd335b0f8060eecce69b662415b16dc503883a02f45dfeb14857"},
     {file = "pytest_cov-5.0.0-py3-none-any.whl", hash = "sha256:4f0764a1219df53214206bf1feea4633c3b558a2925c8b59f144f682861ce652"},
+]
+
+[[package]]
+name = "pytest-xdist"
+version = "3.6.1"
+requires_python = ">=3.8"
+summary = "pytest xdist plugin for distributed testing, most importantly across multiple CPUs"
+groups = ["test"]
+dependencies = [
+    "execnet>=2.1",
+    "pytest>=7.0.0",
+]
+files = [
+    {file = "pytest_xdist-3.6.1-py3-none-any.whl", hash = "sha256:9ed4adfb68a016610848639bb7e02c9352d5d9f03d04809919e2dafc3be4cca7"},
+    {file = "pytest_xdist-3.6.1.tar.gz", hash = "sha256:ead156a4db231eec769737f57668ef58a2084a34b2e55c4a8fa20d861107300d"},
 ]
 
 [[package]]

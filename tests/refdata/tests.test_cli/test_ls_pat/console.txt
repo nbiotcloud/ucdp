@@ -1,9 +1,6 @@
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┓
 ┃ Reference                   ┃ Top ┃ Tb  ┃ Tags ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━┩
-│ glbl_lib.clk_gate           │  X  │     │      │
-│ glbl_lib.regf               │     │     │ bus  │
-│ glbl_lib.regf_tb            │     │  X  │      │
 │ tests.test_mods.SomeMod     │  X  │     │      │
 │ tests.test_mods.SomeSomeMod │  X  │     │      │
 └─────────────────────────────┴─────┴─────┴──────┘

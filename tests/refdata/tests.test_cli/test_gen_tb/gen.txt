@@ -1,0 +1,3 @@
+'glbl_lib.regf_tb#uart_lib.uart-uart_lib.uart_regf' checked.                    
+'$GEN/uart_lib/uart/rtl/uart_regf.sv'... CREATED.
+1 files. 1 CREATED.

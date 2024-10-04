@@ -73,7 +73,7 @@ Environment Variable 'UCDP_PATH'.
 )
 opt_filelist = click.option(
     "--filelist",
-    "-l",
+    "-f",
     multiple=True,
     help="Filelist Names. Environment Variable 'UCDP_FILELIST'.",
     envvar="UCDP_FILELIST",

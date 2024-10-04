@@ -1,0 +1,1 @@
+WARNING I am just an example warning. Modules might emit me on suspects.

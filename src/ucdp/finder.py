@@ -98,7 +98,7 @@ def _find_infos(
                     mat = True
                     yield info
             if not mat:
-                LOGGER.warning(f"{str(pat)!r} did not match any module")
+                LOGGER.error(f"{str(pat)!r} did not match any module")
 
 
 def _find_tops(

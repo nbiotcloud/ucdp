@@ -63,7 +63,7 @@ def test(session: nox.Session) -> None:
     if not IS_DEV:
         session.run_install("pip", "install", f"pdm=={PDM_VERSION}")
         session.run_install("pdm", "install", "-G", "test")
-    session.run("pytest", "-vv", *session.posargs)
+    session.run("pytest", "-vv", "-n", "auto", *session.posargs)
     htmlcovfile = pathlib.Path().resolve() / "htmlcov" / "index.html"
     print(f"Coverage report:\n\n    file://{htmlcovfile!s}\n")
 
