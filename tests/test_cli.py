@@ -23,115 +23,102 @@
 #
 """Test Command-Line-Interface."""
 
+import subprocess
 from pathlib import Path
 
-from click.testing import CliRunner
 from contextlib_chdir import chdir
-from pytest import fixture
+from pydantic import BaseModel
 from test2ref import assert_refdata
 
 import ucdp as u
 
-
-@fixture
-def runner():
-    """Click Runner for Testing."""
-    yield CliRunner()
+from .conftest import TESTDATA_PATH
 
 
-def _assert_output(result, lines):
-    assert [line.rstrip() for line in result.output.splitlines()] == lines
+class Result(BaseModel):
+    """Result."""
+
+    exit_code: int
+    stdout: str
+    stderr: str
 
 
-def _run(runner, prjroot, cmd):
-    result = runner.invoke(u.cli.ucdp, cmd)
-    assert result.exit_code == 0
-    (prjroot / "console.txt").write_text(result.output)
+def run(*cmd, exit_code: int = 0) -> Result:
+    """Run."""
+    result = subprocess.run(("ucdp", *cmd), check=False, capture_output=True)  # noqa: S603
+    assert result.returncode == exit_code
+    stdout = result.stdout.decode("utf-8")
+    stderr = result.stderr.decode("utf-8")
+    return Result(exit_code=result.returncode, stdout=stdout, stderr=stderr)
 
 
-def test_check(runner, example_simple):
+def run2console(prjroot: Path, *cmd, exit_code: int = 0, output="console.txt") -> None:
+    """Run And Capture Console."""
+    result = run(*cmd, exit_code=exit_code)
+    if result.stdout:
+        (prjroot / output).write_text(result.stdout)
+    if result.stderr:
+        (prjroot / output).with_suffix(".err.txt").write_text(result.stderr)
+
+
+def test_check(prjroot, example_simple):
     """Check Command."""
-    result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart"])
-    assert result.exit_code == 0
-    _assert_output(result, ["'uart_lib.uart' checked."])
+    run2console(prjroot, "check", "uart_lib.uart", output="check-uart.txt")
 
-    result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart2"])
-    assert result.exit_code == 0
-    assert result.output == ""
+    run2console(prjroot, "check", "uart_lib.uart2", exit_code=1, output="check-uart2.txt")
 
-    result = runner.invoke(u.cli.ucdp, ["check", "uart_lib.uart", "--stat"])
-    assert result.exit_code == 0
-    _assert_output(
-        result,
-        [
-            "'uart_lib.uart' checked.",
-            "Statistics:",
-            "  Modules: 4",
-            "  Module-Instances: 5",
-            "  LightObjects: 10",
-        ],
-    )
+    run2console(prjroot, "check", "uart_lib.uart", "--stat", output="check-stat.txt")
+
+    assert_refdata(test_check, prjroot)
 
 
-def test_check_topsfile(runner, example_simple, prjroot):
+def test_check_topsfile(prjroot, example_simple):
     """Generate with --tops-file."""
     topfile = prjroot / "tops.txt"
-    topfile.write_text("""
-# comment
-  uart_lib.uart
+    topfile.write_text("# comment\n  uart_lib.uart \n")
 
-""")
-    result = runner.invoke(u.cli.ucdp, ["check", "--tops-file", str(topfile)])
-    assert result.exit_code == 0
-    _assert_output(result, ["'uart_lib.uart' checked."])
+    run2console(prjroot, "check", "--tops-file", str(topfile))
+
+    assert_refdata(test_check_topsfile, prjroot)
 
 
-def test_gen(runner, example_simple, prjroot):
+def test_gen(prjroot, example_simple, uartcorefile):
     """Generate and Clean Command."""
     uartfile = prjroot / "uart_lib" / "uart" / "rtl" / "uart.sv"
 
     assert not uartfile.exists()
 
-    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "-l", "hdl", "--maxworkers", "1"])
-    assert result.exit_code == 0
-    (prjroot / "gen.txt").write_text(result.output)
+    run2console(prjroot, "gen", "uart_lib.uart", "-f", "hdl", output="gen.txt")
 
     assert uartfile.exists()
 
-    result = runner.invoke(u.cli.ucdp, ["cleangen", "uart_lib.uart", "-l", "hdl", "--maxworkers", "1"])
-    assert result.exit_code == 0
-    (prjroot / "cleangen.txt").write_text(result.output)
+    run2console(prjroot, "cleangen", "uart_lib.uart", "-f", "hdl", output="cleangen.txt")
 
     assert not uartfile.exists()
 
-    (prjroot / "console.txt").write_text(result.output)
     assert_refdata(test_gen, prjroot)
 
 
-def test_gen_check(runner, example_simple, prjroot):
+def test_gen_check(prjroot, example_simple, uartcorefile):
     """Generate with Check."""
     uartfile = prjroot / "uart_lib" / "uart" / "rtl" / "uart.sv"
 
-    assert not uartfile.exists()
-
-    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "--check"])
-    assert result.exit_code == 1
-    assert result.output.splitlines()[-1] == "2 files. 2 CREATED."
+    run2console(prjroot, "gen", "uart_lib.uart", "--check", exit_code=1, output="check.txt")
 
     assert uartfile.exists()
 
-    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "--check"])
-    assert result.exit_code == 0
-    assert result.output.splitlines()[-1] == "2 files. 2 identical. untouched."
+    run2console(prjroot, "gen", "uart_lib.uart", "--check", output="re-check.txt")
+
+    assert_refdata(test_gen_check, prjroot)
 
 
-def test_gen_tb(runner, example_simple, prjroot):
+def test_gen_tb(prjroot, example_simple):
     """Generate with Check."""
-    result = runner.invoke(u.cli.ucdp, ["gen", "glbl_lib.regf_tb#uart_lib.uart-uart_lib.uart_regf"])
-    assert result.output.splitlines()[-1] == "1 files. 1 CREATED."
+    run2console(prjroot, "gen", "glbl_lib.regf_tb#uart_lib.uart-uart_lib.uart_regf", output="gen.txt")
+    assert_refdata(test_gen_tb, prjroot)
 
 
-def test_gen_topsfile(runner, example_simple, prjroot):
+def test_gen_topsfile(prjroot, example_simple, uartcorefile):
     """Generate with --tops-file."""
     topfile = prjroot / "tops.txt"
     topfile.write_text("""
@@ -139,254 +126,237 @@ def test_gen_topsfile(runner, example_simple, prjroot):
   uart_lib.uart
 
 """)
-    result = runner.invoke(u.cli.ucdp, ["gen", "--tops-file", str(topfile)])
-    assert result.exit_code == 0
-    assert result.output.splitlines()[-1] == "2 files. 2 CREATED."
+
+    run2console(prjroot, "gen", "--tops-file", str(topfile))
+
+    assert_refdata(test_gen_topsfile, prjroot)
 
 
-def test_gen_default(runner, example_simple, prjroot):
+def test_gen_default(prjroot, example_simple, uartcorefile):
     """Generate and Clean Command."""
-    result = runner.invoke(u.cli.ucdp, ["gen", "uart_lib.uart", "--maxworkers", "1"])
-    assert result.exit_code == 0
-    (prjroot / "gen.txt").write_text(result.output)
+    run2console(prjroot, "gen", "uart_lib.uart", output="gen.txt")
 
-    result = runner.invoke(u.cli.ucdp, ["cleangen", "uart_lib.uart", "--maxworkers", "1"])
-    assert result.exit_code == 0
-    (prjroot / "cleangen.txt").write_text(result.output)
+    run2console(prjroot, "cleangen", "uart_lib.uart", output="cleangen.txt")
+
     assert_refdata(test_gen_default, prjroot)
 
 
-def test_filelist(runner, example_simple, prjroot):
+def test_filelist(prjroot, example_simple):
     """Filelist Command."""
-    cmd = ["filelist", "uart_lib.uart", "-l", "hdl"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "filelist", "uart_lib.uart", "-f", "hdl")
     assert_refdata(test_filelist, prjroot)
 
 
-def test_filelist_default(runner, example_simple, prjroot):
+def test_filelist_default(prjroot, example_simple):
     """Filelist Command with Default."""
-    cmd = ["filelist", "uart_lib.uart"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "filelist", "uart_lib.uart")
     assert_refdata(test_filelist_default, prjroot)
 
 
-def test_filelist_file(runner, example_simple, prjroot):
+def test_filelist_file(prjroot, example_simple):
     """Filelist Command."""
     filepath = prjroot / "file.txt"
-    cmd = ["filelist", "uart_lib.uart", "-l", "hdl", "--file", str(filepath)]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "filelist", "uart_lib.uart", "-f", "hdl", "--file", str(filepath))
     assert_refdata(test_filelist_file, prjroot)
 
 
-def test_filelist_other(runner, prjroot, example_filelist):
+def test_filelist_other(prjroot, example_filelist):
     """Filelist Command."""
-    cmd = ["filelist", "filelist_lib.filelist", "-l", "hdl"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "filelist", "filelist_lib.filelist", "-f", "hdl")
     assert_refdata(test_filelist_other, prjroot)
 
 
-def test_fileinfo(runner, example_simple, prjroot):
+def test_fileinfo(prjroot, example_simple):
     """Fileinfo Command."""
-    cmd = ["fileinfo", "uart_lib.uart", "-l", "hdl"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "fileinfo", "uart_lib.uart", "-f", "hdl")
     assert_refdata(test_fileinfo, prjroot)
 
 
-def test_fileinfo_default(runner, example_simple, prjroot):
+def test_fileinfo_default(prjroot, example_simple):
     """Fileinfo Command."""
-    cmd = ["fileinfo", "uart_lib.uart"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "fileinfo", "uart_lib.uart")
     assert_refdata(test_fileinfo_default, prjroot)
 
 
-def test_fileinfo_minimal(runner, example_simple, prjroot):
+def test_fileinfo_minimal(prjroot, example_simple):
     """Fileinfo Command Minimal."""
-    cmd = ["fileinfo", "uart_lib.uart", "-m"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "fileinfo", "uart_lib.uart", "-m")
     assert_refdata(test_fileinfo_minimal, prjroot)
 
 
-def test_fileinfo_maxlevel(runner, example_simple, prjroot):
+def test_fileinfo_maxlevel(prjroot, example_simple):
     """Fileinfo Command with Maxlevel."""
-    cmd = ["fileinfo", "uart_lib.uart", "-l", "hdl", "--maxlevel=1"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "fileinfo", "uart_lib.uart", "-f", "hdl", "--maxlevel=1")
     assert_refdata(test_fileinfo_maxlevel, prjroot)
 
 
-def test_fileinfo_file(runner, example_simple, prjroot):
+def test_fileinfo_file(prjroot, example_simple):
     """Fileinfo Command with File."""
     filepath = prjroot / "file.txt"
-    cmd = ["fileinfo", "uart_lib.uart", "-l", "hdl", "--file", str(filepath)]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "fileinfo", "uart_lib.uart", "-f", "hdl", "--file", str(filepath))
     assert_refdata(test_fileinfo_file, prjroot)
 
 
-def test_overview(runner, example_simple, prjroot):
+def test_overview(prjroot, example_simple):
     """Overview Command."""
-    cmd = ["overview", "uart_lib.uart"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "overview", "uart_lib.uart")
     assert_refdata(test_overview, prjroot)
 
 
-def test_overview_minimal(runner, example_simple, prjroot):
+def test_overview_minimal(prjroot, example_simple):
     """Overview Command - Minimal."""
-    cmd = ["overview", "uart_lib.uart", "-m"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "overview", "uart_lib.uart", "-m")
     assert_refdata(test_overview_minimal, prjroot)
 
 
-def test_overview_file(runner, example_simple, prjroot):
+def test_overview_file(prjroot, example_simple):
     """Overview Command - Minimal."""
     filepath = prjroot / "file.txt"
-    cmd = ["overview", "uart_lib.uart", "-o", str(filepath)]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "overview", "uart_lib.uart", "-o", str(filepath))
     assert_refdata(test_overview_file, prjroot)
 
 
-def test_overview_tags(runner, example_simple, prjroot):
+def test_overview_tags(prjroot, example_simple):
     """Overview Command."""
-    cmd = ["overview", "uart_lib.uart", "-T", "intf"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "overview", "uart_lib.uart", "-T", "intf")
     assert_refdata(test_overview_tags, prjroot)
 
 
-def test_info_examples(runner, example_simple, prjroot):
+def test_info_examples(prjroot, example_simple):
     """Info Examples Command."""
-    _run(runner, prjroot, ["info", "examples"])
+    run2console(prjroot, "info", "examples")
     assert_refdata(test_info_examples, prjroot)
 
 
-def test_info_templates(runner, example_simple, prjroot):
+def test_info_templates(prjroot, example_simple):
     """Info Templates Command."""
-    _run(runner, prjroot, ["info", "template-paths"])
+    run2console(prjroot, "info", "template-paths")
     assert_refdata(test_info_templates, prjroot)
 
 
-def test_rendergen(runner, example_simple, prjroot, testdata):
+def test_rendergen(prjroot, example_simple):
     """Command rendergen."""
-    template_filepath = testdata / "example.txt.mako"
+    template_filepath = TESTDATA_PATH / "example.txt.mako"
     filepath = prjroot / "output.txt"
-    cmd = ["rendergen", "uart_lib.uart", str(template_filepath), str(filepath)]
-    _run(runner, prjroot, cmd)
-
+    run2console(prjroot, "rendergen", "uart_lib.uart", str(template_filepath), str(filepath))
     assert_refdata(test_rendergen, prjroot)
 
 
-def test_rendergen_defines(runner, example_simple, prjroot, testdata):
+def test_rendergen_defines(prjroot, example_simple):
     """Command rendergen."""
-    template_filepath = testdata / "example.txt.mako"
+    template_filepath = TESTDATA_PATH / "example.txt.mako"
     filepath = prjroot / "output.txt"
-    cmd = ["rendergen", "uart_lib.uart", str(template_filepath), str(filepath), "-D", "one=1", "-D", "two"]
-    _run(runner, prjroot, cmd)
+    run2console(
+        prjroot, "rendergen", "uart_lib.uart", str(template_filepath), str(filepath), "-D", "one=1", "-D", "two"
+    )
     assert_refdata(test_rendergen_defines, prjroot)
 
 
-def test_renderinplace(runner, example_simple, prjroot, testdata):
+def test_renderinplace(prjroot, example_simple):
     """Command renderinplace."""
-    template_filepath = testdata / "example.txt.mako"
+    template_filepath = TESTDATA_PATH / "example.txt.mako"
     filepath = prjroot / "output.txt"
     filepath.write_text("""
 GENERATE INPLACE BEGIN content('test')
 GENERATE INPLACE END content
 """)
-    cmd = ["renderinplace", "uart_lib.uart", str(template_filepath), str(filepath)]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "renderinplace", "uart_lib.uart", str(template_filepath), str(filepath))
     assert_refdata(test_renderinplace, prjroot)
 
 
-def test_ls(runner, example_simple, testdata, prjroot):
+def test_ls(prjroot, example_simple):
     """List Command."""
-    _run(runner, prjroot, ["ls"])
+    run2console(prjroot, "ls")
     assert_refdata(test_ls, prjroot)
 
 
-def test_ls_base(runner, example_simple, testdata, prjroot):
-    """List Command with Base."""
-    _run(runner, prjroot, ["ls", "-B"])
+def test_ls_base(prjroot, example_simple):
+    """List Command."""
+    run2console(prjroot, "ls", "-B")
     assert_refdata(test_ls_base, prjroot)
 
 
-def test_ls_local(runner, example_simple, testdata, prjroot):
+def test_ls_local(prjroot, example_simple):
     """List Command - Local Only."""
-    _run(runner, prjroot, ["ls", "--local"])
+    run2console(prjroot, "ls", "--local")
     assert_refdata(test_ls_local, prjroot)
 
 
-def test_ls_nonlocal(runner, example_simple, testdata, prjroot):
+def test_ls_nonlocal(prjroot, example_simple):
     """List Command - Non-Local Only."""
-    _run(runner, prjroot, ["ls", "--no-local"])
+    run2console(prjroot, "ls", "--no-local", exit_code=1)
     assert_refdata(test_ls_nonlocal, prjroot)
 
 
-def test_ls_filepath(runner, example_simple, testdata, prjroot):
+def test_ls_filepath(prjroot, tests):
     """List Command With Filepath."""
-    _run(runner, prjroot, ["ls", "-fn"])
+    run2console(prjroot, "ls", "-fn")
     assert_refdata(test_ls_filepath, prjroot)
 
 
-def test_ls_filepath_abs(runner, example_simple, testdata, prjroot):
+def test_ls_filepath_abs(prjroot, tests):
     """List Command With Filepath."""
-    _run(runner, prjroot, ["ls", "-Fn"])
+    run2console(prjroot, "ls", "-Fn")
     assert_refdata(test_ls_filepath_abs, prjroot)
 
 
-def test_ls_names(runner, example_simple, testdata, prjroot):
+def test_ls_names(prjroot, tests):
     """List with Names Only."""
-    _run(runner, prjroot, ["ls", "-n"])
+    run2console(prjroot, "ls", "-n")
     assert_refdata(test_ls_names, prjroot)
 
 
-def test_ls_top(runner, example_simple, testdata, prjroot):
+def test_ls_top(prjroot, tests):
     """List Top Modules Only."""
-    _run(runner, prjroot, ["ls", "-t"])
+    run2console(prjroot, "ls", "-t")
     assert_refdata(test_ls_top, prjroot)
 
 
-def test_ls_tb(runner, example_simple, testdata, prjroot):
+def test_ls_tb(prjroot, tests):
     """List Testbenches Only."""
-    _run(runner, prjroot, ["ls", "-b"])
+    run2console(prjroot, "ls", "-b")
     assert_refdata(test_ls_tb, prjroot)
 
 
-def test_ls_gentb(runner, example_simple, testdata, prjroot):
+def test_ls_gentb(prjroot, tests):
     """List Generic Testbenches Only."""
-    _run(runner, prjroot, ["ls", "-g"])
+    run2console(prjroot, "ls", "-g")
     assert_refdata(test_ls_gentb, prjroot)
 
 
-def test_ls_pat(runner, example_simple, testdata, prjroot):
+def test_ls_pat(prjroot, tests):
     """List Command with Pattern."""
-    _run(runner, prjroot, ["ls", "glbl_lib*", "*SomeMod"])
+    run2console(prjroot, "ls", "*SomeMod")
     assert_refdata(test_ls_pat, prjroot)
 
 
-def test_ls_tags(runner, example_simple, testdata, prjroot):
+def test_ls_tags(prjroot, tests):
     """List Command with Tags."""
-    _run(runner, prjroot, ["ls", "-T", "intf", "-T", "ip*"])
+    run2console(prjroot, "ls", "-T", "intf", "-T", "ip*")
     assert_refdata(test_ls_tags, prjroot)
 
 
-def test_ls_tb_dut(runner, example_simple, testdata, prjroot):
+def test_ls_tb_dut(prjroot, tests):
     """List Testbenches DUTs."""
-    _run(runner, prjroot, ["ls", "tests.test_modtb.GenTbMod#*", "-n"])
+    run2console(prjroot, "ls", "*", "-n")
     assert_refdata(test_ls_tb_dut, prjroot)
 
 
-def test_ls_tb_dut_sub(runner, example_simple, testdata, prjroot):
+def test_ls_tb_dut_sub(prjroot, example_simple):
     """List Testbenches DUT with Subs."""
-    _run(runner, prjroot, ["ls", "glbl_lib.regf_tb#uart_lib.uart-*", "-n"])
+    run2console(prjroot, "ls", "glbl_lib.regf_tb#uart_lib.uart-*", "-n")
     assert_refdata(test_ls_tb_dut_sub, prjroot)
 
 
-def test_ls_tb_dut_sub_all(runner, example_simple, testdata, prjroot):
+def test_ls_tb_dut_sub_all(prjroot, tests):
     """List Testbenches DUT with Subs, glob."""
-    _run(runner, prjroot, ["ls", "*#*-*", "-n"])
+    run2console(prjroot, "ls", "*#*-*", "-n")
     assert_refdata(test_ls_tb_dut_sub_all, prjroot)
 
 
-def test_ls_none(runner, example_simple, testdata, prjroot):
+def test_ls_none(prjroot, tests):
     """List Testbenches DUT with Subs, glob."""
-    _run(runner, prjroot, ["ls", "#"])
+    run2console(prjroot, "ls", "#", exit_code=1)
     assert_refdata(test_ls_none, prjroot)
 
 
@@ -404,9 +374,9 @@ def test_autocomplete_top(example_simple):
     ]
 
 
-def test_autocomplete_path(tmp_path):
+def test_autocomplete_path(prjroot):
     """Autocompletion for Path."""
-    with chdir(tmp_path):
+    with chdir(prjroot):
         Path("aaa.txt").touch()
         Path("aab.txt").touch()
         Path("ac.txt").touch()
@@ -416,29 +386,25 @@ def test_autocomplete_path(tmp_path):
         assert u.cliutil.auto_path(None, None, "b") == []
 
 
-def test_toppath(runner, example_simple):
+def test_toppath(prjroot, example_simple):
     """Check Command."""
-    result = runner.invoke(u.cli.ucdp, ["check", str(example_simple / "uart_lib" / "uart.py")])
-    assert result.exit_code == 0
-    _assert_output(result, ["'uart_lib.uart' checked."])
+    run2console(prjroot, "check", str(example_simple / "uart_lib" / "uart.py"))
+    assert_refdata(test_toppath, prjroot)
 
 
-def test_modinfo(runner, example_simple, prjroot):
+def test_modinfo(prjroot, example_simple):
     """Modinfo Command."""
-    cmd = ["modinfo", "uart_lib.uart"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "modinfo", "uart_lib.uart")
     assert_refdata(test_modinfo, prjroot)
 
 
-def test_modinfos(runner, example_simple, prjroot):
+def test_modinfos(prjroot, example_simple):
     """Modinfo Command."""
-    cmd = ["modinfo", "*", "-S"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "modinfo", "*", "-S")
     assert_refdata(test_modinfos, prjroot)
 
 
-def test_modinfos_param(runner, example_param, prjroot):
+def test_modinfos_param(example_param, prjroot):
     """Modinfo Command."""
-    cmd = ["modinfo", "*"]
-    _run(runner, prjroot, cmd)
+    run2console(prjroot, "modinfo", "*")
     assert_refdata(test_modinfos_param, prjroot)

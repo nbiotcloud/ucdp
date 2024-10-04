@@ -1,6 +1,3 @@
-glbl_lib.clk_gate
-glbl_lib.regf
-glbl_lib.regf_tb
 tests.test_flipflops.FlipFlopMod
 tests.test_modconfigurable.AnotherMod
 tests.test_modconfigurable.MyMod
@@ -30,5 +27,3 @@ tests.test_modtb.TbMod
 tests.test_modtb.TopMod
 tests.test_modtb.TopTbMod
 tests.test_muxes.MuxMod
-uart_lib.uart
-uart_lib.uart.UartCoreMod

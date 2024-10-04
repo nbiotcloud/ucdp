@@ -1,0 +1,5 @@
+'uart_lib.uart' checked.                                                        
+Statistics:
+  Modules: 4
+  Module-Instances: 5
+  LightObjects: 10

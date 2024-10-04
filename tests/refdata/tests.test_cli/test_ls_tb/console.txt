@@ -1,7 +1,6 @@
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┓
 ┃ Reference                 ┃ Top ┃ Tb  ┃ Tags ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━┩
-│ glbl_lib.regf_tb          │     │  X  │      │
 │ tests.test_modtb.GenTbMod │  X  │  X  │      │
 │ tests.test_modtb.TbMod    │  X  │  X  │      │
 │ tests.test_modtb.TopTbMod │  X  │  X  │      │

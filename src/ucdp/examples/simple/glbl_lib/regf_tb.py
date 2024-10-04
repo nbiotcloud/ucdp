@@ -24,6 +24,8 @@
 
 """A Simplified Register File Testbench."""
 
+import logging
+
 import ucdp as u
 
 from .regf import RegfMod
@@ -36,4 +38,4 @@ class RegfTbMod(u.AGenericTbMod):
     dut_modclss: u.ClassVar[u.ModClss] = {RegfMod}
 
     def _build(self):
-        pass
+        logging.getLogger(__name__).warning("I am just an example warning. Modules might emit me on suspects.")

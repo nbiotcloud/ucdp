@@ -25,8 +25,10 @@
 """Command Line Interface."""
 
 import logging
+import sys
 from collections import defaultdict
 from collections.abc import Iterable
+from logging import StreamHandler
 from pathlib import Path
 
 import click
@@ -38,6 +40,7 @@ from rich.pretty import pprint
 from rich.table import Table
 
 from ._cligroup import MainGroup
+from ._logging import HasErrorHandler
 from .cache import CACHE
 from .cliutil import (
     PathType,
@@ -92,26 +95,57 @@ class Ctx(BaseModel):
     )
 
     console: Console
+    has_error_handler: HasErrorHandler | None
+
+    verbose: int = 0
+    no_cache: bool = False
+    no_color: bool | None = None
+
+    @staticmethod
+    def create(no_color: bool | None = None, **kwargs) -> "Ctx":
+        """Create."""
+        console = Console(log_time=False, log_path=False, no_color=no_color)
+        has_error_handler = HasErrorHandler()
+        return Ctx(console=console, has_error_handler=has_error_handler, no_color=no_color, **kwargs)
+
+    def __enter__(self):
+        # Logging
+        level = _LOGLEVELMAP.get(self.verbose, logging.DEBUG)
+        if not self.no_color:
+            handler = RichHandler(
+                show_time=False,
+                show_path=False,
+                rich_tracebacks=True,
+                console=Console(stderr=True, no_color=self.no_color),
+            )
+            format_ = "%(message)s"
+        else:
+            handler = StreamHandler(stream=sys.stderr)
+            format_ = "%(levelname)s %(message)s"
+        handlers = [handler, self.has_error_handler]
+        logging.basicConfig(level=level, format=format_, handlers=handlers)
+
+        # Cache
+        if self.no_cache:
+            CACHE.disable()
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, tb):
+        if exc_type or self.has_error_handler.has_errors:
+            self.console.print("[red][bold]Aborted.")
+            sys.exit(1)
 
 
 @click.group(cls=MainGroup, context_settings={"help_option_names": ["-h", "--help"]})
 @click.option("-v", "--verbose", count=True, help="Increase Verbosity.")
 @click.option("-C", "--no-cache", is_flag=True, help="Disable Caching.")
+@click.option("--no-color", is_flag=True, help="Disable Coloring.", envvar="UCDP_NO_COLOR")
 @click.version_option()
 @click.pass_context
-def ucdp(ctx, verbose=0, no_cache=False):
+def ucdp(ctx, verbose=0, no_cache=False, no_color=False):
     """Unified Chip Design Platform."""
-    level = _LOGLEVELMAP.get(verbose, logging.DEBUG)
-    handler = RichHandler(
-        show_time=False,
-        show_path=False,
-        rich_tracebacks=True,
-        console=Console(stderr=True),
-    )
-    logging.basicConfig(level=level, format="%(message)s", handlers=[handler])
-    if no_cache:
-        CACHE.disable()
-    ctx.obj = Ctx(console=Console(log_time=False, log_path=False))
+    ctx.obj = ctx.with_resource(Ctx.create(verbose=verbose, no_cache=no_cache, no_color=no_color))
 
 
 pass_ctx = click.make_pass_decorator(Ctx)
@@ -160,7 +194,11 @@ def check(ctx, tops, path, local=None, stat=False, tops_file=None):
     for filepath in tops_file or []:
         tops.extend(read_file(filepath))
     for info in find(path, patterns=tuple(tops), local=local, is_top=True):
-        top = load_top(ctx, info.topmodref, path)
+        try:
+            top = load_top(ctx, info.topmodref, path)
+        except Exception as exc:
+            LOGGER.warning(str(exc))
+            continue
         if stat:
             print("Statistics:")
             for name, value in top.get_stat().items():
@@ -207,7 +245,11 @@ def gen(
     filelist = filelist or ["*"]
     with Generator(makolator=makolator, maxworkers=maxworkers, check=check) as generator:
         for info in find(path, patterns=tuple(tops), local=local, is_top=True):
-            top = load_top(ctx, info.topmodref, path)
+            try:
+                top = load_top(ctx, info.topmodref, path)
+            except Exception as exc:
+                LOGGER.warning(str(exc))
+                continue
             for item in filelist:
                 generator.generate(top, item, target=target, data=data)
 
@@ -457,11 +499,11 @@ def modinfo(ctx, tops, path, local, top, sub):
     for info in find(path, patterns=tops, local=local, is_top=top):
         try:
             top = load_top(ctx, info.topmodref, path, quiet=True)
-        except Exception as exc:  # noqa: PERF203
+        except Exception as exc:
             LOGGER.warning(str(exc))
-        else:
-            print(sep + top.mod.get_info(sub=sub))
-            sep = "\n\n"
+            continue
+        print(sep + top.mod.get_info(sub=sub))
+        sep = "\n\n"
 
 
 @ucdp.command(
