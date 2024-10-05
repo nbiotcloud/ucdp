@@ -32,7 +32,7 @@ from test2ref import assert_refdata
 
 import ucdp as u
 
-from .conftest import TESTDATA_PATH
+from .conftest import DOCS_PATH, TESTDATA_PATH
 
 
 class Result(BaseModel):
@@ -393,18 +393,23 @@ def test_toppath(prjroot, example_simple):
 
 
 def test_info(prjroot, example_simple):
-    """Info Command."""
+    """Info Command For One Module."""
     run2console(prjroot, "info", "uart_lib.uart")
     assert_refdata(test_info, prjroot)
 
 
 def test_infos(prjroot, example_simple):
-    """Info Command."""
+    """Info Command For Multiple Modules."""
     run2console(prjroot, "info", "*", "-S")
     assert_refdata(test_infos, prjroot)
 
 
 def test_infos_param(example_param, prjroot):
-    """Info Command."""
+    """Info Command For Parameterized Module."""
     run2console(prjroot, "info", "*")
     assert_refdata(test_infos_param, prjroot)
+
+
+def test_infos_doc(prjroot, example_simple):
+    """Info Command For Multiple Modules."""
+    run2console(prjroot, "info", "*", "-o", DOCS_PATH / "examples" / "simple")

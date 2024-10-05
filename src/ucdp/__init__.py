@@ -82,6 +82,7 @@ from .modfilelist import (
     resolve_modfilelists,
     search_modfilelists,
 )
+from .modinfo import get_modinfo
 from .moditer import ModPostIter, ModPreIter, uniquemods
 from .modref import ModRef
 from .modtailored import ATailoredMod
@@ -239,6 +240,7 @@ __all__ = [
     "get_ident",
     "get_makolator",
     "get_modbaseinfos",
+    "get_modinfo",
     "get_overview_tree",
     "get_repr",
     "get_snakecasename",

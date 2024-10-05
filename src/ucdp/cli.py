@@ -72,6 +72,7 @@ from .generate import Generator, clean, get_makolator, render_generate, render_i
 from .iterutil import namefilter
 from .loader import load
 from .modfilelist import iter_modfilelists
+from .modinfo import get_modinfo
 from .modtopref import PAT_TOPMODREF, TopModRef
 from .pathutil import relative
 from .top import Top
@@ -492,18 +493,27 @@ TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 @opt_local
 @click.option("--top", "-t", default=None, is_flag=True, help="List loadable top modules only.")
 @click.option("--sub", "-S", default=False, is_flag=True, help="Show Submodules.")
+@click.option("--output", "-o", type=PathType, help="Output Directory.")
 @pass_ctx
-def info(ctx, tops, path, local, top, sub):
+def info(ctx, tops, path, local, top, sub, output):
     """Module Information."""
-    sep = ""
-    for info in find(path, patterns=tops, local=local, is_top=top):
-        try:
-            top = load_top(ctx, info.topmodref, path, quiet=True)
-        except Exception as exc:
-            LOGGER.warning(str(exc))
-            continue
-        print(sep + top.mod.get_info(sub=sub))
-        sep = "\n\n"
+    makolator = get_makolator()
+    with Generator(makolator=makolator, no_stat=not output):
+        sep = ""
+        for info in find(path, patterns=tops, local=local, is_top=top):
+            try:
+                top = load_top(ctx, info.topmodref, path, quiet=True)
+            except Exception as exc:
+                LOGGER.warning(str(exc))
+                continue
+            mod = top.mod
+            modinfo = get_modinfo(top.mod, sub=sub)
+            if output:
+                with makolator.open_outputfile(output / f"{mod.libname}.{mod.modname}.md") as file:
+                    file.write(modinfo)
+            else:
+                print(sep + modinfo)
+                sep = "\n\n"
 
 
 @ucdp.command(

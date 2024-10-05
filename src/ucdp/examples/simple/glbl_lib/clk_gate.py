@@ -29,7 +29,11 @@ import ucdp as u  # (1)
 
 
 class ClkGateMod(u.AMod):
-    """Clock Gate."""
+    """
+    Clock Gate.
+
+    A simple Clock Gate
+    """
 
     # File Lists
     filelists: u.ClassVar[u.ModFileLists] = (  # (2)

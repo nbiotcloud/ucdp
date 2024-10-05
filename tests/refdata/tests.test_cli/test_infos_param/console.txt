@@ -1,16 +1,24 @@
-## `param_lib.param` (`param_lib.param.ParamMod`)
+# Module `param_lib.param`
 
-### Parameters
+Python: `param_lib.param.ParamMod`
 
-| Name      | Type                                                                                                                 |
-| ----      | ----                                                                                                                 |
-| param_p   | IntegerType(default=10)                                                                                              |
-| width_p   | IntegerType(default=Log2Expr(Op(Param(IntegerType(default=10), 'param_p'), '+', ConstExpr(IntegerType(default=1))))) |
-| default_p | IntegerType(default=Param(IntegerType(default=10), 'param_p'))                                                       |
+Example Module With Parameters.
 
-### Ports
+## Parameters
 
-| Name        | Type                                                                                                                                             |
-| ----        | ----                                                                                                                                             |
-| data_i (IN) | UintType(Param(IntegerType(default=10), 'param_p'))                                                                                              |
-| cnt_o (OUT) | UintType(Param(IntegerType(default=Log2Expr(Op(Param(IntegerType(default=10), 'param_p'), '+', ConstExpr(IntegerType(default=1))))), 'width_p')) |
+| Name        | Type                                                                                                                   |
+| ----        | ----                                                                                                                   |
+| `param_p`   | `IntegerType(default=10)`                                                                                              |
+| `width_p`   | `IntegerType(default=Log2Expr(Op(Param(IntegerType(default=10), 'param_p'), '+', ConstExpr(IntegerType(default=1)))))` |
+| `default_p` | `IntegerType(default=Param(IntegerType(default=10), 'param_p'))`                                                       |
+
+## Ports
+
+| Name            | Type                                                                                                                                               |
+| ----            | ----                                                                                                                                               |
+| `data_i` (`IN`) | `UintType(Param(IntegerType(default=10), 'param_p'))`                                                                                              |
+| `cnt_o` (`OUT`) | `UintType(Param(IntegerType(default=Log2Expr(Op(Param(IntegerType(default=10), 'param_p'), '+', ConstExpr(IntegerType(default=1))))), 'width_p'))` |
+
+## Files
+
+None

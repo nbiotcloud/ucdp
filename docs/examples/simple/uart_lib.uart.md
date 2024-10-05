@@ -35,12 +35,11 @@ None
 | ----                 | ----                                                                        |
 | `gen`                | `full`                                                                      |
 | `filepaths`          | `$PRJROOT/uart_lib/uart/rtl/uart.sv`                                        |
-| `template_filepaths` | `$PRJ/src/ucdp/examples/simple/uart_lib/main.mako` |
+| `template_filepaths` | `/Users/iccode17/projects/ucdp/src/ucdp/examples/simple/uart_lib/main.mako` |
 
 ### Filelist `header`
 
 | Name                 | Type                                                                       |
 | ----                 | ----                                                                       |
 | `filepaths`          | `$PRJROOT/uart.hpp`                                                        |
-| `template_filepaths` | `$PRJ/src/ucdp/examples/simple/uart_lib/hpp.mako` |
-
+| `template_filepaths` | `/Users/iccode17/projects/ucdp/src/ucdp/examples/simple/uart_lib/hpp.mako` |

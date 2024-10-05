@@ -255,7 +255,7 @@ def resolve_modfilelists(
 
 def iter_modfilelists(
     topmod: BaseMod,
-    name: str,
+    name: str = "*",
     target: str | None = None,
     filelistparser: FileListParser | None = None,
     replace_envvars: bool = False,

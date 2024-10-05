@@ -12,6 +12,7 @@ import ucdp as u
 EXAMPLES_PATH = Path(u.__file__).parent / "examples"
 TESTDATA_PATH = Path(__file__).parent / "testdata"
 TESTS_PATH = Path(__file__).parent
+DOCS_PATH = Path(__file__).parent.parent / "docs"
 
 
 @contextmanager
