@@ -24,7 +24,7 @@
 
 [project]
 name = "ucdp"
-version = ["dynamic"]
+dynamic = ["version"]
 description = "Unified Chip Design Platform"
 readme = "README.md"
 authors = [
