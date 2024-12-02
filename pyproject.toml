@@ -24,7 +24,7 @@
 
 [project]
 name = "ucdp"
-version = "0.23.0"
+version = ["dynamic"]
 description = "Unified Chip Design Platform"
 readme = "README.md"
 authors = [
@@ -62,6 +62,9 @@ ucdp = "ucdp.cli:ucdp"
 [build-system]
 requires = ["pdm-backend"]
 build-backend = "pdm.backend"
+
+[tool.pdm.version]
+source = "scm"
 
 [tool.pdm]
 [tool.pdm.dev-dependencies]
