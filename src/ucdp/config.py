@@ -150,6 +150,11 @@ class AConfig(LightObject):
                 hashdata[key] = tuple(items)
         return hashlib.sha256(str(hashdata).encode("utf-8")).hexdigest()[:16]
 
+    @property
+    def unique_name(self) -> str:
+        """Unique Configuration Hash."""
+        return self.hash
+
 
 BaseConfig = AConfig
 """BaseConfig"""
