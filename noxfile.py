@@ -45,7 +45,7 @@ nox.options.reuse_existing_virtualenvs = True
 
 IS_DEV = bool(int(os.environ.get("DEV", "0")))
 PYTHON = False if IS_DEV else None
-PDM_VERSION = "2.18.1"
+PDM_VERSION = "2.22.0"
 
 
 @nox.session(python=PYTHON)
