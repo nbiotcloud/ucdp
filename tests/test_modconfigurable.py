@@ -200,3 +200,28 @@ def test_unique():
 
     mod = UniqueMod(config=UniqueConfig(baseaddr=0x2000))
     assert mod.modname == "unique_b0x2000"
+
+
+def test_missing_config():
+    """Missing Configuration."""
+    with raises(u.ValidationError):
+        MyMod()
+
+
+class DefaultMod(u.AConfigurableMod):
+    """Example Configurable Module."""
+
+    config: UniqueConfig
+
+    def _build(self):
+        pass
+
+    def get_default_config(self) -> UniqueConfig:
+        """Calculate Config."""
+        return UniqueConfig(baseaddr=0xCAFE)
+
+
+def test_default_config():
+    """Default Configuration."""
+    mod = DefaultMod()
+    assert mod.modname == "default_b0xCAFE"

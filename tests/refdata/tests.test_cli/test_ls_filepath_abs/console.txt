@@ -1,5 +1,6 @@
 tests.test_flipflops.FlipFlopMod $PRJ/tests/test_flipflops.py
 tests.test_modconfigurable.AnotherMod $PRJ/tests/test_modconfigurable.py
+tests.test_modconfigurable.DefaultMod $PRJ/tests/test_modconfigurable.py
 tests.test_modconfigurable.MyMod $PRJ/tests/test_modconfigurable.py
 tests.test_modconfigurable.MyOtherMod $PRJ/tests/test_modconfigurable.py
 tests.test_modconfigurable.RootMod $PRJ/tests/test_modconfigurable.py

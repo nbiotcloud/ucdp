@@ -90,6 +90,11 @@ class AConfigurableMod(BaseTopMod):
     config: BaseConfig
 
     def __init__(self, parent: BaseMod | None = None, name: str | None = None, **kwargs):
+        if "config" not in kwargs:
+            try:
+                kwargs["config"] = self.get_default_config()
+            except NotImplementedError:
+                pass
         if "config" not in kwargs and parent is not None:
             raise ValueError("'config' is required if 'parent' is given")
         super().__init__(parent=parent, name=name, **kwargs)  # type: ignore[call-arg]
@@ -108,3 +113,7 @@ class AConfigurableMod(BaseTopMod):
     def topmodname(self) -> str:
         """Top Module Name."""
         return get_topmodname(self.__class__)
+
+    def get_default_config(self) -> BaseConfig:
+        """Create Default Configuration."""
+        raise NotImplementedError
