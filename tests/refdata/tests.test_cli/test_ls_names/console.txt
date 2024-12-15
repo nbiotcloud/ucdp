@@ -1,5 +1,6 @@
 tests.test_flipflops.FlipFlopMod
 tests.test_modconfigurable.AnotherMod
+tests.test_modconfigurable.DefaultMod
 tests.test_modconfigurable.MyMod
 tests.test_modconfigurable.MyOtherMod
 tests.test_modconfigurable.RootMod
