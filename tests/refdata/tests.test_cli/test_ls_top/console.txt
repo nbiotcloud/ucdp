@@ -6,6 +6,7 @@
 │ tests.test_modconfigurable.MyOtherMod │  X  │     │      │
 │ tests.test_modconfigurable.RootMod    │  X  │     │      │
 │ tests.test_modconfigurable.TopMod     │  X  │     │      │
+│ tests.test_modconfigurable.UniqueMod  │  X  │     │      │
 │ tests.test_modfilelist.FlavorMod      │  X  │     │      │
 │ tests.test_modfilelist.MultiMod       │  X  │     │      │
 │ tests.test_mods.DeclMod               │  X  │     │      │

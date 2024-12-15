@@ -101,7 +101,7 @@ class AConfigurableMod(BaseTopMod):
         name = config.name
         modbasename = get_modname(self.__class__)
         if not name and "config" in self.model_fields_set and not config.is_default:
-            name = config.hash
+            name = config.unique_name
         return join_names(modbasename, name)
 
     @property

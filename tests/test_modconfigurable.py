@@ -168,3 +168,35 @@ def test_sub():
     inst3 = mod.get_inst("u_inst3")
     assert inst3.modname == "sub_one"
     assert inst3.topmodname == "sub"
+
+
+class UniqueConfig(u.AConfig):
+    """Configuration."""
+
+    baseaddr: u.Hex = 0x1000
+
+    @property
+    def unique_name(self):
+        """Unique Name."""
+        return f"b{self.baseaddr!s}"
+
+
+class UniqueMod(u.AConfigurableMod):
+    """Example Configurable Module."""
+
+    config: UniqueConfig = UniqueConfig()
+
+    def _build(self):
+        pass
+
+
+def test_unique():
+    """Unique Name."""
+    mod = UniqueMod()
+    assert mod.modname == "unique"
+
+    mod = UniqueMod(config=UniqueConfig())
+    assert mod.modname == "unique"
+
+    mod = UniqueMod(config=UniqueConfig(baseaddr=0x2000))
+    assert mod.modname == "unique_b0x2000"
