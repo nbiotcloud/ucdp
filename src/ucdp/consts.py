@@ -45,7 +45,7 @@ PAT_OPT_IDENTIFIER: str = r"^([a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?)?$"
 UPWARDS: str = ".."
 """UPWARDS."""
 
-Gen = Literal["no", "inplace", "full"]
+Gen = Literal["no", "inplace", "full", "custom"]
 """Gen."""
 
 PATH = Path(__file__).parent
