@@ -96,7 +96,7 @@ class ModFileList(IdentLightObject):
     is_leaf: bool = False
 
     @staticmethod
-    def get_mod_placeholder(mod, **kwargs) -> Placeholder:
+    def get_mod_placeholder(mod: BaseMod, **kwargs) -> Placeholder:
         """Get Module Placeholder."""
         return {"mod": mod, **kwargs}
 
@@ -108,6 +108,10 @@ class ModFileList(IdentLightObject):
             "modref": modcls.get_modref(),
             **kwargs,
         }
+
+    def generate(mod: BaseMod) -> None:
+        """Custom Generate Function."""
+        raise NotImplementedError
 
 
 ModFileLists = tuple[ModFileList, ...]

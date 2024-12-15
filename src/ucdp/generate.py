@@ -182,6 +182,9 @@ class Generator(Object):
             for mod, modfilelist in modfilelists:
                 if modfilelist.gen == "no":
                     continue
+                if modfilelist.gen == "custom":
+                    jobs.append(exe.submit(modfilelist.generate, mod))
+                    continue
                 filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
                 template_filepaths: tuple[Path, ...] = modfilelist.template_filepaths or ()  # type: ignore[assignment]
                 inc_filepaths: tuple[Path, ...] = modfilelist.inc_filepaths or ()  # type: ignore[assignment]
