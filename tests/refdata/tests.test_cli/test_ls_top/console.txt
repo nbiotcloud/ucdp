@@ -3,6 +3,7 @@
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━┩
 │ tests.test_flipflops.FlipFlopMod      │  X  │     │      │
 │ tests.test_modconfigurable.AnotherMod │  X  │     │      │
+│ tests.test_modconfigurable.DefaultMod │  X  │     │      │
 │ tests.test_modconfigurable.MyOtherMod │  X  │     │      │
 │ tests.test_modconfigurable.RootMod    │  X  │     │      │
 │ tests.test_modconfigurable.TopMod     │  X  │     │      │
