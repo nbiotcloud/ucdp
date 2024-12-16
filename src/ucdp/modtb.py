@@ -33,13 +33,14 @@ from caseconverter import snakecase
 
 from ._modbuilder import build
 from .modbase import BaseMod, ModClss
+from .modbasetop import BaseTopMod
 from .modfilelist import ModFileLists
 from .modutil import get_libpath, get_modname, get_topmodname
 from .object import Field
 from .test import Test
 
 
-class ATbMod(BaseMod):
+class ATbMod(BaseTopMod):
     """
     Testbench Module.
 
