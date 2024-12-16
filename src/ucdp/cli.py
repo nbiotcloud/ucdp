@@ -95,7 +95,7 @@ class Ctx(BaseModel):
     )
 
     console: Console
-    has_error_handler: HasErrorHandler | None
+    has_error_handler: HasErrorHandler | None = None
 
     verbose: int = 0
     no_cache: bool = False
