@@ -59,7 +59,7 @@ class TbMod(u.ATbMod):
     """A Testbench Module."""
 
     def _build(self):
-        mod = DutMod()
+        mod = DutMod(self, "u_dut")
         mod.con("main_i", "create(main_s)")
 
 
@@ -101,6 +101,7 @@ def test_basic():
     assert tb.is_tb is True
     assert repr(tb) == "<tests.test_modtb.TbMod(inst='tb', libname='tests', modname='tb')>"
     assert tb.get_modref() == u.ModRef("tests", "test_modtb", modclsname="TbMod")
+    assert repr(tb.get_inst("u_dut")) == "<tests.test_modtb.DutMod(inst='tb/u_dut', libname='tests', modname='tb_dut')>"
 
 
 def test_generic():
