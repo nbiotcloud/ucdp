@@ -88,16 +88,22 @@ class AConfigurableMod(BaseTopMod):
     """
 
     config: BaseConfig
+    is_default: bool
 
     def __init__(self, parent: BaseMod | None = None, name: str | None = None, **kwargs):
+        is_default = False
         if "config" not in kwargs:
             try:
                 kwargs["config"] = self.get_default_config()
+                is_default = True
             except NotImplementedError:
                 pass
-        if "config" not in kwargs and parent is not None:
-            raise ValueError("'config' is required if 'parent' is given")
-        super().__init__(parent=parent, name=name, **kwargs)  # type: ignore[call-arg]
+        try:
+            is_default = is_default or kwargs["config"].is_default
+        except KeyError:
+            if parent is not None:
+                raise ValueError("'config' is required if 'parent' is given") from None
+        super().__init__(parent=parent, name=name, is_default=is_default, **kwargs)  # type: ignore[call-arg]
 
     @property
     def modname(self) -> str:
@@ -105,7 +111,7 @@ class AConfigurableMod(BaseTopMod):
         config = self.config
         name = config.name
         modbasename = get_modname(self.__class__)
-        if not name and "config" in self.model_fields_set and not config.is_default:
+        if not name and "config" in self.model_fields_set and not self.is_default:
             name = config.unique_name
         return join_names(modbasename, name)
 
