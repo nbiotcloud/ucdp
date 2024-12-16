@@ -91,6 +91,8 @@ def is_top(modcls: ModCls) -> bool:
     if issubclass(modcls, AGenericTbMod):
         return modcls.build_dut.__qualname__ != AGenericTbMod.build_dut.__qualname__
     if issubclass(modcls, AConfigurableMod):
+        if modcls.get_default_config is not AConfigurableMod.get_default_config:
+            return True
         config_field = modcls.model_fields["config"]
         return config_field.default is not PydanticUndefined
     if issubclass(modcls, (AMod, ATbMod)):

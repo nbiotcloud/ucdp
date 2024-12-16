@@ -4,8 +4,10 @@
 │ tests.test_flipflops.FlipFlopMod      │  X  │     │      │
 │ tests.test_modconfigurable.AnotherMod │  X  │     │      │
 │ tests.test_modconfigurable.DefaultMod │  X  │     │      │
+│ tests.test_modconfigurable.MyMod      │     │     │      │
 │ tests.test_modconfigurable.MyOtherMod │  X  │     │      │
 │ tests.test_modconfigurable.RootMod    │  X  │     │      │
+│ tests.test_modconfigurable.SubMod     │     │     │      │
 │ tests.test_modconfigurable.TopMod     │  X  │     │      │
 │ tests.test_modconfigurable.UniqueMod  │  X  │     │      │
 │ tests.test_modfilelist.FlavorMod      │  X  │     │      │
@@ -21,11 +23,10 @@
 │ tests.test_mods.SubMod                │  X  │     │ ip   │
 │ tests.test_mods.TopMod                │  X  │     │ ippp │
 │ tests.test_mods.WrongName             │  X  │     │      │
+│ tests.test_modtailored.TailMod        │     │     │      │
 │ tests.test_modtailored.TopMod         │  X  │     │      │
-│ tests.test_modtb.GenTbMod             │  X  │  X  │      │
+│ tests.test_modtb.DutMod               │     │     │      │
 │ tests.test_modtb.SubMod               │  X  │     │      │
-│ tests.test_modtb.TbMod                │  X  │  X  │      │
 │ tests.test_modtb.TopMod               │  X  │     │      │
-│ tests.test_modtb.TopTbMod             │  X  │  X  │      │
 │ tests.test_muxes.MuxMod               │  X  │     │      │
 └───────────────────────────────────────┴─────┴─────┴──────┘

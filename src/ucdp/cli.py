@@ -407,11 +407,11 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, minimal=False
 @arg_tops
 @opt_path
 @click.option("--names", "-n", default=False, is_flag=True, help="Just print names")
-@click.option("--top", "-t", default=False, is_flag=True, help="List loadable top modules only.")
-@click.option("--tb", "-b", default=False, is_flag=True, help="List testbench modules only.")
+@click.option("--top/--no-top", "-t/-T", default=None, is_flag=True, help="List loadable top modules only.")
+@click.option("--tb/--no-tb", "-b/-B", default=None, is_flag=True, help="List testbench modules only.")
 @click.option("--generic-tb", "-g", default=False, is_flag=True, help="List Generic Testbench modules only.")
 @opt_local
-@click.option("--base", "-B", default=False, is_flag=True, help="Show Base Classes.")
+@click.option("--base", "-A", default=False, is_flag=True, help="Show Base Classes.")
 @click.option("--filepath", "-f", default=False, is_flag=True, help="Show File Path.")
 @click.option("--abs-filepath", "-F", default=False, is_flag=True, help="Show Absolute File Path.")
 @opt_tag
@@ -421,8 +421,8 @@ def ls(  # noqa: C901
     path=None,
     tops=None,
     names=False,
-    top=False,
-    tb=False,
+    top=None,
+    tb=None,
     local=None,
     generic_tb=False,
     tag=None,
@@ -433,10 +433,10 @@ def ls(  # noqa: C901
     """List Modules."""
     with ctx.console.status("Searching"):
         infos = find(path, patterns=tops or ["*"], local=local)
-    if top:
-        infos = [info for info in infos if info.is_top]
-    if tb:
-        infos = [info for info in infos if info.tb]
+    if top is not None:
+        infos = [info for info in infos if info.is_top == top]
+    if tb is not None:
+        infos = [info for info in infos if bool(info.tb) == tb]
     if generic_tb:
         infos = [info for info in infos if info.tb == "Generic"]
     if tag:

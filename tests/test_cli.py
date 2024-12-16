@@ -218,7 +218,7 @@ def test_overview_file(prjroot, example_simple):
 
 def test_overview_tags(prjroot, example_simple):
     """Overview Command."""
-    run2console(prjroot, "overview", "uart_lib.uart", "-T", "intf")
+    run2console(prjroot, "overview", "uart_lib.uart", "--tag", "intf")
     assert_refdata(test_overview_tags, prjroot)
 
 
@@ -272,7 +272,7 @@ def test_ls(prjroot, example_simple):
 
 def test_ls_base(prjroot, example_simple):
     """List Command."""
-    run2console(prjroot, "ls", "-B")
+    run2console(prjroot, "ls", "-A")
     assert_refdata(test_ls_base, prjroot)
 
 
@@ -312,10 +312,22 @@ def test_ls_top(prjroot, tests):
     assert_refdata(test_ls_top, prjroot)
 
 
+def test_ls_notop(prjroot, tests):
+    """List No Top Modules Only."""
+    run2console(prjroot, "ls", "-T")
+    assert_refdata(test_ls_notop, prjroot)
+
+
 def test_ls_tb(prjroot, tests):
     """List Testbenches Only."""
     run2console(prjroot, "ls", "-b")
     assert_refdata(test_ls_tb, prjroot)
+
+
+def test_ls_notb(prjroot, tests):
+    """List Testbenches Only."""
+    run2console(prjroot, "ls", "-B")
+    assert_refdata(test_ls_notb, prjroot)
 
 
 def test_ls_gentb(prjroot, tests):
@@ -332,7 +344,7 @@ def test_ls_pat(prjroot, tests):
 
 def test_ls_tags(prjroot, tests):
     """List Command with Tags."""
-    run2console(prjroot, "ls", "-T", "intf", "-T", "ip*")
+    run2console(prjroot, "ls", "--tag", "intf", "--tag", "ip*")
     assert_refdata(test_ls_tags, prjroot)
 
 

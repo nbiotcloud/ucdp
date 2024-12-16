@@ -125,7 +125,7 @@ opt_filepath = click.option(
 )
 opt_tag = click.option(
     "--tag",
-    "-T",
+    "-G",
     default=[],
     multiple=True,
     help="Filter Modules by Tag Name or Wildcard.",
