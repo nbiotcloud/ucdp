@@ -1,0 +1,8 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┓
+┃ Reference                         ┃ Top ┃ Tb  ┃ Tags ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━┩
+│ tests.test_modconfigurable.MyMod  │     │     │      │
+│ tests.test_modconfigurable.SubMod │     │     │      │
+│ tests.test_modtailored.TailMod    │     │     │      │
+│ tests.test_modtb.DutMod           │     │     │      │
+└───────────────────────────────────┴─────┴─────┴──────┘
