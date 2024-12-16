@@ -224,4 +224,4 @@ class DefaultMod(u.AConfigurableMod):
 def test_default_config():
     """Default Configuration."""
     mod = DefaultMod()
-    assert mod.modname == "default_b0xCAFE"
+    assert mod.modname == "default"
