@@ -181,6 +181,8 @@ ignore = [
     'S101',
     # ClassVar
     'RUF012',
+    # No separate type-checking block
+    'TCH001',
 ]
 [tool.ruff.lint.per-file-ignores]
 "test_*" = [

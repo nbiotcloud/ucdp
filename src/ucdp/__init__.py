@@ -120,7 +120,7 @@ from .overview import get_overview_tree
 from .param import Param
 from .pathutil import improved_glob, improved_resolve, startswith_envvar, use_envvars
 from .routepath import Routeable, Routeables, RoutePath, parse_routepath, parse_routepaths
-from .signal import BaseSignal, Port, Signal
+from .signal import ASYNC, BaseClkRel, BaseSignal, ClkRel, Port, Signal
 from .slices import DOWN, UP, Slice, SliceDirection, mask_to_slices
 from .test import Test
 from .top import Top
@@ -162,12 +162,14 @@ __all__ = [
     "Assign",
     "Assigns",
     "AStructType",
+    "ASYNC",
     "ATailoredMod",
     "ATbMod",
     "AUTO",
     "AVecType",
     "AVersionConfig",
     "BaseClassInfo",
+    "BaseClkRel",
     "BaseConfig",
     "BaseEnumType",
     "BaseMod",
@@ -192,6 +194,7 @@ __all__ = [
     "ClassVar",
     "clean",
     "cli",
+    "ClkRel",
     "ClkRstAnType",
     "ClkType",
     "concat",

@@ -36,21 +36,58 @@ def test_example_simple(example_simple):
     assert mod.qualname == "uart_lib.uart"
     assert [repr(item) for item in mod.namespace] == [
         "Port(ClkRstAnType(), 'main_i', direction=IN, doc=Doc(title='Clock and Reset'))",
-        "Port(UartIoType(), 'uart_i', direction=IN, doc=Doc(title='UART', comment='RX/TX'))",
-        "Port(BusType(), 'bus_i', direction=IN)",
+        "Port(UartIoType(), 'uart_i', direction=IN, doc=Doc(title='UART', comment='RX/TX'), clkrel=ASYNC)",
+        "Port(BusType(), 'bus_i', direction=IN, clkrel=ClkRel(clk=Port(ClkType(), "
+        "'main_clk_i', direction=IN, doc=Doc(title='Clock'))))",
         "Signal(ClkType(), 'clk_s', doc=Doc(title='Clock'))",
         "Signal(DynamicStructType(), 'core_regf_i_s', direction=OUT)",
     ]
     assert [repr(item) for item in mod.params] == []
     assert [repr(item) for item in mod.ports] == [
         "Port(ClkRstAnType(), 'main_i', direction=IN, doc=Doc(title='Clock and Reset'))",
-        "Port(UartIoType(), 'uart_i', direction=IN, doc=Doc(title='UART', comment='RX/TX'))",
-        "Port(BusType(), 'bus_i', direction=IN)",
+        "Port(UartIoType(), 'uart_i', direction=IN, doc=Doc(title='UART', comment='RX/TX'), clkrel=ASYNC)",
+        "Port(BusType(), 'bus_i', direction=IN, clkrel=ClkRel(clk=Port(ClkType(), "
+        "'main_clk_i', direction=IN, doc=Doc(title='Clock'))))",
+    ]
+    assert [repr(item) for item in mod.ports.leveliter()] == [
+        "(0, Port(ClkRstAnType(), 'main_i', direction=IN, doc=Doc(title='Clock and Reset')))",
+        "(1, Port(ClkType(), 'main_clk_i', direction=IN, doc=Doc(title='Clock')))",
+        "(1, Port(RstAnType(), 'main_rst_an_i', direction=IN, doc=Doc(title='Async "
+        "Reset', descr='Low-Active', comment='Async Reset (Low-Active)')))",
+        "(0, Port(UartIoType(), 'uart_i', direction=IN, doc=Doc(title='UART', comment='RX/TX'), clkrel=ASYNC))",
+        "(1, Port(BitType(), 'uart_rx_o', direction=OUT, clkrel=ASYNC))",
+        "(1, Port(BitType(), 'uart_tx_i', direction=IN, clkrel=ASYNC))",
+        "(0, Port(BusType(), 'bus_i', direction=IN, "
+        "clkrel=ClkRel(clk=Port(ClkType(), 'main_clk_i', direction=IN, "
+        "doc=Doc(title='Clock')))))",
+        "(1, Port(TransType(), 'bus_trans_i', direction=IN, "
+        "clkrel=ClkRel(clk=Port(ClkType(), 'main_clk_i', direction=IN, "
+        "doc=Doc(title='Clock')))))",
+        "(1, Port(AddrType(32), 'bus_addr_i', direction=IN, "
+        "clkrel=ClkRel(clk=Port(ClkType(), 'main_clk_i', direction=IN, "
+        "doc=Doc(title='Clock')))))",
+        "(1, Port(WriteType(), 'bus_write_i', direction=IN, "
+        "clkrel=ClkRel(clk=Port(ClkType(), 'main_clk_i', direction=IN, "
+        "doc=Doc(title='Clock')))))",
+        "(1, Port(DataType(32), 'bus_wdata_i', direction=IN, "
+        "clkrel=ClkRel(clk=Port(ClkType(), 'main_clk_i', direction=IN, "
+        "doc=Doc(title='Clock')))))",
+        "(1, Port(BitType(default=1), 'bus_ready_o', direction=OUT, "
+        "doc=Doc(descr='Transfer is finished on HIGH.'), "
+        "clkrel=ClkRel(clk=Port(ClkType(), 'main_clk_i', direction=IN, "
+        "doc=Doc(title='Clock')))))",
+        "(1, Port(RespType(), 'bus_resp_o', direction=OUT, "
+        "clkrel=ClkRel(clk=Port(ClkType(), 'main_clk_i', direction=IN, "
+        "doc=Doc(title='Clock')))))",
+        "(1, Port(DataType(32), 'bus_rdata_o', direction=OUT, "
+        "clkrel=ClkRel(clk=Port(ClkType(), 'main_clk_i', direction=IN, "
+        "doc=Doc(title='Clock')))))",
     ]
     assert [repr(item) for item in mod.portssignals] == [
         "Port(ClkRstAnType(), 'main_i', direction=IN, doc=Doc(title='Clock and Reset'))",
-        "Port(UartIoType(), 'uart_i', direction=IN, doc=Doc(title='UART', comment='RX/TX'))",
-        "Port(BusType(), 'bus_i', direction=IN)",
+        "Port(UartIoType(), 'uart_i', direction=IN, doc=Doc(title='UART', comment='RX/TX'), clkrel=ASYNC)",
+        "Port(BusType(), 'bus_i', direction=IN, clkrel=ClkRel(clk=Port(ClkType(), "
+        "'main_clk_i', direction=IN, doc=Doc(title='Clock'))))",
         "Signal(ClkType(), 'clk_s', doc=Doc(title='Clock'))",
         "Signal(DynamicStructType(), 'core_regf_i_s', direction=OUT)",
     ]

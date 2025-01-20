@@ -2,4 +2,4 @@
 Statistics:
   Modules: 4
   Module-Instances: 5
-  LightObjects: 10
+  LightObjects: 11
