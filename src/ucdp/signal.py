@@ -93,11 +93,12 @@ A [Port][ucdp.signal.Port] is a module interface signal with a direction IN, OUT
 
 """
 
-from typing import ClassVar
+from abc import abstractmethod
+from typing import ClassVar, Optional
 
 from .casting import Casting
 from .ident import Ident
-from .object import PosArgs
+from .object import LightObject, PosArgs
 from .orientation import FWD, AOrientation, Direction
 from .typebase import BaseType
 
@@ -212,6 +213,7 @@ class Port(BaseSignal):
     """
 
     direction: Direction
+    clkrel: Optional["BaseClkRel"] = None
     _posargs: ClassVar[PosArgs] = ("type_", "name")
 
     def __init__(self, type_: BaseType, name: str, **kwargs):
@@ -220,3 +222,67 @@ class Port(BaseSignal):
             if direction is None:
                 raise ValueError(f"'direction' is required (could not be retrieved from name {name!r}).")
         super().__init__(type_=type_, name=name, **kwargs)  # type: ignore[call-arg]
+
+
+class BaseClkRel(LightObject):
+    """
+    Base Class for All Clock Relations.
+
+    Expresses which Clock is used by which Port.
+    """
+
+    clk: Port | None
+    """Clock Port."""
+
+    @property
+    @abstractmethod
+    def info(self) -> str:
+        """Information."""
+
+
+class ClkRel(BaseClkRel):
+    """
+    Clock Relation.
+
+    >>> import ucdp as u
+    >>> clk = u.Port(type_=u.ClkType(), name="clk_i")
+    >>> inp = u.Port(type_=u.UintType(8), name="inp_i", clkrel=u.ASYNC)
+    >>> inp.clkrel
+    ASYNC
+    >>> inp.clkrel.info
+    'ASYNC'
+    >>> outp = u.Port(type_=u.UintType(8), name="outp_o", clkrel=u.ClkRel(clk=clk))
+    >>> outp.clkrel
+    ClkRel(clk=Port(ClkType(), 'clk_i', direction=IN))
+    >>> outp.clkrel.info
+    'clk: clk_i'
+
+    """
+
+    clk: Port
+    """Clock Port."""
+
+    @property
+    def info(self) -> str:
+        """Information."""
+        return f"clk: {self.clk}"
+
+
+class _AsyncClkRel(BaseClkRel):
+    """Async."""
+
+    clk: None = None
+
+    @property
+    def info(self) -> str:
+        """Information."""
+        return "ASYNC"
+
+    def __repr__(self) -> str:
+        return "ASYNC"
+
+    def __str__(self) -> str:
+        return "ASYNC"
+
+
+ASYNC = _AsyncClkRel()

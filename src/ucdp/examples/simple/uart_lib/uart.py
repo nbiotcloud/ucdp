@@ -58,8 +58,8 @@ class UartMod(u.AMod):
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
-        self.add_port(UartIoType(), "uart_i", route="create(u_core/uart_i)")
-        self.add_port(BusType(), "bus_i")
+        self.add_port(UartIoType(), "uart_i", route="create(u_core/uart_i)", clkrel=u.ASYNC)
+        self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
 
         clkgate = ClkGateMod(self, "u_clk_gate")
         clkgate.con("clk_i", "main_clk_i")

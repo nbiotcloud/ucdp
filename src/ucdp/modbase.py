@@ -58,7 +58,7 @@ from .object import Field, NamedObject, Object, PrivateField, computed_field
 from .orientation import FWD, IN, Direction, Orientation
 from .param import Param
 from .routepath import Routeables, RoutePath, parse_routepaths
-from .signal import BaseSignal, Port, Signal
+from .signal import BaseClkRel, BaseSignal, ClkRel, Port, Signal
 from .typebase import BaseType
 from .typedescriptivestruct import DescriptiveStructType
 from .typestruct import StructItem
@@ -364,6 +364,7 @@ class BaseMod(NamedObject):
         comment: str | None = None,
         ifdef: str | None = None,
         route: Routeables | None = None,
+        clkrel: str | Port | BaseClkRel | None = None,
     ) -> Port:
         """
         Add Module Port (:any:`Port`).
@@ -379,11 +380,14 @@ class BaseMod(NamedObject):
             comment: Source Code Comment. Default is 'title'
             ifdef: IFDEF mapping
             route: Routes (iterable or string separated by ';')
+            clkrel: Clock relation.
         """
         doc = doc_from_type(type_, title, descr, comment)
         if direction is None:
             direction = Direction.from_name(name) or IN
-        port = Port(type_, name, direction=direction, doc=doc, ifdef=ifdef)
+        if clkrel is not None:
+            clkrel = self._resolve_clkrel(clkrel)
+        port = Port(type_, name, direction=direction, doc=doc, ifdef=ifdef, clkrel=clkrel)
         if self.__is_locked:
             raise LockError(f"{self}: Cannot add port {name!r}.")
         self.namespace[name] = port
@@ -392,6 +396,16 @@ class BaseMod(NamedObject):
         for routepath in parse_routepaths(route):
             self._router.add(RoutePath(expr=port), routepath)
         return port
+
+    def _resolve_clkrel(self, clkrel: str | Port | BaseClkRel) -> BaseClkRel:
+        if isinstance(clkrel, BaseClkRel):
+            return clkrel
+        if isinstance(clkrel, Port):
+            return ClkRel(clk=clkrel)
+        if isinstance(clkrel, str):
+            port = self.ports[clkrel]
+            return ClkRel(clk=port)
+        raise ValueError(f"Invalid {clkrel=}")
 
     def add_signal(
         self,
