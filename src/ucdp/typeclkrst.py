@@ -33,6 +33,7 @@ Clock and Reset Types.
 * :any:`DiffClkRstAnType` - Differential Clock and Async Reset
 """
 
+from .clkrelbase import BaseClkRel
 from .typebase import AScalarType
 from .typeenum import AEnumType
 from .typescalar import BitType
@@ -152,9 +153,10 @@ class ClkRstAnType(AStructType):
     """
 
     title: str = "Clock and Reset"
+    clkrel: BaseClkRel | None = None
 
     def _build(self) -> None:
-        self._add("clk", ClkType())
+        self._add("clk", ClkType(), clkrel=self.clkrel)
         self._add("rst_an", RstAnType())
 
 
@@ -171,10 +173,11 @@ class DiffClkType(AStructType):
     """
 
     title: str = "Differential Clock"
+    clkrel: BaseClkRel | None = None
 
     def _build(self) -> None:
-        self._add("p", ClkType(default=0))
-        self._add("n", ClkType(default=1), title="Inverted Clock")
+        self._add("p", ClkType(default=0), clkrel=self.clkrel)
+        self._add("n", ClkType(default=1), title="Inverted Clock", clkrel=self.clkrel)
 
 
 class DiffClkRstAnType(AStructType):
@@ -190,7 +193,8 @@ class DiffClkRstAnType(AStructType):
     """
 
     title: str = "Differential Clock and Reset"
+    clkrel: BaseClkRel | None = None
 
     def _build(self) -> None:
-        self._add("clk", DiffClkType())
+        self._add("clk", DiffClkType(clkrel=self.clkrel))
         self._add("rst_an", RstAnType())

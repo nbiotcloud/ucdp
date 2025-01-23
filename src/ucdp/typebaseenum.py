@@ -222,7 +222,7 @@ class BaseEnumType(BaseScalarType, Dict):
         if isinstance(other, BaseEnumType) and self.keytype.is_connectable(other.keytype):
             return [("", "")]
 
-        if isinstance(other, BaseScalarType) and self.keytype.is_connectable(other):
+        if isinstance(other, BaseScalarType) and (self.keytype.is_connectable(other) or self.width == other.width):
             return [("", "")]
 
         return None

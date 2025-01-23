@@ -37,6 +37,7 @@ from abc import abstractmethod
 from collections.abc import Callable
 from typing import Any, ClassVar
 
+from .clkrelbase import BaseClkRel
 from .consts import PAT_IDENTIFIER
 from .dict import Dict
 from .doc import Doc
@@ -57,6 +58,7 @@ class StructItem(Object):
         orientation: Orientation of struct member. `FWD` by default
         doc: Documentation Container
         ifdef: IFDEF encapsulation
+        clkrel: Clock Relation
     """
 
     name: str = Field(pattern=PAT_IDENTIFIER)
@@ -64,6 +66,7 @@ class StructItem(Object):
     orientation: Orientation = FWD
     doc: Doc = Doc()
     ifdef: str | None = None
+    clkrel: BaseClkRel | None = None
 
     _posargs: ClassVar[PosArgs] = ("name", "type_")
 
@@ -105,6 +108,7 @@ class BaseStructType(Dict, ACompositeType):
         descr: str | None = None,
         comment: str | None = None,
         ifdef: str | None = None,
+        clkrel: BaseClkRel | None = None,
     ) -> None:
         """
         Add member `name` with `type_` and `orientation`.
@@ -119,6 +123,7 @@ class BaseStructType(Dict, ACompositeType):
             descr: Documentation Description.
             comment: Source Code Comment.
             ifdef: IFDEF encapsulation.
+            clkrel: Clock Relation (For signals and ports only).
 
         :meta public:
         """
@@ -127,7 +132,7 @@ class BaseStructType(Dict, ACompositeType):
         items = self._items
         if name not in items.keys():
             doc = doc_from_type(type_, title=title, descr=descr, comment=comment)
-            structitem = StructItem(name, type_, orientation=orientation, doc=doc, ifdef=ifdef)
+            structitem = StructItem(name, type_, orientation=orientation, doc=doc, ifdef=ifdef, clkrel=clkrel)
             if not self.filter_ or self.filter_(structitem):
                 items[name] = structitem
         else:

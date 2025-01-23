@@ -21,47 +21,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-"""Human Friendly Numbers."""
+"""
+Clock Relation.
+"""
 
-from typing import Annotated
+from abc import abstractmethod
 
-import humannum
-from pydantic import (
-    BeforeValidator,
-    PlainSerializer,
-    WithJsonSchema,
-)
-
-Hex = Annotated[
-    humannum.Hex,
-    BeforeValidator(lambda x: humannum.hex_(x)),
-    PlainSerializer(lambda x: str(x), return_type=str),
-    WithJsonSchema({"type": "string"}, mode="serialization"),
-]
-"""Hex."""
-
-Bytesize = Annotated[
-    humannum.Bytesize,
-    BeforeValidator(lambda x: humannum.bytesize_(x)),
-    PlainSerializer(lambda x: str(x), return_type=str),
-    WithJsonSchema({"type": "string"}, mode="serialization"),
-]
-"""Bytesize."""
-Bytes = Bytesize
-
-Bin = Annotated[
-    humannum.Bin,
-    BeforeValidator(lambda x: humannum.bin_(x)),
-    PlainSerializer(lambda x: str(x), return_type=str),
-    WithJsonSchema({"type": "string"}, mode="serialization"),
-]
-"""Bin."""
+from .object import LightObject
 
 
-Freq = Annotated[
-    humannum.Freq,
-    BeforeValidator(lambda x: humannum.freq(x)),
-    PlainSerializer(lambda x: str(x), return_type=str),
-    WithJsonSchema({"type": "string"}, mode="serialization"),
-]
-"""Freq."""
+class BaseClkRel(LightObject):
+    """
+    Base Class for All Clock Relations.
+
+    Expresses which Clock is used by which Port.
+    """
+
+    @property
+    @abstractmethod
+    def info(self) -> str:
+        """Information."""

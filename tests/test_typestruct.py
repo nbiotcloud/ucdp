@@ -150,3 +150,37 @@ def test_structitem():
     assert item.title == "title"
     assert item.descr == "descr"
     assert item.comment == "comment"
+
+
+class ClkRelStruct(u.AStructType):
+    """Example Clock Relation."""
+
+    def _build(self):
+        self._add("clk0", u.ClkType())
+        self._add("data0", u.BitType(), clkrel=u.ClkRel(clk="clk0"))
+        self._add("clk1", u.ClkType())
+        self._add("data1", u.BitType(), clkrel=u.ClkRel(clk="clk1"), orientation=u.BWD)
+
+
+def test_clkrel_ident():
+    """Clock Relation."""
+    ident = u.Ident(ClkRelStruct(), "name")
+    assert tuple(ident.iter()) == (
+        u.Ident(ClkRelStruct(), "name"),
+        u.Ident(u.ClkType(), "name_clk0", doc=u.Doc(title="Clock")),
+        u.Ident(u.BitType(), "name_data0"),
+        u.Ident(u.ClkType(), "name_clk1", doc=u.Doc(title="Clock")),
+        u.Ident(u.BitType(), "name_data1"),
+    )
+
+
+def test_clkrel_port():
+    """Clock Relation."""
+    port = u.Port(ClkRelStruct(), "port_o")
+    assert tuple(port.iter()) == (
+        u.Port(ClkRelStruct(), "port_o", direction=u.OUT),
+        u.Port(u.ClkType(), "port_clk0_o", direction=u.OUT, doc=u.Doc(title="Clock")),
+        u.Port(u.BitType(), "port_data0_o", direction=u.OUT, clkrel=u.ClkRel(clk="clk0")),
+        u.Port(u.ClkType(), "port_clk1_o", direction=u.OUT, doc=u.Doc(title="Clock")),
+        u.Port(u.BitType(), "port_data1_i", direction=u.IN, clkrel=u.ClkRel(clk="clk1")),
+    )

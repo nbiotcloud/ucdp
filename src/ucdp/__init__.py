@@ -33,6 +33,8 @@ from .assigns import Assign, Assigns
 from .baseclassinfo import BaseClassInfo, get_baseclassinfos
 from .buildproduct import ABuildProduct
 from .casting import Casting
+from .clkrel import ASYNC, ClkRel
+from .clkrelbase import BaseClkRel
 from .config import AConfig, AVersionConfig, BaseConfig
 from .const import Const
 from .consts import AUTO, PAT_IDENTIFIER
@@ -120,7 +122,7 @@ from .overview import get_overview_tree
 from .param import Param
 from .pathutil import improved_glob, improved_resolve, startswith_envvar, use_envvars
 from .routepath import Routeable, Routeables, RoutePath, parse_routepath, parse_routepaths
-from .signal import ASYNC, BaseClkRel, BaseSignal, ClkRel, Port, Signal
+from .signal import BaseSignal, Port, Signal
 from .slices import DOWN, UP, Slice, SliceDirection, mask_to_slices
 from .test import Test
 from .top import Top
