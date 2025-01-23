@@ -5,7 +5,7 @@
 groups = ["default", "checktypes", "doc", "format", "test"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:23cffb214e88f0204259afcf917b33e7fec8ea0c42abc3cf459d11fd1c5b8c50"
+content_hash = "sha256:554f7da8420333bd1e4ceccecfbca3227e90e32ed1f4d4ec7cba2733739de601"
 
 [[metadata.targets]]
 requires_python = ">=3.10.0,<4.0"
@@ -461,7 +461,7 @@ files = [
 
 [[package]]
 name = "humannum"
-version = "1.1.1"
+version = "1.2.0"
 requires_python = "<4.0,>=3.9.0"
 summary = "Human Friendly Numbers"
 groups = ["default"]
@@ -469,8 +469,8 @@ dependencies = [
     "humanfriendly>=10.0",
 ]
 files = [
-    {file = "humannum-1.1.1-py3-none-any.whl", hash = "sha256:c04b51d150c55f8df209a868ba013580c0fd8c650c3d1cc3548106548d78f650"},
-    {file = "humannum-1.1.1.tar.gz", hash = "sha256:a6d4861f07da8cc097206a1b44cf9282b929e3b04a4904c416d0ce4bf3c16dec"},
+    {file = "humannum-1.2.0-py3-none-any.whl", hash = "sha256:fc7190dad470d3268731fa6368b8bda15721435e811814c3aab6ed048129b57c"},
+    {file = "humannum-1.2.0.tar.gz", hash = "sha256:d031196e784fef879d26e947e586414f47cc8f20a95ba1135f5e1121da03325f"},
 ]
 
 [[package]]

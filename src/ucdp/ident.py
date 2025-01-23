@@ -114,7 +114,7 @@ from .object import Field, Light, NamedObject, PosArgs
 from .orientation import AOrientation
 from .typearray import ArrayType
 from .typebase import BaseType
-from .typestruct import BaseStructType
+from .typestruct import BaseStructType, StructItem
 
 
 class Ident(Expr, NamedObject, Light):
@@ -193,6 +193,19 @@ class Ident(Expr, NamedObject, Light):
     def cast(self, other: "Ident") -> Casting:
         """Cast self=cast(other)."""
         return None
+
+    def _new_structitem(self, structitem: StructItem, **kwargs):
+        direction = self.direction and self.direction * structitem.orientation
+        suffix = (direction and direction.suffix) or self.suffix
+        basename = join_names(self.basename, structitem.name)
+        return self.new(
+            type_=structitem.type_,
+            name=f"{basename}{suffix}",
+            direction=direction,
+            doc=structitem.doc,
+            ifdef=structitem.ifdef or self.ifdef,
+            **kwargs,
+        )
 
 
 #     def iterhier(self, filter_=None, stop=None, maxlevel=None, value=None) -> Iterator:
@@ -289,19 +302,12 @@ def _iters(idents: Iterable[Ident], filter_=None, stop=None, value=None, level: 
             if not filter_ or filter_(ident):
                 yield identlevel, ident
             if isinstance(type_, BaseStructType):
-                for structitem in reversed(type_.values()):
-                    direction = ident.direction and ident.direction * structitem.orientation
-                    suffix = (direction and direction.suffix) or ident.suffix
-                    basename = join_names(ident.basename, structitem.name)
-                    child = ident.new(
-                        type_=structitem.type_,
-                        name=f"{basename}{suffix}",
-                        direction=direction,
-                        doc=structitem.doc,
-                        ifdef=structitem.ifdef or ident.ifdef,
-                    )
+                substack = deque()
+                for structitem in type_.values():
+                    child = ident._new_structitem(structitem)
                     if not stop or not stop(child):
-                        stack.append((identlevel + 1, child))
+                        substack.append((identlevel + 1, child))
+                stack.extend(reversed(substack))
             elif isinstance(type_, ArrayType):
                 elementident = ident.new(type_=type_.itemtype)
                 # do not forward stop and filter_ as these are just intermediate identifiers
