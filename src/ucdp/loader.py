@@ -34,9 +34,9 @@ from pathlib import Path
 from ._modloader import build_top, find_modrefs, load_modcls
 from .logging import LOGGER
 from .modbase import BaseMod
+from .modgenerictb import AGenericTbMod
 from .moditer import get_mod
 from .modref import ModRef
-from .modtb import AGenericTbMod
 from .modtopref import TopModRef
 from .modtoprefinfo import get_modbasecls, is_top
 from .nameutil import didyoumean

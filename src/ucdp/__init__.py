@@ -72,6 +72,7 @@ from .mod import AMod
 from .modbase import BaseMod, ModCls, ModClss, ModTags
 from .modbasetop import BaseTopMod
 from .modconfigurable import AConfigurableMod
+from .modconfigurabletb import AConfigurableTbMod
 from .modcore import ACoreMod
 from .modfilelist import (
     ModFileList,
@@ -84,10 +85,11 @@ from .modfilelist import (
     resolve_modfilelists,
     search_modfilelists,
 )
+from .modgenerictb import AGenericTbMod
 from .moditer import ModPostIter, ModPreIter, uniquemods
 from .modref import ModRef
 from .modtailored import ATailoredMod
-from .modtb import AGenericTbMod, ATbMod
+from .modtb import ATbMod
 from .modtopref import TopModRef
 from .modtoprefinfo import TopModRefInfo
 from .modutil import get_modbaseinfos, is_tb_from_modname
@@ -152,6 +154,7 @@ __all__ = [
     "ACompositeType",
     "AConfig",
     "AConfigurableMod",
+    "AConfigurableTbMod",
     "ACoreMod",
     "AEnumType",
     "AGenericTbMod",

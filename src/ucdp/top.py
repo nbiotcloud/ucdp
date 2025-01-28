@@ -26,8 +26,8 @@
 
 from .iterutil import Names
 from .modbase import BaseMod
+from .modgenerictb import AGenericTbMod
 from .moditer import FilterFunc, MaxLevel, ModPostIter, ModPreIter, StopFunc, get_mod, get_mods
-from .modtb import AGenericTbMod
 from .modtopref import TopModRef
 from .object import _CACHED_INSTANCES, Field, Object
 

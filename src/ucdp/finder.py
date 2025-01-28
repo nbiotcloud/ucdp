@@ -42,9 +42,9 @@ from ._modloader import (
 from .iterutil import namefilter
 from .logging import LOGGER
 from .modbase import ModCls
+from .modgenerictb import AGenericTbMod
 from .moditer import get_mods
 from .modref import ModRef
-from .modtb import AGenericTbMod
 from .modtopref import TopModRef
 from .modtoprefinfo import TopModRefInfo, is_top
 from .util import extend_sys_path

@@ -26,50 +26,51 @@
 Testbench Module.
 """
 
-from typing import ClassVar
-
+from .config import BaseConfig
 from .modbase import BaseMod
-from .modbasetop import BaseTopMod
-from .modfilelist import ModFileLists
-from .modutil import get_libpath, get_modname, get_topmodname
-from .object import Field
+from .modtb import ATbMod
+from .modutil import get_modname, get_topmodname
+from .nameutil import join_names
 
 
-class ATbMod(BaseTopMod):
+class AConfigurableTbMod(ATbMod):
     """
-    Testbench Module.
-
-    Attributes:
-        filelists: File Lists.
-        dut_modclss: Testbench is limited to these kind of modules.
-        title: Title.
-        dut: Module Under Test.
-        parent: Parent.
+    A Testbench Module Which Is Assembled According To A Recipe ([AConfig][ucdp.config.AConfig]).
     """
 
-    filelists: ClassVar[ModFileLists] = ()
-    """File Lists."""
+    config: BaseConfig
+    is_default: bool
 
-    title: str = "Testbench"
-
-    parent: BaseMod | None = Field(default=None, init=False)
+    def __init__(self, parent: BaseMod | None = None, name: str | None = None, **kwargs):
+        is_default = False
+        if "config" not in kwargs:
+            try:
+                kwargs["config"] = self.get_default_config()
+                is_default = True
+            except NotImplementedError:
+                pass
+        try:
+            is_default = is_default or kwargs["config"].is_default
+        except KeyError:
+            if parent is not None:
+                raise ValueError("'config' is required if 'parent' is given") from None
+        super().__init__(parent=parent, name=name, is_default=is_default, **kwargs)  # type: ignore[call-arg]
 
     @property
     def modname(self) -> str:
         """Module Name."""
-        return get_modname(self.__class__)
+        config = self.config
+        name = config.name
+        modbasename = get_modname(self.__class__)
+        if not name and "config" in self.model_fields_set and not self.is_default:
+            name = config.unique_name
+        return join_names(modbasename, name)
 
     @property
     def topmodname(self) -> str:
         """Top Module Name."""
         return get_topmodname(self.__class__)
 
-    @property
-    def libpath(self) -> str:
-        """Library Path."""
-        return get_libpath(self.__class__)
-
-    @property
-    def is_tb(self) -> bool:
-        """Determine if module belongs to Testbench or Design."""
-        return True
+    def get_default_config(self) -> BaseConfig:
+        """Create Default Configuration."""
+        raise NotImplementedError
