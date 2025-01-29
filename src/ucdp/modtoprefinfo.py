@@ -34,13 +34,15 @@ from .consts import PKG_PATHS
 from .mod import AMod
 from .modbase import BaseMod, ModCls, ModTags
 from .modconfigurable import AConfigurableMod
+from .modconfigurabletb import AConfigurableTbMod
 from .modcore import ACoreMod
+from .modgenerictb import AGenericTbMod
 from .modtailored import ATailoredMod
-from .modtb import AGenericTbMod, ATbMod
+from .modtb import ATbMod
 from .modtopref import TopModRef
 from .object import Object
 
-BASECLSS = (AConfigurableMod, ACoreMod, ATailoredMod, AMod, AGenericTbMod, ATbMod, BaseMod)
+BASECLSS = (AConfigurableMod, ACoreMod, ATailoredMod, AMod, AGenericTbMod, ATbMod, BaseMod, AConfigurableTbMod)
 
 
 TbType = Literal["Static", "Generic", ""]
