@@ -332,17 +332,45 @@ class Slice(LightObject):
         """
         return _get_direction(self.left, self.right)
 
-    def extract(self, word):
+    def extract(self, word: int, is_signed: bool = False) -> int:
         """
         Extract slice value from `word`.
 
-        >>> slice = Slice(left=5, right=1)
-        >>> slice.mask
-        62
-        >>> slice.extract(0x59)
-        12
+        >>> slice = Slice(width=4, right=4)
+        >>> hex(slice.mask)
+        '0xf0'
+        >>> slice.extract(0x193)
+        9
+        >>> slice.extract(0x193, is_signed=True)
+        -7
         """
-        return (word & self.mask) >> self.right
+        value = (word & self.mask) >> self.right
+        if is_signed:
+            value = _unsigned_to_signed(value, self.width)
+        return value
+
+    def update(self, word, value, is_signed: bool = False):
+        """
+        Extract slice value from `word`.
+
+        >>> slice = Slice(width=4, right=4)
+        >>> hex(slice.mask)
+        '0xf0'
+        >>> hex(slice.update(0x123, 9))
+        '0x193'
+        >>> hex(slice.update(0x123, -7, is_signed=True))
+        '0x193'
+        >>> slice.update(0x123, -7)
+        Traceback (most recent call last):
+          ...
+        ValueError: -7 is not a unsigned 4 bit integer
+        """
+        mask = self.mask
+        if is_signed:
+            value = _signed_to_unsigned(value, self.width)
+        else:
+            _check_unsigned(value, self.width)
+        return (word & ~mask) | ((value << self.right) & mask)
 
     @property
     def slice(self):
@@ -381,6 +409,30 @@ def _check_direction(left: Any, right: Any, direction: SliceDirection | None):
         req = direction.name.lower()
         act = slicedirection.name.lower()
         raise ValueError(f"Slice must be {req}wards but is {act}wards")
+
+
+def _signed_to_unsigned(value: int, width: int) -> int:
+    high = (1 << (width - 1)) - 1
+    low = ~high
+    if value < low or value > high:
+        msg = f"{value} is not a signed {width} bit integer"
+        raise ValueError(msg)
+    return (value + (1 << width)) & (~(-1 << width))
+
+
+def _check_unsigned(value: int, width: int) -> None:
+    low = 0
+    high = (1 << width) - 1
+    if value < low or value > high:
+        msg = f"{value} is not a unsigned {width} bit integer"
+        raise ValueError(msg)
+
+
+def _unsigned_to_signed(value: int, width: int) -> int:
+    _check_unsigned(value, width)
+    if value & (1 << (width - 1)):  # MSB set->negative
+        return value - (1 << width)
+    return value
 
 
 def mask_to_slices(mask: int) -> tuple[Slice, ...]:
