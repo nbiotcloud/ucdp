@@ -147,6 +147,7 @@ from .typestruct import (
     bwdfilter,
     fwdfilter,
 )
+from .typeutil import is_scalar, is_signed
 from .util import extend_sys_path, get_copyright
 
 __all__ = [
@@ -264,6 +265,8 @@ __all__ = [
     "INOUT",
     "IntegerType",
     "InvalidExpr",
+    "is_scalar",
+    "is_signed",
     "is_tb_from_modname",
     "iter_modfilelists",
     "join_names",
