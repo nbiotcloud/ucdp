@@ -99,7 +99,7 @@ def is_top(modcls: ModCls) -> bool:
         return config_field.default is not PydanticUndefined
     if issubclass(modcls, (AMod, ATbMod)):
         return True
-    return False
+    return modcls.build_top.__qualname__ != BaseMod.build_top.__qualname__
 
 
 def get_tb(modcls: ModCls) -> TbType:
