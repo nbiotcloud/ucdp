@@ -1,9 +1,8 @@
-site_name: UCDP
-site_description: Unified Chip Design Platform
+site_name: "UCDP"
+site_description: "Unified Chip Design Platform"
 site_url: https://ucdp.readthedocs.io/en
 repo_url: https://github.com/nbiotcloud/ucdp
-#strict: true
-copyright: Copyright (c) 2024 nbiotcloud
+copyright: Copyright (c) 2023-2025 nbiotcloud
 
 theme:
   name: material
@@ -28,8 +27,8 @@ theme:
 
 nav:
   - Get Started:
-    - Welcome to UCDP: index.md
-    - Extensions: extensions.md
+      - Welcome to UCDP: index.md
+      - Extensions: extensions.md
     # - Why use UCDP: why.md
     # - Features: features.md
     # - Installation: install.md
