@@ -1,26 +1,32 @@
-name: test
-
+name: main
 on: [push, pull_request, release]
-
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
-
+        os:
+          - "ubuntu-latest"
+          - "macos-latest"
+          # - "windows-latest"
+        python-version:
+          - "3.10"
+          - "3.11"
+          - "3.12"
+          - "3.13"
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: astral-sh/setup-uv@v5
         with:
+          version: "0.6.9"
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: pip install --no-cache-dir nox
-      - name: NOX
-        run: nox
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Run all
+        run: make all
       - name: Upload coverage data to coveralls.io
-        run: nox -s dev -- coveralls --service=github
+        run: uv run --frozen -- coveralls --service=github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
@@ -28,18 +34,19 @@ jobs:
 
   coveralls:
     name: Indicate completion to coveralls.io
-    needs: build
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: astral-sh/setup-uv@v5
         with:
+          version: "0.6.9"
           python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: pip install --no-cache-dir nox
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
       - name: Upload coverage data to coveralls.io
-        run: nox -s dev -- coveralls --service=github --finish
+        run: uv run --frozen -- coveralls --service=github --finish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

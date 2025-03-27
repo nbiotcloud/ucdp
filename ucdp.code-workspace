@@ -5,8 +5,9 @@
     }
   ],
   "settings": {
-    "python.defaultInterpreterPath": ".nox/dev/bin/python3",
-    "python.terminal.activateEnvInCurrentTerminal": true
+    "python.defaultInterpreterPath": ".venv/bin/python3",
+    "python.terminal.activateEnvInCurrentTerminal": true,
+    "files.trimTrailingWhitespace": true
   },
   "extensions": {
     "recommendations": [

@@ -1,0 +1,13 @@
+{
+    "cookiecutter": {
+    "_checkout": null,
+    "_output_dir": "/Users/iccode17/projects",
+    "_repo_dir": "python-template",
+    "_template": "python-template",
+    "name": "ucdp",
+    "snake_name": "ucdp",
+    "title": "Unified Chip Design Platform",
+    "user": "nbiotcloud",
+    "year": "2023"
+}
+}

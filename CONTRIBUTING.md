@@ -1,33 +1,37 @@
-* DOCME: refer github contribution guide
-* DOCME: our requirements
+# CONTRIBUTING
 
-## Testing
+Please follow github workflow. Create a ticket and/or branch. Create a pull-request.
 
-### Create Environment
+## Local Development
 
-Run these commands just the first time:
+### Installation
 
-```bash
-# Ensure python3 is installed
-python3 -m venv .venv
-source .venv/bin/activate
-pip install nox
-```
+Please these tools:
 
-### Enter Environment
+* [`uv` Installation](https://docs.astral.sh/uv/getting-started/installation/)
+* `make`
+* `git`
+* Visual Studio Code
 
-Run this command once you open a new shell:
 
-```bash
-source .venv/bin/activate
-```
+### Editor
 
-### Test Your Changes
+Start Visual Studio Code:
 
 ```bash
-# test
-nox -R
+make code
 ```
+
+### Testing
+
+Run auto-formatting, linting, tests and documentation build:
+
+```bash
+make all
+```
+
+See `make help` for any further details.
+
 
 ## Project Structure
 
@@ -35,20 +39,18 @@ The project contains these files and directories:
 
 | File/Directory | Description |
 |---|---|
-| `src/` | Python Package Sources - the files this is all about. |
-| `pyproject.toml` | Python Package Meta File. Also contains all tool settings. |
-| `.gitignore` | Lists of files and directories ignored by version control system. |
-| `.github/` | Github Settings. |
-| `.readthedocs.yaml` | Documentation Server Configuration. |
-| `.pre-commit-config.yaml` | Pre-Commit Check Configuration. |
+| `src/` | Python Package Sources - the files this is all about |
+| `pyproject.toml` | Python Package Meta File. Also contains all tool settings |
+| `.gitignore` | Lists of files and directories ignored by version control system |
+| `.github/` | Github Settings |
+| `.readthedocs.yaml` | Documentation Server Configuration |
+| `.pre-commit-config.yaml` | Pre-Commit Check Configuration |
+| `uv.lock` | File with resolved python package dependencies |
 
 Next to that, there are some temporary files ignored by version control system.
 
 | File/Directory | Description |
 |---|---|
-| `pdm.lock` | File with resolved python package dependencies |
-| `htmlcov/` | Test Execution Code Coverage Report in HTML format. |
-| `report.xml` | Test Execution Report. |
-| `.*_cache/` | Cache Directory. |
-| `.nox/` | [nox](https://nox.thea.codes/en/stable/) directory. |
-| `.venv*` | Virtual Environments |
+| `htmlcov/` | Test Execution Code Coverage Report in HTML format |
+| `report.xml` | Test Execution Report |
+| `.venv` | Virtual Environments |

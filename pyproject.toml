@@ -1,7 +1,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2024 nbiotcloud
+# Copyright (c) 2023 nbiotcloud
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -59,45 +59,39 @@ ucdp = "ucdp.cli:ucdp"
 "Documentation" = "https://ucdp.readthedocs.io/en/stable/"
 "Bug Tracker" = "https://github.com/nbiotcloud/ucdp/issues"
 
-[build-system]
-requires = ["pdm-backend"]
-build-backend = "pdm.backend"
-
-[tool.pdm.version]
-source = "scm"
-
-[tool.pdm]
-[tool.pdm.dev-dependencies]
-format = [
-    "pre-commit>=3.5.0",
-]
-test = [
+[dependency-groups]
+dev = [
     "contextlib-chdir>=1.0.2",
     "coveralls>=3.3.1",
-    "hypothesis>=6.100.1",
-    "pytest-cov>=5.0.0",
-    "tabulate>=0.9.0",
-    "test2ref>=0.4.2",
-    "pytest-xdist>=3.6.1",
-]
-checktypes = [
-    "mypy>=1.9.0",
-]
-doc = [
+    "hypothesis>=6.130.3",
+    "mkdocs-click>=0.8.1",
     "mkdocs-include-markdown-plugin>=6.0.5",
     "mkdocs-literate-nav>=0.6.1",
     "mkdocs-material>=9.5.18",
     "mkdocstrings-python>=1.9.2",
-    "mkdocs-click>=0.8.1",
+    "mypy>=1.9.0",
+    "pre-commit>=4.1.0",
+    "pytest-cov>=5.0.0",
+    "ruff>=0.11.2",
+    "test2ref>=0.4.2",
 ]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
 
 [tool.pdm.build]
 includes = ["src/ucdp"]
+
+[tool.pdm.version]
+source = "scm"
+fallback_version = "0.0.0"
 
 [tool.ruff]
 line-length = 120
 fix = true
 target-version = "py310"
+
 [tool.ruff.lint]
 select = [
     # isort
@@ -108,6 +102,8 @@ select = [
     "E", "W",
     # pydocstyle
     "D",
+    # pep8-naming
+    "N",
     # flake8-2020
     "YTT",
     # flake8-bugbear
@@ -129,7 +125,7 @@ select = [
     # implicit string concatenation
     "ISC",
     # type-checking imports
-    "TCH",
+    "TC",
     # comprehensions
     "C",
     "C4",
@@ -179,10 +175,14 @@ ignore = [
     'UP038',
     # Assert
     'S101',
-    # ClassVar
+     # ClassVar
     'RUF012',
-    # No separate type-checking block
-    'TCH001',
+    # Type-Checking
+    'TC001',
+    # Indent of doctest
+    'D412',
+    # / after pos-only
+    'PYI063',
 ]
 [tool.ruff.lint.per-file-ignores]
 "test_*" = [
@@ -196,14 +196,13 @@ ignore = [
 convention = "google"
 
 [tool.pytest.ini_options]
-addopts = """
-    --cov ucdp
+addopts ="""
+    --cov src/ucdp
     --cov-report term
     --cov-report html
     --doctest-glob=docs/*
     --doctest-modules
-    --ignore=noxfile.py
-    --ignore-glob=tests/testdata*
+    --ignore-glob=tests/testdata/*
     --log-level=INFO
     --junitxml=report.xml
 """
