@@ -179,7 +179,7 @@ def get_repr(obj) -> str:
     sign_args = tuple(repr(values[key]) for key in posargs)
     sign_kwargs = (
         f"{key}={values[key]!r}"
-        for key, field in obj.model_fields.items()
+        for key, field in obj.__class__.model_fields.items()
         if field.repr and key in model_fields_set and key not in posargs and values[key] != field.default
     )
     sign = ", ".join((*sign_args, *sign_kwargs))
