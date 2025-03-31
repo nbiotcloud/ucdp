@@ -41,7 +41,6 @@ dependencies = [
     "fuzzywuzzy>=0.18.0",
     "humannum>=1.2.0",
     "icdutil>=0.3.1",
-    "makolator>=2.8.0",
     "matchor>=0.1.0",
     "pydantic>=2.7.0",
     "python-Levenshtein>=0.25.1",
@@ -49,6 +48,7 @@ dependencies = [
     "uniquer>=1.0.2",
     "click-bash4-2-completion>=0.1.0",
     "anycache>=2.2.0",
+    "makolator>=2.10.3",
 ]
 
 [project.scripts]

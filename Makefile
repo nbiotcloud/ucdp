@@ -3,6 +3,7 @@ _BLUE:=\033[0;34m
 _BOLD:=\033[1m
 _NORM:=\033[0m
 ENV:=uv run --frozen --
+PYTEST_OPTIONS=
 
 
 .PHONY: help
