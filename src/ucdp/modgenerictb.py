@@ -26,7 +26,6 @@
 Testbench Module.
 """
 
-from collections.abc import Iterator
 from typing import Any, ClassVar
 
 from caseconverter import snakecase
@@ -35,7 +34,6 @@ from ._modbuilder import build
 from .modbase import BaseMod, ModClss
 from .modtb import ATbMod
 from .modutil import get_modname
-from .test import Test
 
 
 class AGenericTbMod(ATbMod):
@@ -110,12 +108,6 @@ class AGenericTbMod(ATbMod):
         """Module Name."""
         modbasename = get_modname(self.__class__)
         return f"{modbasename}_{self.dut.modname}"
-
-    def get_tests(self) -> Iterator[Test]:
-        """
-        Yield Tests to be run on design.
-        """
-        yield from ()
 
     @classmethod
     def build_tb(cls, dut, **kwargs) -> "ATbMod":
