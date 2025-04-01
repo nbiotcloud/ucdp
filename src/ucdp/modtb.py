@@ -26,6 +26,7 @@
 Testbench Module.
 """
 
+from collections.abc import Sequence
 from typing import ClassVar
 
 from .modbase import BaseMod
@@ -33,6 +34,7 @@ from .modbasetop import BaseTopMod
 from .modfilelist import ModFileLists
 from .modutil import get_libpath, get_modname, get_topmodname
 from .object import Field
+from .test import Test
 
 
 class ATbMod(BaseTopMod):
@@ -73,3 +75,7 @@ class ATbMod(BaseTopMod):
     def is_tb(self) -> bool:
         """Determine if module belongs to Testbench or Design."""
         return True
+
+    def get_tests(self) -> Sequence[Test]:
+        """Get Tests."""
+        return ()
