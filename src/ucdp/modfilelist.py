@@ -109,6 +109,10 @@ class ModFileList(IdentLightObject):
             **kwargs,
         }
 
+    def get_flavors(self, mod: BaseMod) -> Flavors | None:
+        """Determine Flavors."""
+        return self.flavors
+
     def generate(self, mod: BaseMod) -> None:
         """Custom Generate Function."""
         raise NotImplementedError
@@ -184,7 +188,7 @@ def resolve_modfilelists(
     for modfilelist in search_modfilelists(mod.filelists, name, target=target):
         # parser
         filelistparser = filelistparser or FileListParser()
-        for flavor in modfilelist.flavors or [None]:
+        for flavor in modfilelist.get_flavors(mod) or [None]:
             # resolve filepaths, inc_dirs
             inc_dirs: list[Path] = []
             inc_filepaths: list[Path] = []
