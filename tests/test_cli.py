@@ -65,21 +65,11 @@ def test_check(prjroot, example_simple):
     """Check Command."""
     run2console(prjroot, "check", "uart_lib.uart", output="check-uart.txt")
 
-    run2console(prjroot, "check", "uart_lib.uart2", exit_code=1, output="check-uart2.txt")
+    run("check", "uart_lib.uart2", exit_code=1)
 
     run2console(prjroot, "check", "uart_lib.uart", "--stat", output="check-stat.txt")
 
     assert_refdata(test_check, prjroot)
-
-
-def test_check_topsfile(prjroot, example_simple):
-    """Generate with --tops-file."""
-    topfile = prjroot / "tops.txt"
-    topfile.write_text("# comment\n  uart_lib.uart \n")
-
-    run2console(prjroot, "check", "--tops-file", str(topfile))
-
-    assert_refdata(test_check_topsfile, prjroot)
 
 
 def test_gen(prjroot, example_simple, uartcorefile):

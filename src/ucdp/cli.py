@@ -182,27 +182,17 @@ Load Data Model and Check.
 TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 """
 )
-@arg_tops
+@arg_top
 @opt_path
-@opt_local
 @click.option("--stat", default=False, is_flag=True, help="Show Statistics.")
-@opt_topsfile
 @pass_ctx
-def check(ctx, tops, path, local=None, stat=False, tops_file=None):
+def check(ctx, top, path, stat=False):
     """Check."""
-    tops = list(tops)
-    for filepath in tops_file or []:
-        tops.extend(read_file(filepath))
-    for info in find(path, patterns=tuple(tops), local=local, is_top=True):
-        try:
-            top = load_top(ctx, info.topmodref, path)
-        except Exception as exc:
-            LOGGER.warning(str(exc))
-            continue
-        if stat:
-            print("Statistics:")
-            for name, value in top.get_stat().items():
-                print(f"  {name}: {value}")
+    top = load_top(ctx, top, path)
+    if stat:
+        print("Statistics:")
+        for name, value in top.get_stat().items():
+            print(f"  {name}: {value}")
 
 
 @ucdp.command(
