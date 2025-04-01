@@ -49,6 +49,7 @@ dependencies = [
     "click-bash4-2-completion>=0.1.0",
     "anycache>=2.2.0",
     "makolator>=2.10.3",
+    "appdirs>=1.4.4",
 ]
 
 [project.scripts]

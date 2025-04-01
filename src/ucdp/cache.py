@@ -31,6 +31,7 @@ from pathlib import Path
 from shutil import rmtree
 
 from anycache import AnyCache
+from appdirs import user_cache_dir
 from pydantic import BaseModel
 
 CACHE_MAXSIZE = 10 * 1024 * 1024
@@ -79,11 +80,13 @@ def get_cachepath() -> Path | None:
         path = Path(envvar)
     except KeyError:
         try:
-            path = Path.home() / ".cache" / "ucdp"
+            path = Path(user_cache_dir("ucdp", "iccode17"))
         except RuntimeError:  # pragma: no cover
             return None
     try:
         path.mkdir(parents=True, exist_ok=True)
+        (path / "loader").mkdir()
+        (path / "templates").mkdir()
         (path / ".initialized").touch()
     except Exception:
         return None
