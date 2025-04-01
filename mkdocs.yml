@@ -29,13 +29,13 @@ nav:
   - Get Started:
       - Welcome to UCDP: index.md
       - Extensions: extensions.md
-    # - Why use UCDP: why.md
-    # - Features: features.md
-    # - Installation: install.md
-    # - Contributing: contributing.md
+      # - Why use UCDP: why.md
+      # - Features: features.md
+      # - Installation: install.md
+      - Contributing: contributing.md
   # - Concepts:
   #   - Overview: concepts/overview.md
-  - Examples: examples/
+  # - Examples: examples/
   # - Errors: errors/
   - Command Line Interface: cli.md
   - API Documentation: api/
