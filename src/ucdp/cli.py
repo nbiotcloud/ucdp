@@ -238,7 +238,9 @@ def gen(
             try:
                 top = load_top(ctx, info.topmodref, path)
             except Exception as exc:
+                LOGGER.warning(f"Cannot load '{info.topmodref}'")
                 LOGGER.warning(str(exc))
+                LOGGER.warning(f"Debug with 'ucdp check {info.topmodref}'")
                 continue
             for item in filelist:
                 generator.generate(top, item, target=target, data=data)
