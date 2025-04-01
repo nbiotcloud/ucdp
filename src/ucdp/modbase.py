@@ -77,10 +77,10 @@ class BaseMod(NamedObject):
         name: Instance name. Required if parent is provided.
 
     Keyword Args:
-        title: Title
-        descr: Description
-        comment: Comment
-        paramdict: Parameter values for this instance.
+        title (str): Title
+        descr (str): Description
+        comment (str): Comment
+        paramdict (dict): Parameter values for this instance.
     """
 
     filelists: ClassVar[Any] = ()

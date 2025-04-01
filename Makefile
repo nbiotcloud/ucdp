@@ -37,8 +37,7 @@ test: .venv/.valid ## [ALL] Run Unittests via 'pytest' with {PYTEST_OPTIONS}
 
 .PHONY: doc
 doc: .venv/.valid ## [ALL] Build Documentation via 'mkdocs'
-	# ${ENV} mkdocs build --strict
-	${ENV} mkdocs build
+	${ENV} mkdocs build --strict
 
 
 .PHONY: doc-serve
@@ -73,3 +72,12 @@ shell:  ## Open a project specific SHELL. For leaving use 'exit'.
 
 uv.lock:
 	uv lock
+
+
+API_MD_FILES:=$(shell ls src/ucdp/*.py | grep -v "src/ucdp/_" | grep -v cli | sed "s+src/ucdp+docs/api+" | sed "s+\.py+.md+")
+.PHONY: api-md
+api-md: ${API_MD_FILES}## Generate all docs/api/*.md files
+
+
+docs/api/%.md:
+	echo "::: ucdp.$*" > $@
