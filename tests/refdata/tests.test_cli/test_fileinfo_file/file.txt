@@ -6,16 +6,15 @@
             'target': None,
             'inc_dirs': (),
             'inc_filepaths': (),
-            'filepaths': (
-                PosixPath('$PRJROOT/glbl_lib/clk_gate/rtl/clk_gate.sv'),
-            ),
+            'filepaths': ('$PRJROOT/glbl_lib/clk_gate/rtl/clk_gate.sv',),
             'dep_inc_dirs': (),
             'dep_filepaths': (),
             'template_filepaths': (
-                PosixPath('$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako'),
+                '$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako',
             ),
             'inc_template_filepaths': (),
             'flavors': None,
+            'flavor': None,
             'is_leaf': False
         }
     ],
@@ -26,16 +25,15 @@
             'target': None,
             'inc_dirs': (),
             'inc_filepaths': (),
-            'filepaths': (
-                PosixPath('$PRJROOT/uart_lib/uart/rtl/uart_regf.sv'),
-            ),
+            'filepaths': ('$PRJROOT/uart_lib/uart/rtl/uart_regf.sv',),
             'dep_inc_dirs': (),
             'dep_filepaths': (),
             'template_filepaths': (
-                PosixPath('$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako'),
+                '$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako',
             ),
             'inc_template_filepaths': (),
             'flavors': None,
+            'flavor': None,
             'is_leaf': False
         }
     ],
@@ -46,16 +44,15 @@
             'target': None,
             'inc_dirs': (),
             'inc_filepaths': (),
-            'filepaths': (
-                PosixPath('$PRJROOT/uart_lib/uart/rtl/uart_core.sv'),
-            ),
+            'filepaths': ('$PRJROOT/uart_lib/uart/rtl/uart_core.sv',),
             'dep_inc_dirs': (),
             'dep_filepaths': (),
             'template_filepaths': (
-                PosixPath('$PRJ/src/ucdp/examples/simple/uart_lib/main.mako'),
+                '$PRJ/src/ucdp/examples/simple/uart_lib/main.mako',
             ),
             'inc_template_filepaths': (),
             'flavors': None,
+            'flavor': None,
             'is_leaf': False
         }
     ],
@@ -66,14 +63,15 @@
             'target': None,
             'inc_dirs': (),
             'inc_filepaths': (),
-            'filepaths': (PosixPath('$PRJROOT/uart_lib/uart/rtl/uart.sv'),),
+            'filepaths': ('$PRJROOT/uart_lib/uart/rtl/uart.sv',),
             'dep_inc_dirs': (),
             'dep_filepaths': (),
             'template_filepaths': (
-                PosixPath('$PRJ/src/ucdp/examples/simple/uart_lib/main.mako'),
+                '$PRJ/src/ucdp/examples/simple/uart_lib/main.mako',
             ),
             'inc_template_filepaths': (),
             'flavors': None,
+            'flavor': None,
             'is_leaf': False
         }
     ]

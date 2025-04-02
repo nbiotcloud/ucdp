@@ -75,6 +75,8 @@ from .modconfigurable import AConfigurableMod
 from .modconfigurabletb import AConfigurableTbMod
 from .modcore import ACoreMod
 from .modfilelist import (
+    Flavor,
+    Flavors,
     ModFileList,
     ModFileLists,
     Paths,
@@ -237,6 +239,8 @@ __all__ = [
     "Field",
     "FileListParser",
     "FileSet",
+    "Flavor",
+    "Flavors",
     "FlipFlop",
     "FloatType",
     "Hex",

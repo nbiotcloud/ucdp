@@ -138,6 +138,7 @@ def test_flavor():
             filepaths=(TESTS_PATH / "flavor_one.sv",),
             template_filepaths=(TESTS_PATH / "one.sv",),
             flavors=("one",),
+            flavor="one",
         ),
         u.ModFileList(
             name="hdl",
@@ -145,5 +146,6 @@ def test_flavor():
             filepaths=(TESTS_PATH / "flavor_two.sv",),
             template_filepaths=(TESTS_PATH / "two.sv",),
             flavors=("two",),
+            flavor="two",
         ),
     )
