@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Annotated, Any, TypeAlias
 
 from matchor import match
+from pydantic import PlainSerializer
 from pydantic.functional_validators import BeforeValidator
 
 from .consts import Gen
@@ -37,7 +38,7 @@ from .filelistparser import FileListParser
 from .iterutil import namefilter
 from .modbase import BaseMod, get_modbaseclss
 from .moditer import ModPostIter
-from .object import Field, IdentLightObject
+from .object import Field, IdentObject, Object
 from .pathutil import improved_resolve
 
 Paths = tuple[Path, ...]
@@ -53,7 +54,11 @@ def _to_paths(values: Iterable[Any]) -> tuple[Path, ...]:
     return tuple(Path(value) for value in values)
 
 
-ToPaths = Annotated[StrPaths, BeforeValidator(_to_paths)]
+ToPaths = Annotated[
+    StrPaths,
+    BeforeValidator(_to_paths),
+    PlainSerializer(lambda paths: tuple(path.as_posix() for path in paths), return_type=tuple),
+]
 """ToPaths."""
 
 Placeholder = dict[str, Any]
@@ -63,10 +68,11 @@ Module Attributes for File Path.
 These placeholder are filled during `resolve`.
 """
 
-Flavors: TypeAlias = tuple[str, ...]
+Flavor: TypeAlias = Object | str
+Flavors: TypeAlias = tuple[Flavor, ...]
 
 
-class ModFileList(IdentLightObject):
+class ModFileList(IdentObject):
     """
     Module File List.
 
@@ -93,6 +99,7 @@ class ModFileList(IdentLightObject):
     template_filepaths: ToPaths = Field(default=(), strict=False)
     inc_template_filepaths: ToPaths = Field(default=(), strict=False)
     flavors: Flavors | None = None
+    flavor: Flavor | None = None
     is_leaf: bool = False
 
     @staticmethod
@@ -258,6 +265,7 @@ def resolve_modfilelists(
                 template_filepaths=tuple(template_filepaths),
                 inc_template_filepaths=tuple(inc_template_filepaths),
                 flavors=(flavor,) if flavor is not None else None,
+                flavor=flavor,
             )
 
 
