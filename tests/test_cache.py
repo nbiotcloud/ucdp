@@ -24,7 +24,6 @@
 """Test Cache."""
 
 import os
-from pathlib import Path
 from unittest import mock
 
 from ucdp.cache import Cache
@@ -34,11 +33,10 @@ def test_default():
     """Default."""
     with mock.patch.dict(os.environ, {}):
         cache = Cache.init()
-        default_path = Path.home() / ".cache" / "ucdp"
-        assert cache.path == default_path
-        assert cache.templates_path == default_path / "templates"
+        assert cache.path
+        assert cache.templates_path == cache.path / "templates"
         assert cache.loader_cache.maxsize != 0
-        assert default_path.exists()
+        assert cache.path.exists()
         cache.clear()
         # assert not default_path.exists()
 

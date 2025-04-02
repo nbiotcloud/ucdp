@@ -32,6 +32,7 @@ from . import cli
 from .assigns import Assign, Assigns
 from .baseclassinfo import BaseClassInfo, get_baseclassinfos
 from .buildproduct import ABuildProduct
+from .cache import CACHE
 from .casting import Casting
 from .clkrel import ASYNC, ClkRel
 from .clkrelbase import BaseClkRel
@@ -155,6 +156,7 @@ __all__ = [
     "AUTO",
     "BWD",
     "BWDM",
+    "CACHE",
     "DOWN",
     "FWD",
     "FWDM",
