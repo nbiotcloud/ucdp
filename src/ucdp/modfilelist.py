@@ -124,6 +124,10 @@ class ModFileList(IdentObject):
         """Custom Generate Function."""
         raise NotImplementedError
 
+    def get_gen(self, mod: BaseMod, flavor: Flavor | None) -> Gen:
+        """Get Generate."""
+        return self.gen
+
 
 ModFileLists = tuple[ModFileList, ...]
 """ModFileLists."""

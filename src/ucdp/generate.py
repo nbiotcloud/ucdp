@@ -184,9 +184,10 @@ class Generator(Object):
         with ThreadPoolExecutor(max_workers=self.maxworkers) as exe:
             jobs = []  # type: ignore [var-annotated]
             for mod, modfilelist in modfilelists:
-                if modfilelist.gen == "no":
+                gen = modfilelist.get_gen(mod, modfilelist.flavor)
+                if gen == "no":
                     continue
-                if modfilelist.gen == "custom":
+                if gen == "custom":
                     jobs.append(exe.submit(modfilelist.generate, mod))
                     continue
                 filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
@@ -194,7 +195,7 @@ class Generator(Object):
                 inc_filepaths: tuple[Path, ...] = modfilelist.inc_filepaths or ()  # type: ignore[assignment]
                 inc_template_filepaths: tuple[Path, ...] = modfilelist.inc_template_filepaths or ()  # type: ignore[assignment]
                 ctx = {"mod": mod, "modfilelist": modfilelist}
-                if modfilelist.gen == "inplace":
+                if gen == "inplace":
                     jobs.extend(exe.submit(_inplace, inc_template_filepaths, path, ctx) for path in inc_filepaths)
                     jobs.extend(exe.submit(_inplace, template_filepaths, path, ctx) for path in filepaths)
                 else:
