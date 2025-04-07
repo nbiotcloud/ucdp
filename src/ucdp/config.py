@@ -72,13 +72,14 @@ class AConfig(LightObject):
             >>> variant0.feature
             False
             >>> variant0.hash
-            '7f16ca5fadcb6e3d'
+            'd0cf21ab30478424'
 
         To create 2nd variant
 
             >>> for name, value in variant0:
             ...     name, value
             ('name', 'variant0')
+            ('modname', '')
             ('base_addr', Hex('0x1000'))
             ('ram_size', Bytesize('16 KB'))
             ('rom_size', None)
@@ -96,7 +97,7 @@ class AConfig(LightObject):
             >>> variant1.feature
             True
             >>> variant1.hash
-            '89a81c4c7760e3d3'
+            'eb8052ba0b38cc3f'
 
         To create another variant based on an existing:
 
@@ -112,13 +113,17 @@ class AConfig(LightObject):
             >>> variant2.feature
             True
             >>> variant2.hash
-            '17714da763ff4d59'
+            'd8704dd8163a5ecc'
 
     ???+ bug "Todo"
         * fix name type
     """
 
     name: str = Field(pattern=PAT_OPT_IDENTIFIER, default="")
+    """Configuration Name."""
+
+    modname: str = Field(pattern=PAT_OPT_IDENTIFIER, default="")
+    """Enforced Module Name."""
 
     _posargs: ClassVar[PosArgs] = ("name",)
     _hash_excludes: ClassVar[set[str]] = set()
@@ -193,11 +198,12 @@ class AVersionConfig(AConfig):
             >>> version.mem_baseaddr
             Hex('0x12340000')
             >>> version.hash
-            '872899af38feb238'
+            'e98d9954882a5081'
 
             >>> for name, value in version:
             ...     name, value
             ('name', 'my')
+            ('modname', '')
             ('title', 'Title')
             ('version', '1.2.3')
             ('timestamp', datetime.datetime(2020, 10, 17, 23, 42))
@@ -210,9 +216,9 @@ class AVersionConfig(AConfig):
         >>> timestamp0 = datetime.datetime(2020, 10, 17, 23, 42)
         >>> timestamp1 = datetime.datetime(2020, 10, 17, 23, 43)
         >>> MyVersionConfig(mem_baseaddr=0x12340000, title=title, version=version, timestamp=timestamp0).hash
-        'b022b2a8ae767ed8'
+        '5b23b35be0ab5615'
         >>> MyVersionConfig(mem_baseaddr=0x12340000, title=title, version=version, timestamp=timestamp1).hash
-        'b022b2a8ae767ed8'
+        '5b23b35be0ab5615'
 
     """
 

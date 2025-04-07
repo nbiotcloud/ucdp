@@ -56,12 +56,13 @@ def test_config():
         "feature": False,
         "ignored": 0,
         "mem_baseaddr": u.Hex("0xF100"),
+        "modname": "",
         "name": "myconfig",
         "ram_size": u.Bytesize("16 KB"),
         "rom_size": u.Bytesize("0 bytes"),
     }
 
-    assert config.hash == "db829f1d9872ab0e"
+    assert config.hash == "5f9de9502e167f99"
     assert config.is_default is False
 
 
@@ -76,11 +77,11 @@ class OtherConfig(u.AConfig):
 def test_default_config():
     """Default Configuration."""
     config = OtherConfig()
-    assert config.hash == "180b3344e5934705"
+    assert config.hash == "286f2a5127a1bd37"
     assert config.is_default is True
 
     config = OtherConfig(name="abc")
-    assert config.hash == "06449e0c672f3868"
+    assert config.hash == "619017c580520b19"
     assert config.is_default is False
 
 
