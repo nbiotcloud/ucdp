@@ -162,7 +162,7 @@ def test_sub():
     assert inst1.topmodname == "sub"
 
     inst2 = mod.get_inst("u_inst2")
-    assert inst2.modname == "sub_bf7afe6890b5eaaa"
+    assert inst2.modname == "sub_8a5068b003412f45"
     assert inst2.topmodname == "sub"
 
     inst3 = mod.get_inst("u_inst3")
@@ -225,3 +225,10 @@ def test_default_config():
     """Default Configuration."""
     mod = DefaultMod()
     assert mod.modname == "default"
+
+
+def test_config_modname():
+    """Modname from config."""
+    config = MyConfig(modname="forced_name")
+    mod = MyMod(config=config)
+    assert mod.modname == "forced_name"
