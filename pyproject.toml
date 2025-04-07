@@ -49,6 +49,7 @@ dependencies = [
     "python-Levenshtein>=0.25.1",
     "rich>=13.7.1",
     "uniquer>=1.0.2",
+    "platformdirs>=4.3.7",
 ]
 
 [project.scripts]

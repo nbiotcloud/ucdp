@@ -31,15 +31,15 @@ from pathlib import Path
 from shutil import rmtree
 
 from anycache import AnyCache
+from platformdirs import user_cache_dir
 from pydantic import BaseModel
-
-CACHE_MAXSIZE = 10 * 1024 * 1024
 
 
 class Cache(BaseModel):
     """UCDP Caching System."""
 
     path: Path | None
+    maxsize: int = 10 * 1024 * 1024
 
     @classmethod
     def init(cls) -> "Cache":
@@ -65,9 +65,16 @@ class Cache(BaseModel):
     @property
     def loader_cache(self) -> AnyCache:
         """Path for Loader."""
+        return self._get_anycache("loader")
+
+    def get_cache(self, name: str):
+        """Create Cache Function Decorator."""
+        return self._get_anycache(name).anycache
+
+    def _get_anycache(self, name: str) -> AnyCache:
         if not self.path:
             return AnyCache(maxsize=0)
-        return AnyCache(cachedir=self.path / "loader", maxsize=CACHE_MAXSIZE)
+        return AnyCache(cachedir=self.path / name, maxsize=self.maxsize)
 
 
 def get_cachepath() -> Path | None:
@@ -79,7 +86,7 @@ def get_cachepath() -> Path | None:
         path = Path(envvar)
     except KeyError:
         try:
-            path = Path.home() / ".cache" / "ucdp"
+            path = Path(user_cache_dir("ucdp", ensure_exists=True))
         except RuntimeError:  # pragma: no cover
             return None
     try:

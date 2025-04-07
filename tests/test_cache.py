@@ -24,9 +24,9 @@
 """Test Cache."""
 
 import os
-from pathlib import Path
 from unittest import mock
 
+import ucdp as u
 from ucdp.cache import Cache
 
 
@@ -34,13 +34,33 @@ def test_default():
     """Default."""
     with mock.patch.dict(os.environ, {}):
         cache = Cache.init()
-        default_path = Path.home() / ".cache" / "ucdp"
-        assert cache.path == default_path
-        assert cache.templates_path == default_path / "templates"
+        assert cache.path
+        assert cache.templates_path == cache.path / "templates"
         assert cache.loader_cache.maxsize != 0
-        assert default_path.exists()
+        assert cache.path.exists()
+
+
+def test_get_cache(tmp_path):
+    """Get Cache."""
+    with mock.patch.dict(os.environ, {"UCDP_CACHE": str(tmp_path)}):
+        cache = Cache.init()
+
+        test_get_cache.count = 0
+
+        @cache.get_cache("foo")()
+        def myfunc(a, b):
+            test_get_cache.count += 1
+            return a + b
+
+        assert myfunc(1, 2) == 3
+        assert test_get_cache.count == 1
+        assert myfunc(1, 2) == 3
+        assert test_get_cache.count == 1
+
         cache.clear()
-        # assert not default_path.exists()
+
+        assert myfunc(1, 2) == 3
+        assert test_get_cache.count == 2
 
 
 def test_env(tmp_path):
@@ -70,3 +90,8 @@ def test_env_disabled(tmp_path):
         assert cache.path is None
         assert cache.templates_path is None
         assert cache.loader_cache.maxsize == 0
+
+
+def test_cache():
+    """Test Cache is Exposed."""
+    assert isinstance(u.CACHE, Cache)
