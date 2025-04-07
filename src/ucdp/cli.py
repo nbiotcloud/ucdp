@@ -50,6 +50,7 @@ from .cliutil import (
     auto_path,
     defines2data,
     opt_check,
+    opt_create,
     opt_defines,
     opt_dry_run,
     opt_file,
@@ -212,6 +213,7 @@ TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 @opt_local
 @opt_topsfile
 @opt_check
+@opt_create
 @pass_ctx
 def gen(
     ctx,
@@ -224,13 +226,14 @@ def gen(
     define=None,
     local=None,
     check=False,
+    create=False,
     tops_file=None,
 ):
     """Generate."""
     tops = list(tops)
     for filepath in tops_file or []:
         tops.extend(read_file(filepath))
-    makolator = get_makolator(show_diff=show_diff, paths=path)
+    makolator = get_makolator(show_diff=show_diff, paths=path, create=create)
     data = defines2data(define)
     filelist = filelist or ["*"]
     with Generator(makolator=makolator, maxworkers=maxworkers, check=check) as generator:
@@ -264,11 +267,12 @@ GENFILE: Generated File.
 @click.argument("genfile", type=PathType, shell_complete=auto_path, nargs=1)
 @opt_show_diff
 @opt_defines
+@opt_create
 @pass_ctx
-def rendergen(ctx, top, path, template_filepaths, genfile, show_diff=False, define=None):
+def rendergen(ctx, top, path, template_filepaths, genfile, show_diff=False, define=None, create=False):
     """Render Generate."""
     top = load_top(ctx, top, path)
-    makolator = get_makolator(show_diff=show_diff, paths=path)
+    makolator = get_makolator(show_diff=show_diff, paths=path, create=create)
     data = defines2data(define)
     render_generate(top, template_filepaths, genfile=genfile, makolator=makolator, data=data)
 
@@ -291,12 +295,15 @@ INPLACEFILE: Inplace File.
 @click.argument("inplacefile", type=PathType, shell_complete=auto_path, nargs=1)
 @opt_show_diff
 @opt_defines
+@opt_create
 @click.option("--ignore_unknown", "-i", default=False, is_flag=True, help="Ignore Unknown Placeholder.")
 @pass_ctx
-def renderinplace(ctx, top, path, template_filepaths, inplacefile, show_diff=False, define=None, ignore_unknown=False):
+def renderinplace(
+    ctx, top, path, template_filepaths, inplacefile, show_diff=False, define=None, ignore_unknown=False, create=False
+):
     """Render Inplace."""
     top = load_top(ctx, top, path)
-    makolator = get_makolator(show_diff=show_diff, paths=path)
+    makolator = get_makolator(show_diff=show_diff, paths=path, create=create)
     data = defines2data(define)
     render_inplace(
         top,
