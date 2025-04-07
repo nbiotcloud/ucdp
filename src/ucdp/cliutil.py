@@ -150,6 +150,13 @@ opt_check = click.option(
     is_flag=True,
     help="Report an error if any file changes.",
 )
+opt_create = click.option(
+    "--create",
+    "-c",
+    default=False,
+    is_flag=True,
+    help="Create missing inplace files.",
+)
 
 
 def defines2data(defines: list[str]) -> dict[str, str]:

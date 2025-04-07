@@ -79,3 +79,13 @@ def get_libname(cls) -> str:
 def get_libpath(cls) -> Path:
     """Module Library Path."""
     return Path(getfile(cls)).parent
+
+
+def get_file(cls, basedir: Path | None = None) -> Path:
+    """Get File Path."""
+    path = Path(getfile(cls))
+    basedir = basedir or Path()
+    try:
+        return path.relative_to(basedir)
+    except ValueError:
+        return Path(*path.parts[-2:])

@@ -5,6 +5,7 @@ _NORM:=\033[0m
 ENV:=uv run --frozen --
 PYTEST_OPTIONS=
 
+
 .PHONY: help
 help:  ## [DEFAULT] Show this help
 	@grep -E '^[a-zA-Z0-9_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?##"}; {printf "${_BLUE}${_BOLD}%-10s${_NORM} %s\n", $$1, $$2}'
