@@ -1,6 +1,6 @@
 # CONTRIBUTING
 
-Please follow github workflow. Create a ticket and/or branch. Create a pull-request.
+Please follow the github workflow. Create a ticket and/or branch. Create a pull-request.
 
 ## Local Development
 
