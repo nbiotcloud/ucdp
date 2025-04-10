@@ -38,7 +38,7 @@ from .clkrel import ASYNC, ClkRel
 from .clkrelbase import BaseClkRel
 from .config import AConfig, AVersionConfig, BaseConfig
 from .const import Const
-from .consts import AUTO, PAT_IDENTIFIER
+from .consts import AUTO, PAT_IDENTIFIER, PAT_OPT_IDENTIFIER, PATH, RE_IDENTIFIER, Gen
 from .dict import Dict
 from .doc import Doc
 from .docutil import doc_from_type
@@ -168,7 +168,10 @@ __all__ = [
     "OPEN",
     "OUT",
     "OUTM",
+    "PATH",
     "PAT_IDENTIFIER",
+    "PAT_OPT_IDENTIFIER",
+    "RE_IDENTIFIER",
     "TODO",
     "UP",
     "ABuildProduct",
@@ -245,6 +248,7 @@ __all__ = [
     "Flavors",
     "FlipFlop",
     "FloatType",
+    "Gen",
     "Hex",
     "Ident",
     "IdentFilter",
