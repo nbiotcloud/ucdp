@@ -134,7 +134,10 @@ class Ctx(BaseModel):
 
     def __exit__(self, exc_type, exc_value, tb):
         if exc_type or self.has_error_handler.has_errors:
-            self.console.print("[red][bold]Aborted.")
+            if exc_type is KeyboardInterrupt:
+                self.console.print("[red]Aborted.")
+            else:
+                self.console.print("[red][bold]Failed.")
             sys.exit(1)
 
 
