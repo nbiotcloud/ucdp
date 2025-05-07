@@ -24,6 +24,7 @@
 """Test Module File Information."""
 
 import ucdp as u
+from ucdp import IN, OUT, Assign, ConstExpr, Default, Note, Port, UintType
 
 
 class SubMod(u.AMod):
@@ -31,7 +32,12 @@ class SubMod(u.AMod):
 
     def _build(self):
         self.add_port(u.UintType(4), "in_i")
-        self.add_port(u.UintType(4), "out_o")
+        self.add_port(u.UintType(4), "open_i")
+        self.add_port(u.UintType(4), "open_o")
+        self.add_port(u.UintType(4), "note_i")
+        self.add_port(u.UintType(4), "note_o")
+        self.add_port(u.UintType(4), "default_i")
+        self.add_port(u.UintType(4), "default_o")
 
 
 class TopMod(u.AMod):
@@ -40,13 +46,23 @@ class TopMod(u.AMod):
     def _build(self):
         sub = SubMod(self, "u_sub0")
         sub.con("in_i", "4'h4")
-        sub.con("out_o", u.OPEN)
+        sub.con("open_i", u.OPEN)
+        sub.con("open_o", u.OPEN)
+        sub.con("note_i", u.note("my note"))
+        sub.con("note_o", u.note("other note"))
+        sub.con("default_i", u.DEFAULT)
+        sub.con("default_o", u.DEFAULT)
 
 
 def test_top():
     """Top Module."""
     top = TopMod()
     assert tuple(top.get_instcons("u_sub0").iter()) == (
-        u.Assign(target=u.Port(u.UintType(4), "in_i", direction=u.IN), source=u.ConstExpr(u.UintType(4, default=4))),
-        u.Assign(target=u.Port(u.UintType(4), "out_o", direction=u.OUT), source=u.Note(note="OPEN")),
+        Assign(target=Port(UintType(4), "in_i", direction=IN), source=ConstExpr(UintType(4, default=4))),
+        Assign(target=Port(UintType(4), "open_i", direction=IN), source=Note(note="OPEN")),
+        Assign(target=Port(UintType(4), "open_o", direction=OUT), source=Note(note="OPEN")),
+        Assign(target=Port(UintType(4), "note_i", direction=IN), source=Note(note="my note")),
+        Assign(target=Port(UintType(4), "note_o", direction=OUT), source=Note(note="other note")),
+        Assign(target=Port(UintType(4), "default_i", direction=IN), source=Default(note="DEFAULT")),
+        Assign(target=Port(UintType(4), "default_o", direction=OUT), source=Default(note="DEFAULT")),
     )
