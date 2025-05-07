@@ -55,6 +55,9 @@ class Note(LightObject):
 OPEN = Note(note="OPEN")
 """Open Note."""
 
+UNUSED = Note(note="UNUSED")
+"""UNUSED Note."""
+
 TODO = Note(note="TODO")
 """Todo Note."""
 
