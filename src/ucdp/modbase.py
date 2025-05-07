@@ -899,8 +899,8 @@ class Router(Object):
         tmod = mod.get_inst(tpath.path) if tpath.path else mod
         smod = mod.get_inst(spath.path) if spath.path else mod
         # Referenced expression/signal
-        texpr = tmod.parser.parse(tpath.expr)
-        sexpr = smod.parser.parse(spath.expr)
+        texpr = tmod.parser.parse(tpath.expr) if not isinstance(tpath.expr, Note) else tpath.expr
+        sexpr = smod.parser.parse(spath.expr) if not isinstance(spath.expr, Note) else spath.expr
         tident = None if not isinstance(texpr, Ident) else texpr
         sident = None if not isinstance(sexpr, Ident) else sexpr
         tparts = tpath.parts
