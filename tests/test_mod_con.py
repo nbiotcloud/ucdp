@@ -23,6 +23,11 @@
 #
 """Test Module File Information."""
 
+import re
+from logging import INFO, WARNING
+
+from pytest import raises
+
 import ucdp as u
 from ucdp import IN, OUT, Assign, ConstExpr, Default, Note, Port, UintType
 
@@ -32,6 +37,7 @@ class SubMod(u.AMod):
 
     def _build(self):
         self.add_port(u.UintType(4), "in_i")
+        self.add_port(u.UintType(4), "out_o")
         self.add_port(u.UintType(4), "open_i")
         self.add_port(u.UintType(4), "open_o")
         self.add_port(u.UintType(4), "note_i")
@@ -44,8 +50,12 @@ class TopMod(u.AMod):
     """Top."""
 
     def _build(self):
+        self.add_port(u.UintType(4), "in_i")
+        self.add_port(u.UintType(4), "out_o")
+
         sub = SubMod(self, "u_sub0")
         sub.con("in_i", "4'h4")
+        sub.con("out_o", "out_o")
         sub.con("open_i", u.OPEN)
         sub.con("open_o", u.OPEN)
         sub.con("note_i", u.note("my note"))
@@ -59,6 +69,7 @@ def test_top():
     top = TopMod()
     assert tuple(top.get_instcons("u_sub0").iter()) == (
         Assign(target=Port(UintType(4), "in_i", direction=IN), source=ConstExpr(UintType(4, default=4))),
+        Assign(target=Port(UintType(4), "out_o", direction=OUT), source=Port(UintType(4), "out_o", direction=OUT)),
         Assign(target=Port(UintType(4), "open_i", direction=IN), source=Note(note="OPEN")),
         Assign(target=Port(UintType(4), "open_o", direction=OUT), source=Note(note="OPEN")),
         Assign(target=Port(UintType(4), "note_i", direction=IN), source=Note(note="my note")),
@@ -66,3 +77,92 @@ def test_top():
         Assign(target=Port(UintType(4), "default_i", direction=IN), source=Default(note="DEFAULT")),
         Assign(target=Port(UintType(4), "default_o", direction=OUT), source=Default(note="DEFAULT")),
     )
+
+
+class TopErrMod(u.AMod):
+    """Top Module with Routing Error."""
+
+    def _build(self):
+        self.add_port(u.UintType(4), "in_i")
+        self.add_port(u.UintType(4), "out_o")
+
+        sub = SubMod(self, "u_sub0")
+        sub.con("in_i", "5'h4")
+        sub.con("out_o", "out_o")
+
+
+def test_top_err(caplog):
+    """Top Module with Routing Error."""
+    msg = (
+        "<tests.test_mod_con.TopErrMod(inst='top_err', libname='tests', modname='top_err')>: "
+        "Cannot assign 'ConstExpr(UintType(5, default=4))' of type UintType(5, default=4) to 'in_i' "
+        "of type UintType(4)."
+    )
+    with raises(TypeError, match=re.escape(msg)):
+        TopErrMod()
+
+
+class TopWarnMod(u.AMod):
+    """Top Module with Routing Warning."""
+
+    def _build(self):
+        self.add_port(u.UintType(4), "in_i")
+        self.add_port(u.UintType(4), "out_o")
+
+        sub = SubMod(self, "u_sub0")
+        sub.con("in_i", "5'h4", on_error="warn")
+        sub.con("out_o", "out_o")
+
+
+def test_top_warn(caplog):
+    """Top Module with Routing Error."""
+    msg = (
+        "<tests.test_mod_con.TopWarnMod(inst='top_warn', libname='tests', modname='top_warn')>: "
+        "Cannot assign 'ConstExpr(UintType(5, default=4))' of type UintType(5, default=4) to 'in_i' "
+        "of type UintType(4)."
+    )
+    top = TopWarnMod()
+    assert tuple(top.get_instcons("u_sub0").iter()) == (
+        Assign(target=Port(UintType(4), "in_i", direction=IN)),
+        Assign(target=Port(UintType(4), "out_o", direction=OUT), source=Port(UintType(4), "out_o", direction=OUT)),
+        Assign(target=Port(UintType(4), "open_i", direction=IN)),
+        Assign(target=Port(UintType(4), "open_o", direction=OUT)),
+        Assign(target=Port(UintType(4), "note_i", direction=IN)),
+        Assign(target=Port(UintType(4), "note_o", direction=OUT)),
+        Assign(target=Port(UintType(4), "default_i", direction=IN)),
+        Assign(target=Port(UintType(4), "default_o", direction=OUT)),
+    )
+    assert caplog.record_tuples == [("ucdp", WARNING, msg)]
+
+
+class TopIgnoreMod(u.AMod):
+    """Top Module with ignored Routing Error."""
+
+    def _build(self):
+        self.add_port(u.UintType(4), "in_i")
+        self.add_port(u.UintType(4), "out_o")
+
+        sub = SubMod(self, "u_sub0")
+        sub.con("in_i", "5'h4", on_error="ignore")
+        sub.con("out_o", "out_o")
+
+
+def test_top_ign(caplog):
+    """Top Module with ignored Routing Error."""
+    msg = (
+        "Ignored: <tests.test_mod_con.TopIgnoreMod(inst='top_ignore', libname='tests', modname='top_ignore')>: "
+        "Cannot assign 'ConstExpr(UintType(5, default=4))' of type UintType(5, default=4) to 'in_i' "
+        "of type UintType(4)."
+    )
+    top = TopIgnoreMod()
+    assert tuple(top.get_instcons("u_sub0").iter()) == (
+        Assign(target=Port(UintType(4), "in_i", direction=IN)),
+        Assign(target=Port(UintType(4), "out_o", direction=OUT), source=Port(UintType(4), "out_o", direction=OUT)),
+        Assign(target=Port(UintType(4), "open_i", direction=IN)),
+        Assign(target=Port(UintType(4), "open_o", direction=OUT)),
+        Assign(target=Port(UintType(4), "note_i", direction=IN)),
+        Assign(target=Port(UintType(4), "note_o", direction=OUT)),
+        Assign(target=Port(UintType(4), "default_i", direction=IN)),
+        Assign(target=Port(UintType(4), "default_o", direction=OUT)),
+    )
+    assert caplog.record_tuples == [("ucdp", INFO, msg)]

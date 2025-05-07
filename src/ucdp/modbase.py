@@ -30,7 +30,7 @@ Base Hardware Module.
 from abc import abstractmethod
 from functools import cached_property
 from inspect import getmro
-from typing import Any, ClassVar, Optional, TypeAlias, Union, no_type_check
+from typing import Any, ClassVar, Literal, Optional, TypeAlias, Union, no_type_check
 
 from aligntext import align
 from caseconverter import snakecase
@@ -66,6 +66,7 @@ from .typedescriptivestruct import DescriptiveStructType
 from .typestruct import StructItem
 
 ModTags: TypeAlias = set[str]
+RoutingError: TypeAlias = Literal["error", "warn", "ignore"]
 
 
 class BaseMod(NamedObject):
@@ -768,7 +769,7 @@ class BaseMod(NamedObject):
         if self.__is_locked:
             raise LockError(f"{self}: Is already locked for modifications.")
 
-    def con(self, port: Routeables, source: Routeables):
+    def con(self, port: Routeables, source: Routeables, on_error: RoutingError = "error"):
         """Connect `port` to `dest`."""
         parents = self.__parents
         if not parents:
@@ -776,14 +777,14 @@ class BaseMod(NamedObject):
         router = parents[-1]._router
         for subtarget in parse_routepaths(port, basepath=self.name):
             for subsource in parse_routepaths(source):
-                router.add(subtarget, subsource)
+                router.add(subtarget, subsource, on_error=on_error)
 
-    def route(self, target: Routeables, source: Routeables):
+    def route(self, target: Routeables, source: Routeables, on_error: RoutingError = "error"):
         """Route `source` to `target` within the actual module."""
         router = self._router
         for subtarget in parse_routepaths(target):
             for subsource in parse_routepaths(source):
-                router.add(subtarget, subsource)
+                router.add(subtarget, subsource, on_error=on_error)
 
     def __str__(self):
         modref = self.get_modref()
@@ -852,28 +853,38 @@ class Router(Object):
     """The One And Only Router."""
 
     mod: BaseMod
-    __routes: list[tuple[RoutePath, RoutePath]] = PrivateField(default_factory=list)
+    __routes: list[tuple[RoutePath, RoutePath, RoutingError]] = PrivateField(default_factory=list)
 
-    def add(self, tpath: RoutePath, spath: RoutePath) -> None:
+    def add(self, tpath: RoutePath, spath: RoutePath, on_error: RoutingError = "error") -> None:
         """Add route from `source` to `tpath`."""
         LOGGER.debug("%s: router: add '%s' to '%s'", self.mod, spath, tpath)
-        self.__routes.append(self._create(tpath, spath))
+        self.__routes.append(self._create(tpath, spath, on_error))
 
     def flush(self) -> None:
         """Create Pending Routes."""
-        for tpath, spath in self.__routes:
-            tpathc, spathc = self._create(tpath, spath)
-            self._route(tpathc, spathc)
+        for tpath, spath, on_error in self.__routes:
+            tpathc, spathc, on_errorc = self._create(tpath, spath, on_error)
+            try:
+                self._route(tpathc, spathc)
+            except Exception as exc:
+                if on_errorc == "ignore":
+                    LOGGER.info("Ignored: %s", exc)
+                elif on_errorc == "warn":
+                    LOGGER.warning(exc)
+                else:
+                    raise
         self.__routes.clear()
 
-    def _create(self, tpath: RoutePath, spath: RoutePath) -> tuple[RoutePath, RoutePath]:
+    def _create(
+        self, tpath: RoutePath, spath: RoutePath, on_error: RoutingError
+    ) -> tuple[RoutePath, RoutePath, RoutingError]:
         if tpath.create:
             if self.__create(spath, tpath):
                 tpath = tpath.new(create=False)
         elif spath.create:
             if self.__create(tpath, spath):
                 spath = spath.new(create=False)
-        return tpath, spath
+        return tpath, spath, on_error
 
     @no_type_check  # TODO: fix types
     def __create(self, rpath: RoutePath, cpath: RoutePath) -> bool:
