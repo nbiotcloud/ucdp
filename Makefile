@@ -63,7 +63,7 @@ distclean:  ## Remove everything mentioned by '.gitignore' file and UNTRACKED fi
 
 .PHONY: shell
 shell:  ## Open a project specific SHELL. For leaving use 'exit'.
-	${ENV} "${SHELL}"
+	${ENV} ${SHELL}
 
 
 # Helper
