@@ -410,3 +410,25 @@ def test_modinfos_param(example_param, prjroot):
     """Modinfo Command."""
     run2console(prjroot, "modinfo", "*")
     assert_refdata(test_modinfos_param, prjroot)
+
+
+def test_create(tmp_path):
+    """Test Command For The Create Function."""
+    with chdir(tmp_path):
+        run("create", "--name", "my_name", "--library", "my_library")
+    assert_refdata(test_create, tmp_path)
+
+
+def test_create_numbers(tmp_path):
+    """Test Command For The Create Function But More Specified With Numbers."""
+    with chdir(tmp_path):
+        run("create", "--name", "my_name2", "--library", "my_library_2")
+    assert_refdata(test_create_numbers, tmp_path)
+
+
+def test_create_invalid_name(tmp_path):
+    """Test Command For The Create Function But To Test Where The Maximum Is."""
+    with chdir(tmp_path):
+        run("create", "--name", "my_name_2_previus", "--library", "my_library_2_previus.py", exit_code=1)
+    # Check that no file is generated
+    assert tuple(tmp_path.glob("*")) == ()

@@ -67,6 +67,8 @@ from .cliutil import (
     read_file,
 )
 from .consts import PATH
+from .create import CreateInfo
+from .create import create as create_
 from .fileset import FileSet
 from .finder import find
 from .generate import Generator, clean, get_makolator, render_generate, render_inplace
@@ -550,3 +552,17 @@ def template_paths(ctx, path):
     makolator = get_makolator(paths=path)
     for template_path in makolator.config.template_paths:
         print(str(template_path))
+
+
+@ucdp.command(
+    help="""
+Create Datamodel Skeleton.
+"""
+)
+@click.option("--name", prompt=True, help="Name of the Module")
+@click.option("--library", prompt=True, help="Name of the library")
+@pass_ctx
+def create(ctx, name, library):
+    """Let The User Type In The Name And Library Of The File."""
+    info = CreateInfo(name=name, library=library)
+    create_(info)

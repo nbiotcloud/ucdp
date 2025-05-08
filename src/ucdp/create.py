@@ -1,7 +1,6 @@
-#
 # MIT License
 #
-# Copyright (c) 2024-2025 nbiotcloud
+# Copyright (c) 2025 nbiotcloud
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -20,36 +19,45 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-#
+"""Create Utilities."""
 
-"""Constants."""
-
-import re
-import sys
 from pathlib import Path
-from typing import Literal
 
-AUTO: str = "auto"
-"""AUTO."""
+from caseconverter import pascalcase, snakecase, titlecase
+from makolator import Datamodel
 
-PAT_IDENTIFIER: str = r"^[a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?$"
-"""Pattern for Identifier."""
+from .consts import PAT_IDENTIFIER_LOWER
+from .generate import get_makolator
+from .object import Field, Object
 
-RE_IDENTIFIER = re.compile(PAT_IDENTIFIER)
-"""Regular Expression for Identifier."""
 
-PAT_OPT_IDENTIFIER: str = r"^([a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?)?$"
-"""Pattern for Optional Identifier."""
+class CreateInfo(Object):
+    """Module Skeleton Information."""
 
-PAT_IDENTIFIER_LOWER: str = r"^[a-z]([a-z_0-9]*[a-z0-9])?$"
-"""Pattern for Identifier."""
+    name: str = Field(pattern=PAT_IDENTIFIER_LOWER)
+    """Module Name."""
 
-UPWARDS: str = ".."
-"""UPWARDS."""
+    library: str = Field(pattern=PAT_IDENTIFIER_LOWER)
+    """Library Name."""
 
-Gen = Literal["no", "inplace", "full", "custom"]
-"""Gen."""
+    @property
+    def name_pascalcase(self) -> str:
+        """Module Name In Pascalcase."""
+        return pascalcase(self.name)
 
-PATH = Path(__file__).parent
+    @property
+    def name_snakecase(self) -> str:
+        """Module Name In Snakecase."""
+        return snakecase(self.name)
 
-PKG_PATHS = {sys.prefix, sys.base_prefix}
+    @property
+    def name_titlecase(self) -> str:
+        """Module Name In Titlecase."""
+        return titlecase(self.name)
+
+
+def create(info: CreateInfo) -> None:
+    """Creates A Module Skeleton Based On `info`."""
+    mklt = get_makolator()
+    mklt.datamodel = Datamodel(info=info)
+    mklt.gen([Path("mod.py.mako")], dest=Path(f"{info.library}/{info.name}.py"))
