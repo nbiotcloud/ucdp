@@ -22,6 +22,7 @@
 """Create Utilities."""
 
 from pathlib import Path
+from typing import Literal
 
 from caseconverter import pascalcase, snakecase, titlecase
 from makolator import Datamodel
@@ -29,6 +30,8 @@ from makolator import Datamodel
 from .consts import PAT_IDENTIFIER_LOWER
 from .generate import get_makolator
 from .object import Field, Object
+
+TYPE_CHOICES = ["static", "dynamic"]
 
 
 class CreateInfo(Object):
@@ -39,6 +42,15 @@ class CreateInfo(Object):
 
     library: str = Field(pattern=PAT_IDENTIFIER_LOWER)
     """Library Name."""
+
+    regf: bool = False
+    """Include Register File."""
+
+    descr: str = ""
+    """Description."""
+
+    type: Literal["static", "dynamic"] = "static"
+    """Type."""
 
     @property
     def name_pascalcase(self) -> str:
@@ -54,6 +66,13 @@ class CreateInfo(Object):
     def name_titlecase(self) -> str:
         """Module Name In Titlecase."""
         return titlecase(self.name)
+
+    @property
+    def descr_or_default(self) -> str:
+        """Module Description Or A Nice Default."""
+        if self.descr:
+            return self.descr
+        return f"{self.name_titlecase} Module"
 
 
 def create(info: CreateInfo) -> None:

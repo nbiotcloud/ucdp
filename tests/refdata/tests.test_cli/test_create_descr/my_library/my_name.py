@@ -1,4 +1,4 @@
-"""My Name Module."""
+"""My Fancy Module."""
 
 from fileliststandard import HdlFileList
 from glbl_lib.bus import BusType
@@ -20,7 +20,7 @@ class MyNameIoType(u.AStructType):
 
 
 class MyNameMod(u.AMod):
-    """My Name Module."""
+    """My Fancy Module."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
         HdlFileList(gen="full"),

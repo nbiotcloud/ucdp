@@ -1,11 +1,11 @@
-"""My Name2 Example."""
+"""My Name2 Module."""
 
 from fileliststandard import HdlFileList
-from glbl_lib.bus import BusType  # (2)
-from glbl_lib.clk_gate import ClkGateMod  # (3)
-from glbl_lib.regf import RegfMod  # (4)
+from glbl_lib.bus import BusType
+from glbl_lib.clk_gate import ClkGateMod
+from glbl_lib.regf import RegfMod
 
-import ucdp as u  # (1)
+import ucdp as u
 
 
 class MyName2IoType(u.AStructType):
@@ -15,23 +15,16 @@ class MyName2IoType(u.AStructType):
     comment: str = "RX/TX"
 
     def _build(self) -> None:
-        self._add("rx", u.BitType(), u.BWD)  # (5)
-        self._add("tx", u.BitType(), u.FWD)  # (6)
+        self._add("rx", u.BitType(), u.BWD)
+        self._add("tx", u.BitType(), u.FWD)
 
 
 class MyName2Mod(u.AMod):
-    """A Simple My Name2."""
+    """My Name2 Module."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
         HdlFileList(gen="full"),
-        u.ModFileList(
-            name="header",
-            filepaths=("$PRJROOT/{mod.modname}.hpp"),
-            template_filepaths=("hpp.mako"),
-        ),
     )
-
-    tags: u.ClassVar[u.ModTags] = {"intf"}
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
@@ -57,8 +50,8 @@ class MyName2Mod(u.AMod):
         word.add_field("ena", u.EnaType(), is_readable=True, route="u_clk_gate/ena_i")
         word.add_field("strt", u.BitType(), is_writable=True, route="create(u_core/strt_i)")
 
-
 class MyName2CoreMod(u.ACoreMod):
     """A Simple My Name2."""
 
     filelists: u.ClassVar[u.ModFileLists] = (HdlFileList(gen="inplace"),)
+

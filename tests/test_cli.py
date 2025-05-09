@@ -432,3 +432,31 @@ def test_create_invalid_name(tmp_path):
         run("create", "--name", "my_name_2_previus", "--library", "my_library_2_previus.py", exit_code=1)
     # Check that no file is generated
     assert tuple(tmp_path.glob("*")) == ()
+
+
+def test_create_regf(tmp_path):
+    """Test Command For The Create Function But More Specified With Numbers."""
+    with chdir(tmp_path):
+        run("create", "--name", "my_name", "--library", "my_library", "--regf")
+    assert_refdata(test_create_regf, tmp_path)
+
+
+def test_create_no_regf(tmp_path):
+    """Test Command For The Create Function But More Specified With Numbers."""
+    with chdir(tmp_path):
+        run("create", "--name", "my_name", "--library", "my_library", "--no-regf")
+    assert_refdata(test_create_no_regf, tmp_path)
+
+
+def test_create_descr(tmp_path):
+    """Test Command For The Create Function But More Specified."""
+    with chdir(tmp_path):
+        run("create", "--name", "my_name", "--library", "my_library", "--descr", "My Fancy Module")
+    assert_refdata(test_create_descr, tmp_path)
+
+
+def test_create_type(tmp_path):
+    """Test Command For The Create Function But More Specified."""
+    with chdir(tmp_path):
+        run("create", "--name", "my_name", "--library", "my_library", "--type", "dynamic")
+    assert_refdata(test_create_type, tmp_path)

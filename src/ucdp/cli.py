@@ -67,7 +67,7 @@ from .cliutil import (
     read_file,
 )
 from .consts import PATH
-from .create import CreateInfo
+from .create import TYPE_CHOICES, CreateInfo
 from .create import create as create_
 from .fileset import FileSet
 from .finder import find
@@ -561,8 +561,11 @@ Create Datamodel Skeleton.
 )
 @click.option("--name", prompt=True, help="Name of the Module")
 @click.option("--library", prompt=True, help="Name of the library")
+@click.option("--regf/--no-regf", default=True, help="Make use of a register file")
+@click.option("--descr", default="", help="Description")
+@click.option("--type", default="static", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a type")
 @pass_ctx
-def create(ctx, name, library):
+def create(ctx, name, library, regf, descr, type):
     """Let The User Type In The Name And Library Of The File."""
-    info = CreateInfo(name=name, library=library)
+    info = CreateInfo(name=name, library=library, regf=regf, descr=descr, type=type)
     create_(info)

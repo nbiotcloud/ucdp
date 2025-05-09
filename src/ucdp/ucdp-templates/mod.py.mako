@@ -1,43 +1,46 @@
-"""${datamodel.info.name_titlecase} Example."""
+<%
+info = datamodel.info
+%>\
+"""${info.descr_or_default}."""
 
 from fileliststandard import HdlFileList
-from glbl_lib.bus import BusType  # (2)
-from glbl_lib.clk_gate import ClkGateMod  # (3)
-from glbl_lib.regf import RegfMod  # (4)
+from glbl_lib.bus import BusType
+% if info.regf:
+from glbl_lib.clk_gate import ClkGateMod
+from glbl_lib.regf import RegfMod
+% endif
 
-import ucdp as u  # (1)
+import ucdp as u
 
 
-class ${datamodel.info.name_pascalcase}IoType(u.AStructType):
-    """${datamodel.info.name_titlecase} IO."""
+class ${info.name_pascalcase}IoType(u.AStructType):
+    """${info.name_titlecase} IO."""
 
-    title: str = "${datamodel.info.name_titlecase}"
+    title: str = "${info.name_titlecase}"
     comment: str = "RX/TX"
 
     def _build(self) -> None:
-        self._add("rx", u.BitType(), u.BWD)  # (5)
-        self._add("tx", u.BitType(), u.FWD)  # (6)
+        self._add("rx", u.BitType(), u.BWD)
+        self._add("tx", u.BitType(), u.FWD)
 
 
-class ${datamodel.info.name_pascalcase}Mod(u.AMod):
-    """A Simple ${datamodel.info.name_titlecase}."""
+class ${info.name_pascalcase}Mod(u.AMod):
+    """${info.descr_or_default}."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
         HdlFileList(gen="full"),
-        u.ModFileList(
-            name="header",
-            filepaths=("$PRJROOT/{mod.modname}.hpp"),
-            template_filepaths=("hpp.mako"),
-        ),
     )
-
-    tags: u.ClassVar[u.ModTags] = {"intf"}
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
-        self.add_port(${datamodel.info.name_pascalcase}IoType(), "${datamodel.info.name_snakecase}_i", route="create(u_core/${datamodel.info.name_snakecase}_i)", clkrel=u.ASYNC)
+% if info.regf:
+        self.add_port(${info.name_pascalcase}IoType(), "${info.name_snakecase}_i", route="create(u_core/${info.name_snakecase}_i)", clkrel=u.ASYNC)
+%else:
+        self.add_port(${info.name_pascalcase}IoType(), "${info.name_snakecase}_i", clkrel=u.ASYNC)
+%endif:
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
 
+% if info.regf:
         clkgate = ClkGateMod(self, "u_clk_gate")
         clkgate.con("clk_i", "main_clk_i")
         clkgate.con("clk_o", "create(clk_s)")
@@ -46,7 +49,7 @@ class ${datamodel.info.name_pascalcase}Mod(u.AMod):
         regf.con("main_i", "main_i")
         regf.con("bus_i", "bus_i")
 
-        core = ${datamodel.info.name_pascalcase}CoreMod(parent=self, name="u_core")
+        core = ${info.name_pascalcase}CoreMod(parent=self, name="u_core")
 
         core.add_port(u.ClkRstAnType(), "main_i")
         core.con("main_clk_i", "clk_s")
@@ -57,8 +60,9 @@ class ${datamodel.info.name_pascalcase}Mod(u.AMod):
         word.add_field("ena", u.EnaType(), is_readable=True, route="u_clk_gate/ena_i")
         word.add_field("strt", u.BitType(), is_writable=True, route="create(u_core/strt_i)")
 
-
-class ${datamodel.info.name_pascalcase}CoreMod(u.ACoreMod):
-    """A Simple ${datamodel.info.name_titlecase}."""
+class ${info.name_pascalcase}CoreMod(u.ACoreMod):
+    """A Simple ${info.name_titlecase}."""
 
     filelists: u.ClassVar[u.ModFileLists] = (HdlFileList(gen="inplace"),)
+
+% endif
