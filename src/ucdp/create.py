@@ -38,7 +38,7 @@ TYPE_CHOICES = [
     "AMod",
     "ATailoredMod",
     "ATbMod",
-]  # alle sechse
+]  
 
 
 class CreateInfo(Object):
@@ -57,7 +57,7 @@ class CreateInfo(Object):
     """Description."""
 
     type: Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"] = (
-        "AMod"  # alle sechse + AMod is default
+        "AMod"  
     )
     """Type."""
 
