@@ -575,19 +575,19 @@ def create(ctx, name, library, regf, descr, type):
 
 def prompt_type():
     """Let The User Choose The Type Of The File."""
-    ans = click.prompt("Do you want to build a design or testbench?", type=click.Choice(["design", "testbench"]))
-    if ans == "design":
-        ans = click.prompt(
+    answer = click.prompt("Do you want to build a design or testbench?", type=click.Choice(["design", "testbench"]))
+    if answer == "design":
+        answer = click.prompt(
             "Does your design vary more than what `parameter` can cover?", type=click.Choice(["Yes", "No"])
         )
-        if ans == "Yes":
-            ans = click.prompt(
+        if answer == "Yes":
+            answer = click.prompt(
                 "Do you want to use a config or shall the parent module tailor the functionality?",
-                ans=click.Choice(["config", "tailor"]),
+                answer=click.Choice(["config", "tailor"]),
             )
-            if ans == "config":
+            if answer == "config":
                 type_ = "AConfigurableMod"
-            
+
             else:
                 type_ = "ATailoredMod"
 
@@ -595,21 +595,21 @@ def prompt_type():
             type_ = "AMod"
 
     else:
-        ans = click.prompt(
-            "Do you want to build a generic testbench which tests similar modules?", ans=click.Choice(["Yes", "No"])
+        answer = click.prompt(
+            "Do you want to build a generic testbench which tests similar modules?", answer=click.Choice(["Yes", "No"])
         )
-        if ans == "Yes":
-            ans = click.prompt(
+        if answer == "Yes":
+            answer = click.prompt(
                 "Do you want to automatically adapt your testbench to your dut or use a config?",
-                ans=click.Choice(["config", "generic"]),
-        )
-            if ans == "config":
+                answer=click.Choice(["config", "generic"]),
+            )
+            if answer == "config":
                 type_ = "AConfigurableTbMod"
 
-            else: 
+            else:
                 type_ = "AGenericTbMod"
 
         else:
             type_ = "ATbMod"
 
-    return type_ 
+    return type_
