@@ -563,9 +563,54 @@ Create Datamodel Skeleton.
 @click.option("--library", prompt=True, help="Name of the library")
 @click.option("--regf/--no-regf", default=True, help="Make use of a register file")
 @click.option("--descr", default="", help="Description")
-@click.option("--type", default="static", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a type")
+@click.option("--type", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a type")
 @pass_ctx
 def create(ctx, name, library, regf, descr, type):
     """Let The User Type In The Name And Library Of The File."""
+    if type is None:
+        type = prompt_type()
     info = CreateInfo(name=name, library=library, regf=regf, descr=descr, type=type)
     create_(info)
+
+
+def prompt_type():
+    """Let The User Choose The Type Of The File."""
+    type_ = click.prompt("Do you want to build a design or testbench?", type=click.Choice(["design", "testbench"]))
+    if type_ == "design":
+        type_ = click.prompt(
+            "Does your design vary more than what `parameter` can cover?", type=click.Choice(["Yes", "No"])
+        )
+        if type == "Yes":
+            type_ = click.prompt(
+                "Do you want to use a config or shall the parent module tailor the functionality?",
+                type=click.Choice(["config", "tailor"]),
+            )
+            if type == "config":
+                type_ = "AConfigurableMod"
+                print("Ausgabe sollte AConfigurableMod sein")
+                return type_
+            type_ = "ATailoredMod"
+            print("Ausgabe sollte ATailoredMod sein")
+            return type_
+        type_ = "AMod"
+        print("Ausgabe sollte AMod sein")
+        return type_
+    type_ = click.prompt(
+        "Do you want to build a generic testbench which tests similar modules?", type=click.Choice(["Yes", "No"])
+    )
+    if type == "Yes":
+        type_ = click.prompt(
+            "Do you want to automatically adapt your testbench to your dut or use a config?",
+            type=click.Choice(["config", "generic"]),
+        )
+        if type == "config":
+            type_ = "AConfigurableTbMod"
+            print("Ausgabe sollte AConfigurableTbMod sein")
+            return type_
+        type_ = "AGenericTbMod"
+        print("Ausgabe sollte AGenericTbMod sein")
+        return type_
+    type_ = "ATbMod"
+    print("Ausgabe sollte ATbMod sein")
+    return type_
+    return type_

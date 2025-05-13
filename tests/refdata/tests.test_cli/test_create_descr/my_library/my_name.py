@@ -1,4 +1,6 @@
 """My Fancy Module."""
+"""AMod. """
+
 
 from fileliststandard import HdlFileList
 from glbl_lib.bus import BusType

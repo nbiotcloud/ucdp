@@ -2,6 +2,8 @@
 info = datamodel.info
 %>\
 """${info.descr_or_default}."""
+"""${info.type}. """
+
 
 from fileliststandard import HdlFileList
 from glbl_lib.bus import BusType

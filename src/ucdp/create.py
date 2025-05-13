@@ -31,7 +31,14 @@ from .consts import PAT_IDENTIFIER_LOWER
 from .generate import get_makolator
 from .object import Field, Object
 
-TYPE_CHOICES = ["static", "dynamic"]
+TYPE_CHOICES = [
+    "AConfigurableMod",
+    "AConfigurableTbMod",
+    "AGenericTbMod",
+    "AMod",
+    "ATailoredMod",
+    "ATbMod",
+]  # alle sechse
 
 
 class CreateInfo(Object):
@@ -49,7 +56,9 @@ class CreateInfo(Object):
     descr: str = ""
     """Description."""
 
-    type: Literal["static", "dynamic"] = "static"
+    type: Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"] = (
+        "AMod"  # alle sechse + AMod is default
+    )
     """Type."""
 
     @property
