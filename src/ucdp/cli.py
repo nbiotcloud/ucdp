@@ -575,42 +575,47 @@ def create(ctx, name, library, regf, descr, type):
 
 def prompt_type():
     """Let The User Choose The Type Of The File."""
-    type_ = click.prompt("Do you want to build a design or testbench?", type=click.Choice(["design", "testbench"]))
-    if type_ == "design":
-        type_ = click.prompt(
+    ans = click.prompt("Do you want to build a design or testbench?", type=click.Choice(["design", "testbench"]))
+    if ans == "design":
+        ans = click.prompt(
             "Does your design vary more than what `parameter` can cover?", type=click.Choice(["Yes", "No"])
         )
-        if type == "Yes":
-            type_ = click.prompt(
+        if ans == "Yes":
+            ans = click.prompt(
                 "Do you want to use a config or shall the parent module tailor the functionality?",
-                type=click.Choice(["config", "tailor"]),
+                ans=click.Choice(["config", "tailor"]),
             )
-            if type == "config":
-                type_ = "AConfigurableMod"
+            if ans == "config":
+                ans = "AConfigurableMod"
                 print("Ausgabe sollte AConfigurableMod sein")
-                return type_
-            type_ = "ATailoredMod"
-            print("Ausgabe sollte ATailoredMod sein")
-            return type_
-        type_ = "AMod"
-        print("Ausgabe sollte AMod sein")
-        return type_
-    type_ = click.prompt(
-        "Do you want to build a generic testbench which tests similar modules?", type=click.Choice(["Yes", "No"])
-    )
-    if type == "Yes":
-        type_ = click.prompt(
-            "Do you want to automatically adapt your testbench to your dut or use a config?",
-            type=click.Choice(["config", "generic"]),
+                return ans
+            
+            else:
+                ans = "ATailoredMod"
+                print("Ausgabe sollte ATailoredMod sein")
+                return ans
+        else:
+            ans = "AMod"
+            print("Ausgabe sollte AMod sein")
+            return ans
+    else:
+        ans = click.prompt(
+            "Do you want to build a generic testbench which tests similar modules?", ans=click.Choice(["Yes", "No"])
         )
-        if type == "config":
-            type_ = "AConfigurableTbMod"
-            print("Ausgabe sollte AConfigurableTbMod sein")
-            return type_
-        type_ = "AGenericTbMod"
-        print("Ausgabe sollte AGenericTbMod sein")
-        return type_
-    type_ = "ATbMod"
-    print("Ausgabe sollte ATbMod sein")
-    return type_
-    return type_
+        if ans == "Yes":
+            ans = click.prompt(
+                "Do you want to automatically adapt your testbench to your dut or use a config?",
+                ans=click.Choice(["config", "generic"]),
+        )
+            if ans == "config":
+                ans = "AConfigurableTbMod"
+                print("Ausgabe sollte AConfigurableTbMod sein")
+                return ans
+            else: 
+                ans = "AGenericTbMod"
+                print("Ausgabe sollte AGenericTbMod sein")
+                return ans
+        else:
+            ans = "ATbMod"
+            print("Ausgabe sollte ATbMod sein")
+            return ans
