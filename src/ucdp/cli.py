@@ -586,18 +586,14 @@ def prompt_type():
                 ans=click.Choice(["config", "tailor"]),
             )
             if ans == "config":
-                ans = "AConfigurableMod"
-                print("Ausgabe sollte AConfigurableMod sein")
-                return ans
+                type_ = "AConfigurableMod"
             
             else:
-                ans = "ATailoredMod"
-                print("Ausgabe sollte ATailoredMod sein")
-                return ans
+                type_ = "ATailoredMod"
+
         else:
-            ans = "AMod"
-            print("Ausgabe sollte AMod sein")
-            return ans
+            type_ = "AMod"
+
     else:
         ans = click.prompt(
             "Do you want to build a generic testbench which tests similar modules?", ans=click.Choice(["Yes", "No"])
@@ -608,14 +604,12 @@ def prompt_type():
                 ans=click.Choice(["config", "generic"]),
         )
             if ans == "config":
-                ans = "AConfigurableTbMod"
-                print("Ausgabe sollte AConfigurableTbMod sein")
-                return ans
+                type_ = "AConfigurableTbMod"
+
             else: 
-                ans = "AGenericTbMod"
-                print("Ausgabe sollte AGenericTbMod sein")
-                return ans
+                type_ = "AGenericTbMod"
+
         else:
-            ans = "ATbMod"
-            print("Ausgabe sollte ATbMod sein")
-            return ans
+            type_ = "ATbMod"
+
+    return type_ 
