@@ -579,17 +579,17 @@ Type = Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod"
 
 def prompt_flavour() -> Type:
     """Let The User Choose The Type Of The File."""
-    answer = click.prompt("Do you want to build a design or testbench?", type=click.Choice(["design", "testbench"]))
-    if answer == "design":
+    answer = click.prompt("Do you want to build a (d)esign or (t)estbench?", type=click.Choice(["d", "t"]), default="d")
+    if answer == "d":
         answer = click.prompt(
-            "Does your design vary more than what `parameter` can cover?", type=click.Choice(["Yes", "No"])
+            "Does your design vary more than what `parameter` can cover? (y)es. (n)o.", type=click.Choice(["y", "n"])
         )
-        if answer == "Yes":
+        if answer == "y":
             answer = click.prompt(
-                "Do you want to use a config or shall the parent module tailor the functionality?",
-                type=click.Choice(["config", "tailor"]),
+                "Do you want to use a (c)onfig or (t) shall the parent module tailor the functionality?",
+                type=click.Choice(["c", "t"]),
             )
-            if answer == "config":
+            if answer == "c":
                 flavour_ = "AConfigurableMod"
 
             else:
@@ -600,14 +600,15 @@ def prompt_flavour() -> Type:
 
     else:
         answer = click.prompt(
-            "Do you want to build a generic testbench which tests similar modules?", type=click.Choice(["Yes", "No"])
+            "Do you want to build a generic testbench which tests similar modules? (y)es. (n)o.",
+            type=click.Choice(["y", "n"]),
         )
-        if answer == "Yes":
+        if answer == "y":
             answer = click.prompt(
-                "Do you want to automatically adapt your testbench to your dut or use a config?",
-                type=click.Choice(["config", "generic"]),
+                "Do you want to automatically adapt your testbench to your (g) dut or use a (c)onfig?",
+                type=click.Choice(["g", "c"]),
             )
-            if answer == "config":
+            if answer == "c":
                 flavour_ = "AConfigurableTbMod"
 
             else:
