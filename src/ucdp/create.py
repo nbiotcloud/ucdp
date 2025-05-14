@@ -56,8 +56,10 @@ class CreateInfo(Object):
     descr: str = ""
     """Description."""
 
-    type: Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"] = "AMod"
-    """Type."""
+    flavour: Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"] = (
+        "AMod"
+    )
+    """Flavour."""
 
     @property
     def name_pascalcase(self) -> str:

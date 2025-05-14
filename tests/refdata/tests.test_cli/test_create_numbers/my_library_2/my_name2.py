@@ -1,5 +1,4 @@
 """My Name2 Module."""
-"""AMod. """
 
 
 from fileliststandard import HdlFileList
