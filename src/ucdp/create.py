@@ -46,6 +46,12 @@ TYPE_CHOICES_TB = [
     "ATbMod",
 ]
 
+TB_MAP = {
+    "AConfigurableMod": "AGenericTbMod",
+    "AMod": "ATbMod",
+    "ATailoredMod": "AGenericTbMod",
+}
+
 
 class CreateInfo(Object):
     """Module Skeleton Information."""
@@ -95,8 +101,8 @@ class CreateInfo(Object):
         return self.flavour in TYPE_CHOICES_TB
 
 
-def create(info: CreateInfo) -> None:
+def create(info: CreateInfo, force: bool) -> None:
     """Creates A Module Skeleton Based On `info`."""
-    mklt = get_makolator()
+    mklt = get_makolator(force=force)
     mklt.datamodel = Datamodel(info=info)
     mklt.gen([Path("mod.py.mako")], dest=Path(f"{info.library}/{info.name}.py"))
