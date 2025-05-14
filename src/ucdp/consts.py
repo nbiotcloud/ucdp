@@ -41,6 +41,8 @@ RE_IDENTIFIER = re.compile(PAT_IDENTIFIER)
 PAT_OPT_IDENTIFIER: str = r"^([a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?)?$"
 """Pattern for Optional Identifier."""
 
+PAT_IDENTIFIER_LOWER: str = r"^[a-z]([a-z_0-9]*[a-z0-9])?$"
+"""Pattern for Identifier."""
 
 UPWARDS: str = ".."
 """UPWARDS."""

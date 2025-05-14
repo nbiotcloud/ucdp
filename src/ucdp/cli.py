@@ -30,6 +30,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from logging import StreamHandler
 from pathlib import Path
+from typing import Literal
 
 import click
 from click_bash42_completion import patch
@@ -67,6 +68,8 @@ from .cliutil import (
     read_file,
 )
 from .consts import PATH
+from .create import TYPE_CHOICES, CreateInfo
+from .create import create as create_
 from .fileset import FileSet
 from .finder import find
 from .generate import Generator, clean, get_makolator, render_generate, render_inplace
@@ -550,3 +553,68 @@ def template_paths(ctx, path):
     makolator = get_makolator(paths=path)
     for template_path in makolator.config.template_paths:
         print(str(template_path))
+
+
+@ucdp.command(
+    help="""
+Create Datamodel Skeleton.
+"""
+)
+@click.option("--name", prompt=True, help="Name of the Module")
+@click.option("--library", prompt=True, help="Name of the Library")
+@click.option("--regf/--no-regf", default=True, help="Make use of a Register File")
+@click.option("--descr", default="", help="Description")
+@click.option("--flavour", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour")
+@pass_ctx
+def create(ctx, name, library, regf, descr, flavour):
+    """Let The User Type In The Name And Library Of The File."""
+    if flavour is None:
+        flavour = prompt_flavour()
+    info = CreateInfo(name=name, library=library, regf=regf, descr=descr, flavour=flavour)
+    create_(info)
+
+
+Type = Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"]
+
+
+def prompt_flavour() -> Type:
+    """Let The User Choose The Type Of The File."""
+    answer = click.prompt("Do you want to build a (d)esign or (t)estbench?", type=click.Choice(["d", "t"]), default="d")
+    if answer == "d":
+        answer = click.prompt(
+            "Does your design vary more than what `parameter` can cover? (y)es. (n)o.", type=click.Choice(["y", "n"])
+        )
+        if answer == "y":
+            answer = click.prompt(
+                "Do you want to use a (c)onfig or (t) shall the parent module tailor the functionality?",
+                type=click.Choice(["c", "t"]),
+            )
+            if answer == "c":
+                flavour_ = "AConfigurableMod"
+
+            else:
+                flavour_ = "ATailoredMod"
+
+        else:
+            flavour_ = "AMod"
+
+    else:
+        answer = click.prompt(
+            "Do you want to build a generic testbench which tests similar modules? (y)es. (n)o.",
+            type=click.Choice(["y", "n"]),
+        )
+        if answer == "y":
+            answer = click.prompt(
+                "Do you want to automatically adapt your testbench to your (g) dut or use a (c)onfig?",
+                type=click.Choice(["g", "c"]),
+            )
+            if answer == "c":
+                flavour_ = "AConfigurableTbMod"
+
+            else:
+                flavour_ = "AGenericTbMod"
+
+        else:
+            flavour_ = "ATbMod"
+
+    return flavour_
