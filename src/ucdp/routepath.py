@@ -29,6 +29,7 @@ from collections.abc import Iterable
 
 from .expr import Expr
 from .iterutil import split
+from .note import Note
 from .object import LightObject, model_validator
 from .signal import BaseSignal
 
@@ -50,7 +51,7 @@ class RoutePath(LightObject):
         cast: `True` (required), `None` (optional) or `False` (forbidden) type casting.
     """
 
-    expr: str | BaseSignal
+    expr: str | BaseSignal | Note
     path: str | None = None
     create: bool = False
     cast: bool | None = False
@@ -82,7 +83,7 @@ class RoutePath(LightObject):
         return res
 
 
-Routeable = RoutePath | Expr | str
+Routeable = RoutePath | Expr | str | Note
 Routeables = Routeable | Iterable[Routeable]
 
 
@@ -124,7 +125,7 @@ def parse_routepath(value: Routeable, basepath: str | None = None) -> RoutePath:
     """
     if isinstance(value, RoutePath):
         return value
-    if isinstance(value, Expr):
+    if isinstance(value, (Expr, Note)):
         return RoutePath(expr=value, path=basepath or None)
     mat = _RE_PATH.fullmatch(value)
     if mat:
@@ -167,7 +168,7 @@ def parse_routepaths(routepaths: Routeables | None, basepath: str | None = None)
     """
     if not routepaths:
         return ()
-    if isinstance(routepaths, (RoutePath, Expr)):
+    if isinstance(routepaths, (RoutePath, Expr, Note)):
         return (parse_routepath(routepaths, basepath=basepath),)
     if isinstance(routepaths, str):
         return tuple(parse_routepath(path, basepath=basepath) for path in split(routepaths))

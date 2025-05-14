@@ -26,6 +26,7 @@ class MyNameNoRegfMod(u.AMod):
     )
 
     def _build(self) -> None:
+        """Build."""
         self.add_port(u.ClkRstAnType(), "main_i")
         self.add_port(MyNameNoRegfIoType(), "my_name_no_regf_i", clkrel=u.ASYNC)
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")

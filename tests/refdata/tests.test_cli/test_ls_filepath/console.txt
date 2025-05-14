@@ -1,4 +1,9 @@
 tests.test_flipflops.FlipFlopMod tests/test_flipflops.py
+tests.test_mod_con.SubMod tests/test_mod_con.py
+tests.test_mod_con.TopErrMod tests/test_mod_con.py
+tests.test_mod_con.TopIgnoreMod tests/test_mod_con.py
+tests.test_mod_con.TopMod tests/test_mod_con.py
+tests.test_mod_con.TopWarnMod tests/test_mod_con.py
 tests.test_modconfigurable.AnotherMod tests/test_modconfigurable.py
 tests.test_modconfigurable.DefaultMod tests/test_modconfigurable.py
 tests.test_modconfigurable.MyMod tests/test_modconfigurable.py

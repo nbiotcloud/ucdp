@@ -99,7 +99,7 @@ from .modutil import get_modbaseinfos, is_tb_from_modname
 from .mux import Mux
 from .namespace import Namespace
 from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix, str2identifier
-from .note import OPEN, TODO, Note
+from .note import DEFAULT, OPEN, TODO, UNUSED, Default, Note, note
 from .object import (
     Field,
     IdentLightObject,
@@ -159,6 +159,7 @@ __all__ = [
     "BWD",
     "BWDM",
     "CACHE",
+    "DEFAULT",
     "DOWN",
     "FWD",
     "FWDM",
@@ -173,6 +174,7 @@ __all__ = [
     "PAT_OPT_IDENTIFIER",
     "RE_IDENTIFIER",
     "TODO",
+    "UNUSED",
     "UP",
     "ABuildProduct",
     "ACompositeType",
@@ -221,6 +223,7 @@ __all__ = [
     "ConcatExpr",
     "Const",
     "ConstExpr",
+    "Default",
     "DescriptiveStructType",
     "Dict",
     "DiffClkRstAnType",
@@ -350,6 +353,7 @@ __all__ = [
     "maximum",
     "minimum",
     "namefilter",
+    "note",
     "parse",
     "parse_routepath",
     "parse_routepaths",

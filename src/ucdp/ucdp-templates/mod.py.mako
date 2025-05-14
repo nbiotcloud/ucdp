@@ -14,6 +14,17 @@ from glbl_lib.regf import RegfMod
 import ucdp as u
 
 
+% if info.is_tb:
+class ${info.name_pascalcase}Mod(u.${info.flavour}):
+    """${info.descr_or_default}."""
+
+    filelists: u.ClassVar[u.ModFileLists] = (
+        HdlFileList(gen="full"),
+    )
+
+    def _build(self) -> None:
+        dut = self.dut # Design-Under-Test
+% else:
 class ${info.name_pascalcase}IoType(u.AStructType):
     """${info.name_titlecase} IO."""
 
@@ -33,15 +44,16 @@ class ${info.name_pascalcase}Mod(u.${info.flavour}):
     )
 
     def _build(self) -> None:
+        """Build."""
         self.add_port(u.ClkRstAnType(), "main_i")
-% if info.regf:
+%   if info.regf:
         self.add_port(${info.name_pascalcase}IoType(), "${info.name_snakecase}_i", route="create(u_core/${info.name_snakecase}_i)", clkrel=u.ASYNC)
-%else:
+%   else:
         self.add_port(${info.name_pascalcase}IoType(), "${info.name_snakecase}_i", clkrel=u.ASYNC)
-%endif:
+%   endif:
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
 
-% if info.regf:
+%   if info.regf:
         clkgate = ClkGateMod(self, "u_clk_gate")
         clkgate.con("clk_i", "main_clk_i")
         clkgate.con("clk_o", "create(clk_s)")
@@ -61,9 +73,19 @@ class ${info.name_pascalcase}Mod(u.${info.flavour}):
         word.add_field("ena", u.EnaType(), is_readable=True, route="u_clk_gate/ena_i")
         word.add_field("strt", u.BitType(), is_writable=True, route="create(u_core/strt_i)")
 
+%   if info.flavour == "ATailoredMod":
+    def _build_dep(self):
+        """Build Dependent Parts."""
+
+    def _build_final(self):
+        """Build Post."""
+
+%   endif
+
 class ${info.name_pascalcase}CoreMod(u.ACoreMod):
     """A Simple ${info.name_titlecase}."""
 
     filelists: u.ClassVar[u.ModFileLists] = (HdlFileList(gen="inplace"),)
 
+%   endif
 % endif
