@@ -26,8 +26,10 @@
 import subprocess
 from pathlib import Path
 
+from click.testing import CliRunner
 from contextlib_chdir import chdir
 from pydantic import BaseModel
+from pytest import mark
 from test2ref import assert_refdata
 
 import ucdp as u
@@ -532,3 +534,19 @@ def test_create_flavour_atbmod(tmp_path):
     with chdir(tmp_path):
         run("create", "--name", "my_name_flavour_atbmod", "--library", "my_library", "--flavour", "ATbMod")
     assert_refdata(test_create_flavour_atbmod, tmp_path)
+
+
+@mark.parametrize(
+    "input",
+    [
+        ("mod0", "lib", "d", "n"),
+        ("mod1", "lib", "d", "y", "c"),
+    ],
+)
+def test_create_type_questions(tmp_path, input):
+    """Test Type Questionnaire."""
+    runner = CliRunner()
+    with chdir(tmp_path):
+        result = runner.invoke(u.cli.ucdp, ["create"], input="\n".join((*input, "")))
+    assert not result.exception
+    assert_refdata(test_create_type_questions, tmp_path, flavor="-".join(input))
