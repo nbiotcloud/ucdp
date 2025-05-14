@@ -46,6 +46,12 @@ TYPE_CHOICES_TB = [
     "ATbMod",
 ]
 
+TB_MAP = {
+    "AConfigurableMod": "AGenericTbMod",
+    "AMod": "ATbMod",
+    "ATailoredMod": "AGenericTbMod",
+}
+
 
 class CreateInfo(Object):
     """Module Skeleton Information."""

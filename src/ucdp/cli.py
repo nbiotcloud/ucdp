@@ -68,7 +68,7 @@ from .cliutil import (
     read_file,
 )
 from .consts import PATH
-from .create import TYPE_CHOICES, CreateInfo
+from .create import TB_MAP, TYPE_CHOICES, CreateInfo
 from .create import create as create_
 from .fileset import FileSet
 from .finder import find
@@ -560,18 +560,41 @@ def template_paths(ctx, path):
 Create Datamodel Skeleton.
 """
 )
-@click.option("--name", prompt=True, help="Name of the Module")
-@click.option("--library", prompt=True, help="Name of the Library")
-@click.option("--regf/--no-regf", default=True, help="Make use of a Register File")
-@click.option("--descr", default="", help="Description")
-@click.option("--flavour", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour")
-@click.option("--force", is_flag=True)
+@click.option("--name", "-n", prompt=True, help="Name of the Module")
+@click.option("--library", "-l", prompt=True, help="Name of the Library")
+@click.option("--regf/--no-regf", "-r/-R", default=True, help="Make use of a Register File")
+@click.option("--descr", "-d", default="", help="Description")
+@click.option("--flavour", "-F", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour")
+@click.option("--tb/--no-tb", "-t/-T", default=None, help="Create testbench for design module")
+@click.option("--force", "-f", is_flag=True, help="Overwrite existing files")
 @pass_ctx
-def create(ctx, name, library, regf, descr, flavour, force):
+def create(
+    ctx,
+    name,
+    library,
+    regf,
+    descr,
+    flavour,
+    tb,
+    force,
+):
     """Let The User Type In The Name And Library Of The File."""
     if flavour is None:
         flavour = prompt_flavour()
+
     info = CreateInfo(name=name, library=library, regf=regf, descr=descr, flavour=flavour)
+
+    if not info.is_tb:
+        if tb is None:
+            answer = click.prompt(
+                "Do you want to create a corresponding testbench? (y)es. (n)o.",
+                type=click.Choice(["y", "n"]),
+                default="y",
+            )
+            tb = answer == "y"
+        if tb:
+            tbinfo = CreateInfo(name=f"{name}_tb", library=library, regf=regf, descr=descr, flavour=TB_MAP[flavour])
+            create_(tbinfo, force)
     create_(info, force)
 
 
