@@ -564,6 +564,6 @@ def test_create_type_questions(tmp_path, input):
     """Test Type Questionnaire."""
     runner = CliRunner()
     with chdir(tmp_path):
-        result = runner.invoke(u.cli.ucdp, ["create"], input="\n".join((*input, "")))
+        result = runner.invoke(u.cli.ucdp, ["create", "-T"], input="\n".join((*input, "")))
     assert not result.exception
     assert_refdata(test_create_type_questions, tmp_path, flavor="-".join(input))
