@@ -561,60 +561,61 @@ Create Datamodel Skeleton.
 """
 )
 @click.option("--name", prompt=True, help="Name of the Module")
-@click.option("--library", prompt=True, help="Name of the library")
-@click.option("--regf/--no-regf", default=True, help="Make use of a register file")
+@click.option("--library", prompt=True, help="Name of the Library")
+@click.option("--regf/--no-regf", default=True, help="Make use of a Register File")
 @click.option("--descr", default="", help="Description")
-@click.option("--type", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a type")
+@click.option("--flavour", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour")
 @click.option("--force", is_flag=True)
 @pass_ctx
-def create(ctx, name, library, regf, descr, type, force):
+def create(ctx, name, library, regf, descr, flavour, force):
     """Let The User Type In The Name And Library Of The File."""
-    if type is None:
-        type = prompt_type()
-    info = CreateInfo(name=name, library=library, regf=regf, descr=descr, type=type)
+    if flavour is None:
+        flavour = prompt_flavour()
+    info = CreateInfo(name=name, library=library, regf=regf, descr=descr, flavour=flavour)
     create_(info, force)
 
 
 Type = Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"]
 
 
-def prompt_type() -> Type:
+def prompt_flavour() -> Type:
     """Let The User Choose The Type Of The File."""
-    answer = click.prompt("Do you want to build a design or testbench?", type=click.Choice(["design", "testbench"]))
-    if answer == "design":
+    answer = click.prompt("Do you want to build a (d)esign or (t)estbench?", type=click.Choice(["d", "t"]), default="d")
+    if answer == "d":
         answer = click.prompt(
-            "Does your design vary more than what `parameter` can cover?", type=click.Choice(["Yes", "No"])
+            "Does your design vary more than what `parameter` can cover? (y)es. (n)o.", type=click.Choice(["y", "n"])
         )
-        if answer == "Yes":
+        if answer == "y":
             answer = click.prompt(
-                "Do you want to use a config or shall the parent module tailor the functionality?",
-                type=click.Choice(["config", "tailor"]),
+                "Do you want to use a (c)onfig or (t) shall the parent module tailor the functionality?",
+                type=click.Choice(["c", "t"]),
             )
-            if answer == "config":
-                type_ = "AConfigurableMod"
+            if answer == "c":
+                flavour_ = "AConfigurableMod"
 
             else:
-                type_ = "ATailoredMod"
+                flavour_ = "ATailoredMod"
 
         else:
-            type_ = "AMod"
+            flavour_ = "AMod"
 
     else:
         answer = click.prompt(
-            "Do you want to build a generic testbench which tests similar modules?", type=click.Choice(["Yes", "No"])
+            "Do you want to build a generic testbench which tests similar modules? (y)es. (n)o.",
+            type=click.Choice(["y", "n"]),
         )
-        if answer == "Yes":
+        if answer == "y":
             answer = click.prompt(
-                "Do you want to automatically adapt your testbench to your dut or use a config?",
-                type=click.Choice(["config", "generic"]),
+                "Do you want to automatically adapt your testbench to your (g) dut or use a (c)onfig?",
+                type=click.Choice(["g", "c"]),
             )
-            if answer == "config":
-                type_ = "AConfigurableTbMod"
+            if answer == "c":
+                flavour_ = "AConfigurableTbMod"
 
             else:
-                type_ = "AGenericTbMod"
+                flavour_ = "AGenericTbMod"
 
         else:
-            type_ = "ATbMod"
+            flavour_ = "ATbMod"
 
-    return type_
+    return flavour_

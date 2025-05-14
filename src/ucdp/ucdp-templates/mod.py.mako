@@ -2,7 +2,6 @@
 info = datamodel.info
 %>\
 """${info.descr_or_default}."""
-"""${info.type}. """
 
 
 from fileliststandard import HdlFileList
@@ -26,7 +25,7 @@ class ${info.name_pascalcase}IoType(u.AStructType):
         self._add("tx", u.BitType(), u.FWD)
 
 
-class ${info.name_pascalcase}Mod(u.${info.type}):
+class ${info.name_pascalcase}Mod(u.${info.flavour}):
     """${info.descr_or_default}."""
 
     filelists: u.ClassVar[u.ModFileLists] = (

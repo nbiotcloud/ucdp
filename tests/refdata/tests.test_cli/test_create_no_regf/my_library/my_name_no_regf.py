@@ -1,5 +1,4 @@
-"""My Name Module."""
-"""AMod. """
+"""My Name No Regf Module."""
 
 
 from fileliststandard import HdlFileList
@@ -8,10 +7,10 @@ from glbl_lib.bus import BusType
 import ucdp as u
 
 
-class MyNameIoType(u.AStructType):
-    """My Name IO."""
+class MyNameNoRegfIoType(u.AStructType):
+    """My Name No Regf IO."""
 
-    title: str = "My Name"
+    title: str = "My Name No Regf"
     comment: str = "RX/TX"
 
     def _build(self) -> None:
@@ -19,8 +18,8 @@ class MyNameIoType(u.AStructType):
         self._add("tx", u.BitType(), u.FWD)
 
 
-class MyNameMod(u.AMod):
-    """My Name Module."""
+class MyNameNoRegfMod(u.AMod):
+    """My Name No Regf Module."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
         HdlFileList(gen="full"),
@@ -28,6 +27,6 @@ class MyNameMod(u.AMod):
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
-        self.add_port(MyNameIoType(), "my_name_i", clkrel=u.ASYNC)
+        self.add_port(MyNameNoRegfIoType(), "my_name_no_regf_i", clkrel=u.ASYNC)
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
 
