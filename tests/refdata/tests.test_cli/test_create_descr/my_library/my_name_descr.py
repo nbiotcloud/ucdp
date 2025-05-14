@@ -1,4 +1,4 @@
-"""My Name Module."""
+"""My Fancy Module."""
 
 
 from fileliststandard import HdlFileList
@@ -9,10 +9,10 @@ from glbl_lib.regf import RegfMod
 import ucdp as u
 
 
-class MyNameIoType(u.AStructType):
-    """My Name IO."""
+class MyNameDescrIoType(u.AStructType):
+    """My Name Descr IO."""
 
-    title: str = "My Name"
+    title: str = "My Name Descr"
     comment: str = "RX/TX"
 
     def _build(self) -> None:
@@ -20,8 +20,8 @@ class MyNameIoType(u.AStructType):
         self._add("tx", u.BitType(), u.FWD)
 
 
-class MyNameMod(u.AMod):
-    """My Name Module."""
+class MyNameDescrMod(u.AMod):
+    """My Fancy Module."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
         HdlFileList(gen="full"),
@@ -29,7 +29,7 @@ class MyNameMod(u.AMod):
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
-        self.add_port(MyNameIoType(), "my_name_i", route="create(u_core/my_name_i)", clkrel=u.ASYNC)
+        self.add_port(MyNameDescrIoType(), "my_name_descr_i", route="create(u_core/my_name_descr_i)", clkrel=u.ASYNC)
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
 
         clkgate = ClkGateMod(self, "u_clk_gate")
@@ -40,7 +40,7 @@ class MyNameMod(u.AMod):
         regf.con("main_i", "main_i")
         regf.con("bus_i", "bus_i")
 
-        core = MyNameCoreMod(parent=self, name="u_core")
+        core = MyNameDescrCoreMod(parent=self, name="u_core")
 
         core.add_port(u.ClkRstAnType(), "main_i")
         core.con("main_clk_i", "clk_s")
@@ -51,8 +51,8 @@ class MyNameMod(u.AMod):
         word.add_field("ena", u.EnaType(), is_readable=True, route="u_clk_gate/ena_i")
         word.add_field("strt", u.BitType(), is_writable=True, route="create(u_core/strt_i)")
 
-class MyNameCoreMod(u.ACoreMod):
-    """A Simple My Name."""
+class MyNameDescrCoreMod(u.ACoreMod):
+    """A Simple My Name Descr."""
 
     filelists: u.ClassVar[u.ModFileLists] = (HdlFileList(gen="inplace"),)
 

@@ -1,4 +1,4 @@
-"""My Name Module."""
+"""My Name Flavour Aconfigurabletbmod Module."""
 
 
 from fileliststandard import HdlFileList
@@ -9,10 +9,10 @@ from glbl_lib.regf import RegfMod
 import ucdp as u
 
 
-class MyNameIoType(u.AStructType):
-    """My Name IO."""
+class MyNameFlavourAconfigurabletbmodIoType(u.AStructType):
+    """My Name Flavour Aconfigurabletbmod IO."""
 
-    title: str = "My Name"
+    title: str = "My Name Flavour Aconfigurabletbmod"
     comment: str = "RX/TX"
 
     def _build(self) -> None:
@@ -20,8 +20,8 @@ class MyNameIoType(u.AStructType):
         self._add("tx", u.BitType(), u.FWD)
 
 
-class MyNameMod(u.ATbMod):
-    """My Name Module."""
+class MyNameFlavourAconfigurabletbmodMod(u.AConfigurableTbMod):
+    """My Name Flavour Aconfigurabletbmod Module."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
         HdlFileList(gen="full"),
@@ -29,7 +29,7 @@ class MyNameMod(u.ATbMod):
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
-        self.add_port(MyNameIoType(), "my_name_i", route="create(u_core/my_name_i)", clkrel=u.ASYNC)
+        self.add_port(MyNameFlavourAconfigurabletbmodIoType(), "my_name_flavour_aconfigurabletbmod_i", route="create(u_core/my_name_flavour_aconfigurabletbmod_i)", clkrel=u.ASYNC)
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
 
         clkgate = ClkGateMod(self, "u_clk_gate")
@@ -40,7 +40,7 @@ class MyNameMod(u.ATbMod):
         regf.con("main_i", "main_i")
         regf.con("bus_i", "bus_i")
 
-        core = MyNameCoreMod(parent=self, name="u_core")
+        core = MyNameFlavourAconfigurabletbmodCoreMod(parent=self, name="u_core")
 
         core.add_port(u.ClkRstAnType(), "main_i")
         core.con("main_clk_i", "clk_s")
@@ -51,8 +51,8 @@ class MyNameMod(u.ATbMod):
         word.add_field("ena", u.EnaType(), is_readable=True, route="u_clk_gate/ena_i")
         word.add_field("strt", u.BitType(), is_writable=True, route="create(u_core/strt_i)")
 
-class MyNameCoreMod(u.ACoreMod):
-    """A Simple My Name."""
+class MyNameFlavourAconfigurabletbmodCoreMod(u.ACoreMod):
+    """A Simple My Name Flavour Aconfigurabletbmod."""
 
     filelists: u.ClassVar[u.ModFileLists] = (HdlFileList(gen="inplace"),)
 

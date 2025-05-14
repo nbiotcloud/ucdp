@@ -446,61 +446,89 @@ def test_create_invalid_name(tmp_path):
 def test_create_regf(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name", "--library", "my_library", "--regf", "--flavour", "AMod")
+        run("create", "--name", "my_name_regf", "--library", "my_library", "--regf", "--flavour", "AMod")
     assert_refdata(test_create_regf, tmp_path)
 
 
 def test_create_no_regf(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name", "--library", "my_library", "--no-regf", "--flavour", "AMod")
+        run("create", "--name", "my_name_no_regf", "--library", "my_library", "--no-regf", "--flavour", "AMod")
     assert_refdata(test_create_no_regf, tmp_path)
 
 
 def test_create_descr(tmp_path):
     """Test Create Command With Specified Description."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name", "--library", "my_library", "--descr", "My Fancy Module", "--flavour", "AMod")
+        run(
+            "create",
+            "--name",
+            "my_name_descr",
+            "--library",
+            "my_library",
+            "--descr",
+            "My Fancy Module",
+            "--flavour",
+            "AMod",
+        )
     assert_refdata(test_create_descr, tmp_path)
 
 
 def test_create_flavour_amod(tmp_path):
     """Test Create Command With Specified flavour AMod."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name", "--library", "my_library", "--flavour", "AMod")
+        run("create", "--name", "my_name_flavour_amod", "--library", "my_library", "--flavour", "AMod")
     assert_refdata(test_create_flavour_amod, tmp_path)
 
 
 def test_create_flavour_aconfigurablemod(tmp_path):
     """Test Create Command With Specified AConfigurableMod."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name", "--library", "my_library", "--flavour", "AConfigurableMod")
+        run(
+            "create",
+            "--name",
+            "my_name_flavour_aconfigurablemod",
+            "--library",
+            "my_library",
+            "--flavour",
+            "AConfigurableMod",
+        )
     assert_refdata(test_create_flavour_aconfigurablemod, tmp_path)
 
 
 def test_create_flavour_aconfigurabletbmod(tmp_path):
     """Test Create Command With Specified AConfigurableTbMod."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name", "--library", "my_library", "--flavour", "AConfigurableTbMod")
+        run(
+            "create",
+            "--name",
+            "my_name_flavour_aconfigurabletbmod",
+            "--library",
+            "my_library",
+            "--flavour",
+            "AConfigurableTbMod",
+        )
     assert_refdata(test_create_flavour_aconfigurabletbmod, tmp_path)
 
 
 def test_create_flavour_agenerictbmod(tmp_path):
     """Test Create Command With Specified A Generic TbMod."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name", "--library", "my_library", "--flavour", "AGenericTbMod")
+        run(
+            "create", "--name", "my_name_flavour_agenerictbmod", "--library", "my_library", "--flavour", "AGenericTbMod"
+        )
     assert_refdata(test_create_flavour_agenerictbmod, tmp_path)
 
 
 def test_create_flavour_atailoredmod(tmp_path):
     """Test Create Command With Specified ATailoredMod."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name", "--library", "my_library", "--flavour", "ATailoredMod")
+        run("create", "--name", "my_name_flavour_atailoredmod", "--library", "my_library", "--flavour", "ATailoredMod")
     assert_refdata(test_create_flavour_atailoredmod, tmp_path)
 
 
 def test_create_flavour_atbmod(tmp_path):
     """Test Create Command With Specified ATbMod."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name", "--library", "my_library", "--flavour", "ATbMod")
+        run("create", "--name", "my_name_flavour_atbmod", "--library", "my_library", "--flavour", "ATbMod")
     assert_refdata(test_create_flavour_atbmod, tmp_path)
