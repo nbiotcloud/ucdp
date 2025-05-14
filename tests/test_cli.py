@@ -541,6 +541,10 @@ def test_create_flavour_atbmod(tmp_path):
     [
         ("mod0", "lib", "d", "n"),
         ("mod1", "lib", "d", "y", "c"),
+        ("mod2", "lib", "d", "y", "t"),
+        ("mod3", "lib", "t", "y", "g"),
+        ("mod4", "lib", "t", "y", "c"),
+        ("mod5", "lib", "t", "n"),
     ],
 )
 def test_create_type_questions(tmp_path, input):
