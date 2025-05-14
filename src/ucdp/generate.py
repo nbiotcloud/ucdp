@@ -66,7 +66,7 @@ def get_makolator(
     verbose: bool = True,
     paths: Iterable[Path] | None = None,
     create: bool = False,
-    force: bool = True,
+    force: bool | None = None,
 ) -> Makolator:
     """
     Create Makolator.
@@ -76,12 +76,14 @@ def get_makolator(
         verbose: Display updated files.
         paths: Search Path For Data Model And Template Files.
         create: Create missing inplace files.
-        force: override existing files.
+        force: overwrite existing files.
     """
     diffout = print if show_diff else None
     template_paths = get_template_paths(paths=paths)
-    if force:
+    if force is True:
         existing = Existing.OVERWRITE
+    elif force is None:
+        existing = Existing.KEEP_TIMESTAMP
     else:
         existing = Existing.KEEP
 
