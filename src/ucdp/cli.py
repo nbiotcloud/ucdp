@@ -30,6 +30,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from logging import StreamHandler
 from pathlib import Path
+from typing import Literal
 
 import click
 from click_bash42_completion import patch
@@ -38,7 +39,6 @@ from rich.console import Console
 from rich.logging import RichHandler
 from rich.pretty import pprint
 from rich.table import Table
-from typing import Literal
 
 from ._cligroup import MainGroup
 from ._logging import HasErrorHandler
@@ -569,23 +569,25 @@ Create Datamodel Skeleton.
 def create(ctx, name, library, regf, descr, type):
     """Let The User Type In The Name And Library Of The File."""
     if type is None:
-        type_ = prompt_type()
-    info = CreateInfo(name=name, library=library, regf=regf, descr=descr, type=type_)
+        type = prompt_type()
+    info = CreateInfo(name=name, library=library, regf=regf, descr=descr, type=type)
     create_(info)
+
 
 Type = Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"]
 
-def prompt_type() -> Type : 
+
+def prompt_type() -> Type:
     """Let The User Choose The Type Of The File."""
-    answer = click.prompt("Do you want to build a design or testbench?", answer=click.Choice(["design", "testbench"]))
+    answer = click.prompt("Do you want to build a design or testbench?", type=click.Choice(["design", "testbench"]))
     if answer == "design":
-        answer = click.prompt(  
-            "Does your design vary more than what `parameter` can cover?", answer=click.Choice(["Yes", "No"])
+        answer = click.prompt(
+            "Does your design vary more than what `parameter` can cover?", type=click.Choice(["Yes", "No"])
         )
         if answer == "Yes":
             answer = click.prompt(
                 "Do you want to use a config or shall the parent module tailor the functionality?",
-                answer=click.Choice(["config", "tailor"]),
+                type=click.Choice(["config", "tailor"]),
             )
             if answer == "config":
                 type_ = "AConfigurableMod"
@@ -598,12 +600,12 @@ def prompt_type() -> Type :
 
     else:
         answer = click.prompt(
-            "Do you want to build a generic testbench which tests similar modules?", answer=click.Choice(["Yes", "No"])
+            "Do you want to build a generic testbench which tests similar modules?", type=click.Choice(["Yes", "No"])
         )
         if answer == "Yes":
             answer = click.prompt(
                 "Do you want to automatically adapt your testbench to your dut or use a config?",
-                answer=click.Choice(["config", "generic"]),
+                type=click.Choice(["config", "generic"]),
             )
             if answer == "config":
                 type_ = "AConfigurableTbMod"

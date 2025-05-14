@@ -420,7 +420,7 @@ def test_create(tmp_path):
 
 
 def test_create_numbers(tmp_path):
-    """Test Command For The Create Function But More Specified With Numbers."""
+    """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
         run("create", "--name", "my_name2", "--library", "my_library_2", "--type", "AMod")
     assert_refdata(test_create_numbers, tmp_path)
@@ -444,58 +444,63 @@ def test_create_invalid_name(tmp_path):
 
 
 def test_create_regf(tmp_path):
-    """Test Command For The Create Function But More Specified With Numbers."""
+    """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
         run("create", "--name", "my_name", "--library", "my_library", "--regf", "--type", "AMod")
     assert_refdata(test_create_regf, tmp_path)
 
 
 def test_create_no_regf(tmp_path):
-    """Test Command For The Create Function But More Specified With Numbers."""
+    """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
         run("create", "--name", "my_name", "--library", "my_library", "--no-regf", "--type", "AMod")
     assert_refdata(test_create_no_regf, tmp_path)
 
 
 def test_create_descr(tmp_path):
-    """Test Command For The Create Function But More Specified."""
+    """Test Create Command With Specified Description."""
     with chdir(tmp_path):
         run("create", "--name", "my_name", "--library", "my_library", "--descr", "My Fancy Module", "--type", "AMod")
     assert_refdata(test_create_descr, tmp_path)
 
 
 def test_create_type_amod(tmp_path):
-    """Test Command For The Create Function But More Specified."""
+    """Test Create Command With Specified Type AMod."""
     with chdir(tmp_path):
         run("create", "--name", "my_name", "--library", "my_library", "--type", "AMod")
     assert_refdata(test_create_type_amod, tmp_path)
 
+
 def test_create_type_aconfigurablemod(tmp_path):
-    """Test Command For The Create Function But More Specified."""
+    """Test Create Command With Specified AConfigurableMod."""
     with chdir(tmp_path):
         run("create", "--name", "my_name", "--library", "my_library", "--type", "AConfigurableMod")
     assert_refdata(test_create_type_aconfigurablemod, tmp_path)
 
+
 def test_create_type_aconfigurabletbmod(tmp_path):
-    """Test Command For The Create Function But More Specified."""
+    """Test Create Command With Specified AConfigurableTbMod."""
     with chdir(tmp_path):
         run("create", "--name", "my_name", "--library", "my_library", "--type", "AConfigurableTbMod")
     assert_refdata(test_create_type_aconfigurabletbmod, tmp_path)
 
+
 def test_create_type_agenerictbmod(tmp_path):
-    """Test Command For The Create Function But More Specified."""
+    """Test Create Command With Specified A Generic TbMod."""
     with chdir(tmp_path):
         run("create", "--name", "my_name", "--library", "my_library", "--type", "AGenericTbMod")
     assert_refdata(test_create_type_agenerictbmod, tmp_path)
 
+
 def test_create_type_atailoredmod(tmp_path):
-    """Test Command For The Create Function But More Specified."""
+    """Test Create Command With Specified ATailoredMod."""
     with chdir(tmp_path):
         run("create", "--name", "my_name", "--library", "my_library", "--type", "ATailoredMod")
     assert_refdata(test_create_type_atailoredmod, tmp_path)
 
+
 def test_create_type_atbmod(tmp_path):
-    """Test Command For The Create Function But More Specified."""
+    """Test Create Command With Specified ATbMod."""
     with chdir(tmp_path):
         run("create", "--name", "my_name", "--library", "my_library", "--type", "ATbMod")
     assert_refdata(test_create_type_atbmod, tmp_path)

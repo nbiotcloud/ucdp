@@ -38,7 +38,7 @@ TYPE_CHOICES = [
     "AMod",
     "ATailoredMod",
     "ATbMod",
-]  
+]
 
 
 class CreateInfo(Object):
@@ -56,9 +56,7 @@ class CreateInfo(Object):
     descr: str = ""
     """Description."""
 
-    type: Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"] = (
-        "AMod"  
-    )
+    type: Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"] = "AMod"
     """Type."""
 
     @property

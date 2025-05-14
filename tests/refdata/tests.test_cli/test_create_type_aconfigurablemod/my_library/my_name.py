@@ -1,24 +1,19 @@
-<%
-info = datamodel.info
-%>\
-"""${info.descr_or_default}."""
-"""${info.type}. """
+"""My Name Module."""
+"""AConfigurableMod. """
 
 
 from fileliststandard import HdlFileList
 from glbl_lib.bus import BusType
-% if info.regf:
 from glbl_lib.clk_gate import ClkGateMod
 from glbl_lib.regf import RegfMod
-% endif
 
 import ucdp as u
 
 
-class ${info.name_pascalcase}IoType(u.AStructType):
-    """${info.name_titlecase} IO."""
+class MyNameIoType(u.AStructType):
+    """My Name IO."""
 
-    title: str = "${info.name_titlecase}"
+    title: str = "My Name"
     comment: str = "RX/TX"
 
     def _build(self) -> None:
@@ -26,8 +21,8 @@ class ${info.name_pascalcase}IoType(u.AStructType):
         self._add("tx", u.BitType(), u.FWD)
 
 
-class ${info.name_pascalcase}Mod(u.${info.type}):
-    """${info.descr_or_default}."""
+class MyNameMod(u.AConfigurableMod):
+    """My Name Module."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
         HdlFileList(gen="full"),
@@ -35,14 +30,9 @@ class ${info.name_pascalcase}Mod(u.${info.type}):
 
     def _build(self) -> None:
         self.add_port(u.ClkRstAnType(), "main_i")
-% if info.regf:
-        self.add_port(${info.name_pascalcase}IoType(), "${info.name_snakecase}_i", route="create(u_core/${info.name_snakecase}_i)", clkrel=u.ASYNC)
-%else:
-        self.add_port(${info.name_pascalcase}IoType(), "${info.name_snakecase}_i", clkrel=u.ASYNC)
-%endif:
+        self.add_port(MyNameIoType(), "my_name_i", route="create(u_core/my_name_i)", clkrel=u.ASYNC)
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
 
-% if info.regf:
         clkgate = ClkGateMod(self, "u_clk_gate")
         clkgate.con("clk_i", "main_clk_i")
         clkgate.con("clk_o", "create(clk_s)")
@@ -51,7 +41,7 @@ class ${info.name_pascalcase}Mod(u.${info.type}):
         regf.con("main_i", "main_i")
         regf.con("bus_i", "bus_i")
 
-        core = ${info.name_pascalcase}CoreMod(parent=self, name="u_core")
+        core = MyNameCoreMod(parent=self, name="u_core")
 
         core.add_port(u.ClkRstAnType(), "main_i")
         core.con("main_clk_i", "clk_s")
@@ -62,9 +52,8 @@ class ${info.name_pascalcase}Mod(u.${info.type}):
         word.add_field("ena", u.EnaType(), is_readable=True, route="u_clk_gate/ena_i")
         word.add_field("strt", u.BitType(), is_writable=True, route="create(u_core/strt_i)")
 
-class ${info.name_pascalcase}CoreMod(u.ACoreMod):
-    """A Simple ${info.name_titlecase}."""
+class MyNameCoreMod(u.ACoreMod):
+    """A Simple My Name."""
 
     filelists: u.ClassVar[u.ModFileLists] = (HdlFileList(gen="inplace"),)
 
-% endif
