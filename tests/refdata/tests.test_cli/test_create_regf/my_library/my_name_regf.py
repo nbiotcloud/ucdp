@@ -28,6 +28,7 @@ class MyNameRegfMod(u.AMod):
     )
 
     def _build(self) -> None:
+        """Build."""
         self.add_port(u.ClkRstAnType(), "main_i")
         self.add_port(MyNameRegfIoType(), "my_name_regf_i", route="create(u_core/my_name_regf_i)", clkrel=u.ASYNC)
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
@@ -50,6 +51,7 @@ class MyNameRegfMod(u.AMod):
         word = regf.add_word("ctrl")
         word.add_field("ena", u.EnaType(), is_readable=True, route="u_clk_gate/ena_i")
         word.add_field("strt", u.BitType(), is_writable=True, route="create(u_core/strt_i)")
+
 
 class MyNameRegfCoreMod(u.ACoreMod):
     """A Simple My Name Regf."""

@@ -40,6 +40,12 @@ TYPE_CHOICES = [
     "ATbMod",
 ]
 
+TYPE_CHOICES_TB = [
+    "AConfigurableTbMod",
+    "AGenericTbMod",
+    "ATbMod",
+]
+
 
 class CreateInfo(Object):
     """Module Skeleton Information."""
@@ -82,6 +88,11 @@ class CreateInfo(Object):
         if self.descr:
             return self.descr
         return f"{self.name_titlecase} Module"
+
+    @property
+    def is_tb(self) -> bool:
+        """Module Name In Titlecase."""
+        return self.flavour in TYPE_CHOICES_TB
 
 
 def create(info: CreateInfo) -> None:

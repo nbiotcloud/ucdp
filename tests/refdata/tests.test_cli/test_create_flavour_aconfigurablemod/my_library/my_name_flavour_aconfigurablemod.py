@@ -28,6 +28,7 @@ class MyNameFlavourAconfigurablemodMod(u.AConfigurableMod):
     )
 
     def _build(self) -> None:
+        """Build."""
         self.add_port(u.ClkRstAnType(), "main_i")
         self.add_port(MyNameFlavourAconfigurablemodIoType(), "my_name_flavour_aconfigurablemod_i", route="create(u_core/my_name_flavour_aconfigurablemod_i)", clkrel=u.ASYNC)
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
@@ -50,6 +51,7 @@ class MyNameFlavourAconfigurablemodMod(u.AConfigurableMod):
         word = regf.add_word("ctrl")
         word.add_field("ena", u.EnaType(), is_readable=True, route="u_clk_gate/ena_i")
         word.add_field("strt", u.BitType(), is_writable=True, route="create(u_core/strt_i)")
+
 
 class MyNameFlavourAconfigurablemodCoreMod(u.ACoreMod):
     """A Simple My Name Flavour Aconfigurablemod."""
