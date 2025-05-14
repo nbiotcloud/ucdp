@@ -82,8 +82,8 @@ class CreateInfo(Object):
         return f"{self.name_titlecase} Module"
 
 
-def create(info: CreateInfo) -> None:
+def create(info: CreateInfo, force: bool) -> None:
     """Creates A Module Skeleton Based On `info`."""
-    mklt = get_makolator()
+    mklt = get_makolator(force=force)
     mklt.datamodel = Datamodel(info=info)
     mklt.gen([Path("mod.py.mako")], dest=Path(f"{info.library}/{info.name}.py"))

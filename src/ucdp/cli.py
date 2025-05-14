@@ -565,13 +565,14 @@ Create Datamodel Skeleton.
 @click.option("--regf/--no-regf", default=True, help="Make use of a register file")
 @click.option("--descr", default="", help="Description")
 @click.option("--type", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a type")
+@click.option("--force", is_flag=True)
 @pass_ctx
-def create(ctx, name, library, regf, descr, type):
+def create(ctx, name, library, regf, descr, type, force):
     """Let The User Type In The Name And Library Of The File."""
     if type is None:
         type = prompt_type()
     info = CreateInfo(name=name, library=library, regf=regf, descr=descr, type=type)
-    create_(info)
+    create_(info, force)
 
 
 Type = Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"]

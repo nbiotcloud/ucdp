@@ -31,7 +31,7 @@ from contextlib import AbstractContextManager, contextmanager
 from pathlib import Path
 from typing import Any
 
-from makolator import Config, Datamodel, Makolator
+from makolator import Config, Datamodel, Existing, Makolator
 from uniquer import uniquelist
 
 from .cache import CACHE
@@ -62,7 +62,11 @@ def get_template_paths(paths: Iterable[Path] | None = None) -> list[Path]:
 
 
 def get_makolator(
-    show_diff: bool = False, verbose: bool = True, paths: Iterable[Path] | None = None, create: bool = False
+    show_diff: bool = False,
+    verbose: bool = True,
+    paths: Iterable[Path] | None = None,
+    create: bool = False,
+    force: bool = True,
 ) -> Makolator:
     """
     Create Makolator.
@@ -72,9 +76,15 @@ def get_makolator(
         verbose: Display updated files.
         paths: Search Path For Data Model And Template Files.
         create: Create missing inplace files.
+        force: override existing files.
     """
     diffout = print if show_diff else None
     template_paths = get_template_paths(paths=paths)
+    if force:
+        existing = Existing.OVERWRITE
+    else:
+        existing = Existing.KEEP
+
     config = Config(
         template_paths=template_paths,
         marker_linelength=80,
@@ -83,6 +93,7 @@ def get_makolator(
         cache_path=CACHE.templates_path,
         track=True,
         create=create,
+        existing=existing,
     )
     return Makolator(config=config)
 
