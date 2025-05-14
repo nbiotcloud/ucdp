@@ -415,14 +415,14 @@ def test_modinfos_param(example_param, prjroot):
 def test_create(tmp_path):
     """Test Command For The Create Function."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name", "--library", "my_library", "--flavour", "AMod")
+        run("create", "-T", "--name", "my_name", "--library", "my_library", "--flavour", "AMod")
     assert_refdata(test_create, tmp_path)
 
 
 def test_create_numbers(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name2", "--library", "my_library_2", "--flavour", "AMod")
+        run("create", "-T", "-n", "my_name2", "-l", "my_library_2", "-F", "AMod")
     assert_refdata(test_create_numbers, tmp_path)
 
 
@@ -431,6 +431,7 @@ def test_create_invalid_name(tmp_path):
     with chdir(tmp_path):
         run(
             "create",
+            "-T",
             "--name",
             "my_name_2_previus",
             "--library",
@@ -446,14 +447,14 @@ def test_create_invalid_name(tmp_path):
 def test_create_regf(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name_regf", "--library", "my_library", "--regf", "--flavour", "AMod")
+        run("create", "-T", "--name", "my_name_regf", "--library", "my_library", "--regf", "--flavour", "AMod")
     assert_refdata(test_create_regf, tmp_path)
 
 
 def test_create_no_regf(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name_no_regf", "--library", "my_library", "--no-regf", "--flavour", "AMod")
+        run("create", "-T", "--name", "my_name_no_regf", "--library", "my_library", "--no-regf", "--flavour", "AMod")
     assert_refdata(test_create_no_regf, tmp_path)
 
 
@@ -462,6 +463,7 @@ def test_create_descr(tmp_path):
     with chdir(tmp_path):
         run(
             "create",
+            "-T",
             "--name",
             "my_name_descr",
             "--library",
@@ -477,7 +479,7 @@ def test_create_descr(tmp_path):
 def test_create_flavour_amod(tmp_path):
     """Test Create Command With Specified flavour AMod."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name_flavour_amod", "--library", "my_library", "--flavour", "AMod")
+        run("create", "-T", "--name", "my_name_flavour_amod", "--library", "my_library", "--flavour", "AMod")
     assert_refdata(test_create_flavour_amod, tmp_path)
 
 
@@ -486,6 +488,7 @@ def test_create_flavour_aconfigurablemod(tmp_path):
     with chdir(tmp_path):
         run(
             "create",
+            "-T",
             "--name",
             "my_name_flavour_aconfigurablemod",
             "--library",
@@ -501,6 +504,7 @@ def test_create_flavour_aconfigurabletbmod(tmp_path):
     with chdir(tmp_path):
         run(
             "create",
+            "-T",
             "--name",
             "my_name_flavour_aconfigurabletbmod",
             "--library",
@@ -523,12 +527,21 @@ def test_create_flavour_agenerictbmod(tmp_path):
 def test_create_flavour_atailoredmod(tmp_path):
     """Test Create Command With Specified ATailoredMod."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name_flavour_atailoredmod", "--library", "my_library", "--flavour", "ATailoredMod")
+        run(
+            "create",
+            "-T",
+            "--name",
+            "my_name_flavour_atailoredmod",
+            "--library",
+            "my_library",
+            "--flavour",
+            "ATailoredMod",
+        )
     assert_refdata(test_create_flavour_atailoredmod, tmp_path)
 
 
 def test_create_flavour_atbmod(tmp_path):
     """Test Create Command With Specified ATbMod."""
     with chdir(tmp_path):
-        run("create", "--name", "my_name_flavour_atbmod", "--library", "my_library", "--flavour", "ATbMod")
+        run("create", "-T", "--name", "my_name_flavour_atbmod", "--library", "my_library", "--flavour", "ATbMod")
     assert_refdata(test_create_flavour_atbmod, tmp_path)
