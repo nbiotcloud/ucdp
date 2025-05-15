@@ -35,6 +35,7 @@ from typing import Literal
 import click
 from click_bash42_completion import patch
 from pydantic import BaseModel, ConfigDict
+from rich import print
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.pretty import pprint
@@ -582,6 +583,8 @@ def create(
     if flavour is None:
         flavour = prompt_flavour()
 
+        print(f"\nYou choose the flavour [bold blue]{flavour}[/bold blue].\n")
+
     info = CreateInfo(name=name, library=library, regf=regf, descr=descr, flavour=flavour)
 
     if not info.is_tb:
@@ -592,6 +595,7 @@ def create(
                 default="y",
             )
             tb = answer == "y"
+            print("")
         if tb:
             tbinfo = CreateInfo(name=f"{name}_tb", library=library, regf=regf, descr=descr, flavour=TB_MAP[flavour])
             create_(tbinfo, force)

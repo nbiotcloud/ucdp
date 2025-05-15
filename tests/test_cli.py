@@ -566,4 +566,6 @@ def test_create_type_questions(tmp_path, input):
     with chdir(tmp_path):
         result = runner.invoke(u.cli.ucdp, ["create", "-T"], input="\n".join((*input, "")))
     assert not result.exception
+    output_path = tmp_path / "output.txt"
+    output_path.write_text(result.output)
     assert_refdata(test_create_type_questions, tmp_path, flavor="-".join(input))
