@@ -564,9 +564,7 @@ Create Datamodel Skeleton.
 @click.option("--library", "-l", prompt=True, help="Name of the Library")
 @click.option("--regf/--no-regf", "-r/-R", default=True, help="Make use of a Register File")
 @click.option("--descr", "-d", default="", help="Description")
-@click.option(
-    "--flavour", "-F", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour"
-)  # TODO: name = module
+@click.option("--flavour", "-F", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour")
 @click.option("--tb/--no-tb", "-t/-T", default=None, help="Create testbench for design module")
 @click.option("--force", "-f", is_flag=True, help="Overwrite existing files")
 @pass_ctx
@@ -585,8 +583,13 @@ def create(
         flavour = prompt_flavour()
 
     info = CreateInfo(module=module, library=library, regf=regf, descr=descr, flavour=flavour)
+    if info.is_tb:
+        if not module.endswith("_tb"):
+            LOGGER.warning(f"Your testbench module name {module!r} does not end with '_tb'")
 
-    if not info.is_tb:
+    else:
+        if module.endswith("_tb"):
+            LOGGER.warning(f"Your design module name {module!r} ends with '_tb'")
         if tb is None:
             answer = click.prompt(
                 "Do you want to create a corresponding testbench? (y)es. (n)o.",
