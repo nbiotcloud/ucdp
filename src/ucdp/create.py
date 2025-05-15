@@ -56,7 +56,7 @@ TB_MAP = {
 class CreateInfo(Object):
     """Module Skeleton Information."""
 
-    name: str = Field(pattern=PAT_IDENTIFIER_LOWER)
+    module: str = Field(pattern=PAT_IDENTIFIER_LOWER)
     """Module Name."""
 
     library: str = Field(pattern=PAT_IDENTIFIER_LOWER)
@@ -74,26 +74,26 @@ class CreateInfo(Object):
     """Flavour."""
 
     @property
-    def name_pascalcase(self) -> str:
+    def module_pascalcase(self) -> str:
         """Module Name In Pascalcase."""
-        return pascalcase(self.name)
+        return pascalcase(self.module)
 
     @property
-    def name_snakecase(self) -> str:
+    def module_snakecase(self) -> str:
         """Module Name In Snakecase."""
-        return snakecase(self.name)
+        return snakecase(self.module)
 
     @property
-    def name_titlecase(self) -> str:
+    def module_titlecase(self) -> str:
         """Module Name In Titlecase."""
-        return titlecase(self.name)
+        return titlecase(self.module)
 
     @property
     def descr_or_default(self) -> str:
         """Module Description Or A Nice Default."""
         if self.descr:
             return self.descr
-        return f"{self.name_titlecase} Module"
+        return f"{self.module_titlecase} Module"
 
     @property
     def is_tb(self) -> bool:
@@ -105,4 +105,4 @@ def create(info: CreateInfo, force: bool) -> None:
     """Creates A Module Skeleton Based On `info`."""
     mklt = get_makolator(force=force)
     mklt.datamodel = Datamodel(info=info)
-    mklt.gen([Path("mod.py.mako")], dest=Path(f"{info.library}/{info.name}.py"))
+    mklt.gen([Path("mod.py.mako")], dest=Path(f"{info.library}/{info.module}.py"))

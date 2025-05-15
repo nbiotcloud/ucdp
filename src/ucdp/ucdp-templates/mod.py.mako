@@ -15,7 +15,7 @@ import ucdp as u
 
 
 % if info.is_tb:
-class ${info.name_pascalcase}Mod(u.${info.flavour}):
+class ${info.module_pascalcase}Mod(u.${info.flavour}):
     """${info.descr_or_default}."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
@@ -25,10 +25,10 @@ class ${info.name_pascalcase}Mod(u.${info.flavour}):
     def _build(self) -> None:
         dut = self.dut # Design-Under-Test
 % else:
-class ${info.name_pascalcase}IoType(u.AStructType):
-    """${info.name_titlecase} IO."""
+class ${info.module_pascalcase}IoType(u.AStructType):
+    """${info.module_titlecase} IO."""
 
-    title: str = "${info.name_titlecase}"
+    title: str = "${info.module_titlecase}"
     comment: str = "RX/TX"
 
     def _build(self) -> None:
@@ -36,7 +36,7 @@ class ${info.name_pascalcase}IoType(u.AStructType):
         self._add("tx", u.BitType(), u.FWD)
 
 
-class ${info.name_pascalcase}Mod(u.${info.flavour}):
+class ${info.module_pascalcase}Mod(u.${info.flavour}):
     """${info.descr_or_default}."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
@@ -47,9 +47,9 @@ class ${info.name_pascalcase}Mod(u.${info.flavour}):
         """Build."""
         self.add_port(u.ClkRstAnType(), "main_i")
 %   if info.regf:
-        self.add_port(${info.name_pascalcase}IoType(), "${info.name_snakecase}_i", route="create(u_core/${info.name_snakecase}_i)", clkrel=u.ASYNC)
+        self.add_port(${info.module_pascalcase}IoType(), "${info.module_snakecase}_i", route="create(u_core/${info.module_snakecase}_i)", clkrel=u.ASYNC)
 %   else:
-        self.add_port(${info.name_pascalcase}IoType(), "${info.name_snakecase}_i", clkrel=u.ASYNC)
+        self.add_port(${info.module_pascalcase}IoType(), "${info.module_snakecase}_i", clkrel=u.ASYNC)
 %   endif:
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
 
@@ -62,7 +62,7 @@ class ${info.name_pascalcase}Mod(u.${info.flavour}):
         regf.con("main_i", "main_i")
         regf.con("bus_i", "bus_i")
 
-        core = ${info.name_pascalcase}CoreMod(parent=self, name="u_core")
+        core = ${info.module_pascalcase}CoreMod(parent=self, name="u_core")
 
         core.add_port(u.ClkRstAnType(), "main_i")
         core.con("main_clk_i", "clk_s")
@@ -82,8 +82,8 @@ class ${info.name_pascalcase}Mod(u.${info.flavour}):
 
 %   endif
 
-class ${info.name_pascalcase}CoreMod(u.ACoreMod):
-    """A Simple ${info.name_titlecase}."""
+class ${info.module_pascalcase}CoreMod(u.ACoreMod):
+    """A Simple ${info.module_titlecase}."""
 
     filelists: u.ClassVar[u.ModFileLists] = (HdlFileList(gen="inplace"),)
 

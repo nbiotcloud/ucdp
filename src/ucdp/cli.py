@@ -560,17 +560,19 @@ def template_paths(ctx, path):
 Create Datamodel Skeleton.
 """
 )
-@click.option("--name", "-n", prompt=True, help="Name of the Module")
+@click.option("--module", "-m", prompt=True, help="Name of the Module")
 @click.option("--library", "-l", prompt=True, help="Name of the Library")
 @click.option("--regf/--no-regf", "-r/-R", default=True, help="Make use of a Register File")
 @click.option("--descr", "-d", default="", help="Description")
-@click.option("--flavour", "-F", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour")
+@click.option(
+    "--flavour", "-F", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour"
+)  # TODO: name = module
 @click.option("--tb/--no-tb", "-t/-T", default=None, help="Create testbench for design module")
 @click.option("--force", "-f", is_flag=True, help="Overwrite existing files")
 @pass_ctx
 def create(
     ctx,
-    name,
+    module,
     library,
     regf,
     descr,
@@ -582,7 +584,7 @@ def create(
     if flavour is None:
         flavour = prompt_flavour()
 
-    info = CreateInfo(name=name, library=library, regf=regf, descr=descr, flavour=flavour)
+    info = CreateInfo(module=module, library=library, regf=regf, descr=descr, flavour=flavour)
 
     if not info.is_tb:
         if tb is None:
@@ -593,7 +595,7 @@ def create(
             )
             tb = answer == "y"
         if tb:
-            tbinfo = CreateInfo(name=f"{name}_tb", library=library, regf=regf, descr=descr, flavour=TB_MAP[flavour])
+            tbinfo = CreateInfo(module=f"{module}_tb", library=library, regf=regf, descr=descr, flavour=TB_MAP[flavour])
             create_(tbinfo, force)
     create_(info, force)
 
