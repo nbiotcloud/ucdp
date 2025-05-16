@@ -1,3 +1,6 @@
-'uart_lib.uart' checked.                                                        
+'uart_lib.uart' checked.                                                       
+
 Removing '$GEN/uart_lib/uart/rtl/uart_regf.sv'
+
 Removing '$GEN/uart_lib/uart/rtl/uart.sv'
+
