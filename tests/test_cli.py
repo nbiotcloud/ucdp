@@ -564,6 +564,8 @@ def test_create_flavour_atbmod(tmp_path):
         ("mod3", "lib", "t", "y", "g"),
         ("mod4", "lib", "t", "y", "c"),
         ("mod5", "lib", "t", "n"),
+        ("mod6_tb", "lib", "d", "n"),
+        ("mod7_tb", "lib", "t", "n"),
     ],
 )
 def test_create_type_questions(tmp_path, input):
@@ -578,8 +580,8 @@ def test_create_type_questions(tmp_path, input):
 @mark.parametrize(
     "input",
     [
-        ("mod6", "y"),
-        ("mod7", "n"),
+        ("mod0", "y"),
+        ("mod1", "n"),
     ],
 )
 def test_create_tb_questions(tmp_path, input):
@@ -587,7 +589,7 @@ def test_create_tb_questions(tmp_path, input):
     runner = CliRunner()
     with chdir(tmp_path):
         result = runner.invoke(
-            u.cli.ucdp, ["create", "--library", "lib", "--flavour", "amod"], input="\n".join((*input, ""))
+            u.cli.ucdp, ["create", "--library", "lib2", "--flavour", "amod"], input="\n".join((*input, ""))
         )
     assert not result.exception
     assert_refdata(test_create_tb_questions, tmp_path, flavor="-".join(input))
