@@ -417,14 +417,14 @@ def test_modinfos_param(example_param, prjroot):
 def test_create(tmp_path):
     """Test Command For The Create Function."""
     with chdir(tmp_path):
-        run("create", "-T", "--name", "my_name", "--library", "my_library", "--flavour", "AMod")
+        run("create", "-T", "--module", "my_name", "--library", "my_library", "--flavour", "AMod")
     assert_refdata(test_create, tmp_path)
 
 
 def test_create_numbers(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
-        run("create", "-T", "-n", "my_name2", "-l", "my_library_2", "-F", "AMod")
+        run("create", "-T", "-m", "my_name2", "-l", "my_library_2", "-F", "AMod")
     assert_refdata(test_create_numbers, tmp_path)
 
 
@@ -434,7 +434,7 @@ def test_create_invalid_name(tmp_path):
         run(
             "create",
             "-T",
-            "--name",
+            "--module",
             "my_name_2_previus",
             "--library",
             "my_library_2_previus.py",
@@ -449,14 +449,14 @@ def test_create_invalid_name(tmp_path):
 def test_create_regf(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
-        run("create", "-T", "--name", "my_name_regf", "--library", "my_library", "--regf", "--flavour", "AMod")
+        run("create", "-T", "--module", "my_name_regf", "--library", "my_library", "--regf", "--flavour", "AMod")
     assert_refdata(test_create_regf, tmp_path)
 
 
 def test_create_no_regf(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
-        run("create", "-T", "--name", "my_name_no_regf", "--library", "my_library", "--no-regf", "--flavour", "AMod")
+        run("create", "-T", "--module", "my_name_no_regf", "--library", "my_library", "--no-regf", "--flavour", "AMod")
     assert_refdata(test_create_no_regf, tmp_path)
 
 
@@ -466,7 +466,7 @@ def test_create_descr(tmp_path):
         run(
             "create",
             "-T",
-            "--name",
+            "--module",
             "my_name_descr",
             "--library",
             "my_library",
@@ -521,3 +521,21 @@ def test_create_type_questions(tmp_path, input):
     output_path = tmp_path / "output.txt"
     output_path.write_text(result.output)
     assert_refdata(test_create_type_questions, tmp_path, flavor="-".join(input))
+
+
+@mark.parametrize(
+    "input",
+    [
+        ("mod6", "y"),
+        ("mod7", "n"),
+    ],
+)
+def test_create_tb_questions(tmp_path, input):
+    """Test tb Questionnaire."""
+    runner = CliRunner()
+    with chdir(tmp_path):
+        result = runner.invoke(
+            u.cli.ucdp, ["create", "--library", "lib", "--flavour", "amod"], input="\n".join((*input, ""))
+        )
+    assert not result.exception
+    assert_refdata(test_create_tb_questions, tmp_path, flavor="-".join(input))

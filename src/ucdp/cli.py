@@ -561,7 +561,7 @@ def template_paths(ctx, path):
 Create Datamodel Skeleton.
 """
 )
-@click.option("--name", "-n", prompt=True, help="Name of the Module")
+@click.option("--module", "-m", prompt=True, help="Name of the Module")
 @click.option("--library", "-l", prompt=True, help="Name of the Library")
 @click.option("--regf/--no-regf", "-r/-R", default=True, help="Make use of a Register File")
 @click.option("--descr", "-d", default="", help="Description")
@@ -571,7 +571,7 @@ Create Datamodel Skeleton.
 @pass_ctx
 def create(
     ctx,
-    name,
+    module,
     library,
     regf,
     descr,
@@ -582,12 +582,16 @@ def create(
     """Let The User Type In The Name And Library Of The File."""
     if flavour is None:
         flavour = prompt_flavour()
-
         print(f"\nYou choose the flavour [bold blue]{flavour}[/bold blue].\n")
 
-    info = CreateInfo(name=name, library=library, regf=regf, descr=descr, flavour=flavour)
+    info = CreateInfo(module=module, library=library, regf=regf, descr=descr, flavour=flavour)
+    if info.is_tb:
+        if not module.endswith("_tb"):
+            LOGGER.warning(f"Your testbench module name {module!r} does not end with '_tb'")
 
-    if not info.is_tb:
+    else:
+        if module.endswith("_tb"):
+            LOGGER.warning(f"Your design module name {module!r} ends with '_tb'")
         if tb is None:
             answer = click.prompt(
                 "Do you want to create a corresponding testbench? (y)es. (n)o.",
@@ -597,7 +601,7 @@ def create(
             tb = answer == "y"
             print("")
         if tb:
-            tbinfo = CreateInfo(name=f"{name}_tb", library=library, regf=regf, descr=descr, flavour=TB_MAP[flavour])
+            tbinfo = CreateInfo(module=f"{module}_tb", library=library, regf=regf, descr=descr, flavour=TB_MAP[flavour])
             create_(tbinfo, force)
     create_(info, force)
 
