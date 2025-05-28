@@ -146,16 +146,16 @@ def _find_modrefs(envpath: list[str], filepaths: tuple[Path, ...]) -> tuple[ModR
         if pymodname.startswith("_"):
             continue
         # skip non-ucdp files
-        with filepath.open(encoding="utf-8") as file:
-            try:
+        try:
+            with filepath.open(encoding="utf-8") as file:
                 for line in file:
                     if _RE_IMPORT_UCDP.match(line):
                         break
                 else:
                     continue
-            except Exception as exc:
-                LOGGER.info(f"Skipping {str(filepath)!r} ({exc})")
-                continue
+        except Exception as exc:
+            LOGGER.info(f"Skipping {str(filepath)!r} ({exc})")
+            continue
 
         # import module
         try:
