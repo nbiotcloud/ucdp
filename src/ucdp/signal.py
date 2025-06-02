@@ -98,8 +98,9 @@ from typing import ClassVar
 from .casting import Casting
 from .clkrelbase import BaseClkRel
 from .ident import Ident
+from .nameutil import split_suffix
 from .object import PosArgs
-from .orientation import FWD, AOrientation, Direction
+from .orientation import DIRECTION_SUFFIXES, FWD, AOrientation, Direction
 from .typebase import BaseType
 from .typestruct import StructItem
 
@@ -228,3 +229,13 @@ class Port(BaseSignal):
             if direction is None:
                 raise ValueError(f"'direction' is required (could not be retrieved from name {name!r}).")
         super().__init__(type_=type_, name=name, **kwargs)  # type: ignore[call-arg]
+
+    @property
+    def basename(self):
+        """Base Name."""
+        return split_suffix(self.name, only=DIRECTION_SUFFIXES)[0]
+
+    @property
+    def suffix(self):
+        """Suffix."""
+        return split_suffix(self.name, only=DIRECTION_SUFFIXES)[1]

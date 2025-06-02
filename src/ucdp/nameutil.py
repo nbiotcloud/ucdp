@@ -73,12 +73,15 @@ def split_prefix(name: str) -> tuple[str, str]:
 
 
 @functools.lru_cache
-def split_suffix(name: str) -> tuple[str, str]:
+def split_suffix(name: str, only: tuple[str, ...] = ()) -> tuple[str, str]:
     """
     Split Name Into Basename And Suffix.
 
     Args:
         name: Name.
+
+    Keyword Args:
+        only: Limit suffix to given.
 
     Returns:
         tuple: Tuple of Basename and Suffix
@@ -109,7 +112,9 @@ def split_suffix(name: str) -> tuple[str, str]:
     """
     mat = _RE_SPLIT_SUFFIX.match(name)
     if mat:
-        return mat.group("basename", "suffix")  # type: ignore[return-value]
+        basename, suffix = mat.group("basename", "suffix")  # type: ignore[return-value]
+        if not only or suffix in only:
+            return basename, suffix
     return name, ""
 
 
