@@ -1,0 +1,8 @@
+Module: mod0
+Library [ucdp]: lib_type
+Do you want to build a (d)esign or (t)estbench? (d, t) [d]: d
+Does your design vary more than what `parameter` can cover? (y)es. (n)o. (y, n): n
+
+You choose the flavour AMod.
+
+'lib_type/mod0.py'... CREATED.

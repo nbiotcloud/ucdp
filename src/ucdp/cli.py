@@ -561,7 +561,7 @@ Create Datamodel Skeleton.
 """
 )
 @click.option("--module", "-m", prompt=True, help="Name of the Module")
-@click.option("--library", "-l", prompt=True, help="Name of the Library")
+@click.option("--library", "-l", default=Path().resolve().name, prompt=True, help="Name of the Library")
 @click.option("--regf/--no-regf", "-r/-R", default=True, help="Make use of a Register File")
 @click.option("--descr", "-d", default="", help="Description")
 @click.option("--flavour", "-F", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour")
@@ -584,6 +584,7 @@ def create(
         ctx.console.print(f"\nYou choose the flavour [bold blue]{flavour}[/bold blue].\n")
 
     info = CreateInfo(module=module, library=library, regf=regf, descr=descr, flavour=flavour)
+
     if info.is_tb:
         if not module.endswith("_tb"):
             LOGGER.warning(f"Your testbench module name {module!r} does not end with '_tb'")

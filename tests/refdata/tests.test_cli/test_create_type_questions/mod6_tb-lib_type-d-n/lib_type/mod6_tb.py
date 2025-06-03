@@ -1,4 +1,4 @@
-"""Mod6 Module."""
+"""Mod6 Tb Module."""
 
 
 from fileliststandard import HdlFileList
@@ -9,10 +9,10 @@ from glbl_lib.regf import RegfMod
 import ucdp as u
 
 
-class Mod6IoType(u.AStructType):
-    """Mod6 IO."""
+class Mod6TbIoType(u.AStructType):
+    """Mod6 Tb IO."""
 
-    title: str = "Mod6"
+    title: str = "Mod6 Tb"
     comment: str = "RX/TX"
 
     def _build(self) -> None:
@@ -20,8 +20,8 @@ class Mod6IoType(u.AStructType):
         self._add("tx", u.BitType(), u.FWD)
 
 
-class Mod6Mod(u.AMod):
-    """Mod6 Module."""
+class Mod6TbMod(u.AMod):
+    """Mod6 Tb Module."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
         HdlFileList(gen="full"),
@@ -30,7 +30,7 @@ class Mod6Mod(u.AMod):
     def _build(self) -> None:
         """Build."""
         self.add_port(u.ClkRstAnType(), "main_i")
-        self.add_port(Mod6IoType(), "mod6_i", route="create(u_core/mod6_i)", clkrel=u.ASYNC)
+        self.add_port(Mod6TbIoType(), "mod6_tb_i", route="create(u_core/mod6_tb_i)", clkrel=u.ASYNC)
         self.add_port(BusType(), "bus_i", clkrel="main_clk_i")
 
         clkgate = ClkGateMod(self, "u_clk_gate")
@@ -41,7 +41,7 @@ class Mod6Mod(u.AMod):
         regf.con("main_i", "main_i")
         regf.con("bus_i", "bus_i")
 
-        core = Mod6CoreMod(parent=self, name="u_core")
+        core = Mod6TbCoreMod(parent=self, name="u_core")
 
         core.add_port(u.ClkRstAnType(), "main_i")
         core.con("main_clk_i", "clk_s")
@@ -53,8 +53,8 @@ class Mod6Mod(u.AMod):
         word.add_field("strt", u.BitType(), is_writable=True, route="create(u_core/strt_i)")
 
 
-class Mod6CoreMod(u.ACoreMod):
-    """A Simple Mod6."""
+class Mod6TbCoreMod(u.ACoreMod):
+    """A Simple Mod6 Tb."""
 
     filelists: u.ClassVar[u.ModFileLists] = (HdlFileList(gen="inplace"),)
 

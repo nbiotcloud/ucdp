@@ -1,0 +1,9 @@
+Module: mod2
+Library [ucdp]: lib_type
+Do you want to build a (d)esign or (t)estbench? (d, t) [d]: d
+Does your design vary more than what `parameter` can cover? (y)es. (n)o. (y, n): y
+Do you want to use a (c)onfig or (t) shall the parent module tailor the functionality? (c, t): t
+
+You choose the flavour ATailoredMod.
+
+'lib_type/mod2.py'... CREATED.
