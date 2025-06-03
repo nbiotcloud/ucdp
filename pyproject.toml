@@ -204,6 +204,7 @@ addopts ="""
     --doctest-glob=docs/*
     --doctest-modules
     --ignore-glob=tests/testdata/*
+    --ignore-glob=tests/refdata/*
     --log-level=INFO
     --junitxml=report.xml
 """

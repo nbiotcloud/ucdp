@@ -35,7 +35,6 @@ from typing import Literal
 import click
 from click_bash42_completion import patch
 from pydantic import BaseModel, ConfigDict
-from rich import print
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.pretty import pprint
