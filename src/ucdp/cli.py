@@ -581,6 +581,7 @@ def create(
     """Let The User Type In The Name And Library Of The File."""
     if flavour is None:
         flavour = prompt_flavour()
+        ctx.console.print(f"\nYou choose the flavour [bold blue]{flavour}[/bold blue].\n")
 
     info = CreateInfo(module=module, library=library, regf=regf, descr=descr, flavour=flavour)
     if info.is_tb:
@@ -597,6 +598,7 @@ def create(
                 default="y",
             )
             tb = answer == "y"
+            ctx.console.print("")
         if tb:
             tbinfo = CreateInfo(module=f"{module}_tb", library=library, regf=regf, descr=descr, flavour=TB_MAP[flavour])
             create_(tbinfo, force)
