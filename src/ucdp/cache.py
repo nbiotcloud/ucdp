@@ -31,8 +31,10 @@ from pathlib import Path
 from shutil import rmtree
 
 from anycache import AnyCache
-from platformdirs import user_cache_dir
+from platformdirs import user_cache_path
 from pydantic import BaseModel
+
+from .logging import LOGGER
 
 
 class Cache(BaseModel):
@@ -86,13 +88,17 @@ def get_cachepath() -> Path | None:
         path = Path(envvar)
     except KeyError:
         try:
-            path = Path(user_cache_dir("ucdp", ensure_exists=True))
-        except RuntimeError:  # pragma: no cover
+            path = user_cache_path("ucdp", "iccode17", ensure_exists=True)
+        except RuntimeError as exc:  # pragma: no cover
+            LOGGER.warning(exc)
             return None
     try:
         path.mkdir(parents=True, exist_ok=True)
+        (path / "loader").mkdir(exist_ok=True)
+        (path / "templates").mkdir(exist_ok=True)
         (path / ".initialized").touch()
-    except Exception:
+    except Exception as exc:
+        LOGGER.warning(exc)
         return None
     return path
 

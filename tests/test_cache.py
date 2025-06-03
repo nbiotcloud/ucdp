@@ -30,14 +30,14 @@ import ucdp as u
 from ucdp.cache import Cache
 
 
-def test_default():
+def test_default(monkeypatch):
     """Default."""
-    with mock.patch.dict(os.environ, {}):
-        cache = Cache.init()
-        assert cache.path
-        assert cache.templates_path == cache.path / "templates"
-        assert cache.loader_cache.maxsize != 0
-        assert cache.path.exists()
+    monkeypatch.delenv("UCDP_CACHE", raising=False)
+    cache = Cache.init()
+    assert cache.path
+    assert cache.templates_path == cache.path / "templates"
+    assert cache.loader_cache.maxsize != 0
+    assert cache.path.exists()
 
 
 def test_get_cache(tmp_path):
