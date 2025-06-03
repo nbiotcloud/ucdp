@@ -1,4 +1,4 @@
-"""Mod6 Tb Module."""
+"""Mod0 Tb Module."""
 
 
 from fileliststandard import HdlFileList
@@ -9,8 +9,8 @@ from glbl_lib.regf import RegfMod
 import ucdp as u
 
 
-class Mod6TbMod(u.ATbMod):
-    """Mod6 Tb Module."""
+class Mod0TbMod(u.ATbMod):
+    """Mod0 Tb Module."""
 
     filelists: u.ClassVar[u.ModFileLists] = (
         HdlFileList(gen="full"),
