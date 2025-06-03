@@ -1,0 +1,8 @@
+Module: mod5
+Library [ucdp]: lib_type
+Do you want to build a (d)esign or (t)estbench? (d, t) [d]: t
+Do you want to build a generic testbench which tests similar modules? (y)es. (n)o. (y, n): n
+
+You choose the flavour ATbMod.
+
+'lib_type/mod5.py'... CREATED.

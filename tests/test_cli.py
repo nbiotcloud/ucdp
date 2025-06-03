@@ -525,13 +525,7 @@ def test_create_type_questions(tmp_path, input):
     assert_refdata(test_create_type_questions, tmp_path, flavor="-".join(input))
 
 
-@mark.parametrize(
-    "input",
-    [
-        ("mod0", "y"),
-        ("mod1", "n"),
-    ],
-)
+@mark.parametrize("input", [("mod0", "y"), ("mod1", "n")])
 def test_create_tb_questions(tmp_path, input):
     """Test tb Questionnaire."""
     runner = CliRunner()

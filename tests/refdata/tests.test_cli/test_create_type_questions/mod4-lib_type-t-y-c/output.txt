@@ -1,0 +1,9 @@
+Module: mod4
+Library [ucdp]: lib_type
+Do you want to build a (d)esign or (t)estbench? (d, t) [d]: t
+Do you want to build a generic testbench which tests similar modules? (y)es. (n)o. (y, n): y
+Do you want to automatically adapt your testbench to your (g) dut or use a (c)onfig? (g, c): c
+
+You choose the flavour AConfigurableTbMod.
+
+'lib_type/mod4.py'... CREATED.
