@@ -237,3 +237,6 @@ BWD = Orientation(mode=-1)
 IN = Direction(mode=1)
 OUT = Direction(mode=-1)
 INOUT = Direction(mode=0)
+
+DIRECTION_SUFFIXES = tuple(Direction._SUFFIXMAP.values())
+"""Valid Direction Suffixes."""
