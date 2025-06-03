@@ -55,5 +55,20 @@ class Note(LightObject):
 OPEN = Note(note="OPEN")
 """Open Note."""
 
+UNUSED = Note(note="UNUSED")
+"""UNUSED Note."""
+
 TODO = Note(note="TODO")
 """Todo Note."""
+
+
+def note(note: str) -> Note:
+    """Create Note."""
+    return Note(note=note)
+
+
+class Default(Note):
+    """Default Value Note."""
+
+
+DEFAULT = Default(note="DEFAULT")

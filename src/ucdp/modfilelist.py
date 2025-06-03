@@ -30,6 +30,7 @@ from pathlib import Path
 from typing import Annotated, Any, TypeAlias
 
 from matchor import match
+from pydantic import PlainSerializer
 from pydantic.functional_validators import BeforeValidator
 
 from .consts import Gen
@@ -37,7 +38,7 @@ from .filelistparser import FileListParser
 from .iterutil import namefilter
 from .modbase import BaseMod, get_modbaseclss
 from .moditer import ModPostIter
-from .object import Field, IdentLightObject
+from .object import Field, IdentObject, Object
 from .pathutil import improved_resolve
 
 Paths = tuple[Path, ...]
@@ -53,7 +54,11 @@ def _to_paths(values: Iterable[Any]) -> tuple[Path, ...]:
     return tuple(Path(value) for value in values)
 
 
-ToPaths = Annotated[StrPaths, BeforeValidator(_to_paths)]
+ToPaths = Annotated[
+    StrPaths,
+    BeforeValidator(_to_paths),
+    PlainSerializer(lambda paths: tuple(path.as_posix() for path in paths), return_type=tuple),
+]
 """ToPaths."""
 
 Placeholder = dict[str, Any]
@@ -63,10 +68,11 @@ Module Attributes for File Path.
 These placeholder are filled during `resolve`.
 """
 
-Flavors: TypeAlias = tuple[str, ...]
+Flavor: TypeAlias = Object | str
+Flavors: TypeAlias = tuple[Flavor, ...]
 
 
-class ModFileList(IdentLightObject):
+class ModFileList(IdentObject):
     """
     Module File List.
 
@@ -93,6 +99,7 @@ class ModFileList(IdentLightObject):
     template_filepaths: ToPaths = Field(default=(), strict=False)
     inc_template_filepaths: ToPaths = Field(default=(), strict=False)
     flavors: Flavors | None = None
+    flavor: Flavor | None = None
     is_leaf: bool = False
 
     @staticmethod
@@ -109,9 +116,17 @@ class ModFileList(IdentLightObject):
             **kwargs,
         }
 
+    def get_flavors(self, mod: BaseMod) -> Flavors | None:
+        """Determine Flavors."""
+        return self.flavors
+
     def generate(self, mod: BaseMod) -> None:
         """Custom Generate Function."""
         raise NotImplementedError
+
+    def get_gen(self, mod: BaseMod, flavor: Flavor | None) -> Gen:
+        """Get Generate."""
+        return self.gen
 
 
 ModFileLists = tuple[ModFileList, ...]
@@ -184,7 +199,7 @@ def resolve_modfilelists(
     for modfilelist in search_modfilelists(mod.filelists, name, target=target):
         # parser
         filelistparser = filelistparser or FileListParser()
-        for flavor in modfilelist.flavors or [None]:
+        for flavor in modfilelist.get_flavors(mod) or [None]:
             # resolve filepaths, inc_dirs
             inc_dirs: list[Path] = []
             inc_filepaths: list[Path] = []
@@ -254,6 +269,7 @@ def resolve_modfilelists(
                 template_filepaths=tuple(template_filepaths),
                 inc_template_filepaths=tuple(inc_template_filepaths),
                 flavors=(flavor,) if flavor is not None else None,
+                flavor=flavor,
             )
 
 

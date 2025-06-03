@@ -30,6 +30,7 @@ from collections import defaultdict
 from collections.abc import Iterable
 from logging import StreamHandler
 from pathlib import Path
+from typing import Literal
 
 import click
 from click_bash42_completion import patch
@@ -50,6 +51,7 @@ from .cliutil import (
     auto_path,
     defines2data,
     opt_check,
+    opt_create,
     opt_defines,
     opt_dry_run,
     opt_file,
@@ -66,6 +68,8 @@ from .cliutil import (
     read_file,
 )
 from .consts import PATH
+from .create import TB_MAP, TYPE_CHOICES, CreateInfo
+from .create import create as create_
 from .fileset import FileSet
 from .finder import find
 from .generate import Generator, clean, get_makolator, render_generate, render_inplace
@@ -133,7 +137,10 @@ class Ctx(BaseModel):
 
     def __exit__(self, exc_type, exc_value, tb):
         if exc_type or self.has_error_handler.has_errors:
-            self.console.print("[red][bold]Aborted.")
+            if exc_type is KeyboardInterrupt:
+                self.console.print("[red]Aborted.")
+            else:
+                self.console.print("[red][bold]Failed.")
             sys.exit(1)
 
 
@@ -182,27 +189,17 @@ Load Data Model and Check.
 TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 """
 )
-@arg_tops
+@arg_top
 @opt_path
-@opt_local
 @click.option("--stat", default=False, is_flag=True, help="Show Statistics.")
-@opt_topsfile
 @pass_ctx
-def check(ctx, tops, path, local=None, stat=False, tops_file=None):
+def check(ctx, top, path, stat=False):
     """Check."""
-    tops = list(tops)
-    for filepath in tops_file or []:
-        tops.extend(read_file(filepath))
-    for info in find(path, patterns=tuple(tops), local=local, is_top=True):
-        try:
-            top = load_top(ctx, info.topmodref, path)
-        except Exception as exc:
-            LOGGER.warning(str(exc))
-            continue
-        if stat:
-            print("Statistics:")
-            for name, value in top.get_stat().items():
-                print(f"  {name}: {value}")
+    top = load_top(ctx, top, path)
+    if stat:
+        print("Statistics:")
+        for name, value in top.get_stat().items():
+            print(f"  {name}: {value}")
 
 
 @ucdp.command(
@@ -222,6 +219,7 @@ TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 @opt_local
 @opt_topsfile
 @opt_check
+@opt_create
 @pass_ctx
 def gen(
     ctx,
@@ -234,13 +232,14 @@ def gen(
     define=None,
     local=None,
     check=False,
+    create=False,
     tops_file=None,
 ):
     """Generate."""
     tops = list(tops)
     for filepath in tops_file or []:
         tops.extend(read_file(filepath))
-    makolator = get_makolator(show_diff=show_diff, paths=path)
+    makolator = get_makolator(show_diff=show_diff, paths=path, create=create)
     data = defines2data(define)
     filelist = filelist or ["*"]
     with Generator(makolator=makolator, maxworkers=maxworkers, check=check) as generator:
@@ -248,7 +247,9 @@ def gen(
             try:
                 top = load_top(ctx, info.topmodref, path)
             except Exception as exc:
+                LOGGER.warning(f"Cannot load '{info.topmodref}'")
                 LOGGER.warning(str(exc))
+                LOGGER.warning(f"Debug with 'ucdp check {info.topmodref}'")
                 continue
             for item in filelist:
                 generator.generate(top, item, target=target, data=data)
@@ -272,11 +273,12 @@ GENFILE: Generated File.
 @click.argument("genfile", type=PathType, shell_complete=auto_path, nargs=1)
 @opt_show_diff
 @opt_defines
+@opt_create
 @pass_ctx
-def rendergen(ctx, top, path, template_filepaths, genfile, show_diff=False, define=None):
+def rendergen(ctx, top, path, template_filepaths, genfile, show_diff=False, define=None, create=False):
     """Render Generate."""
     top = load_top(ctx, top, path)
-    makolator = get_makolator(show_diff=show_diff, paths=path)
+    makolator = get_makolator(show_diff=show_diff, paths=path, create=create)
     data = defines2data(define)
     render_generate(top, template_filepaths, genfile=genfile, makolator=makolator, data=data)
 
@@ -299,12 +301,15 @@ INPLACEFILE: Inplace File.
 @click.argument("inplacefile", type=PathType, shell_complete=auto_path, nargs=1)
 @opt_show_diff
 @opt_defines
+@opt_create
 @click.option("--ignore_unknown", "-i", default=False, is_flag=True, help="Ignore Unknown Placeholder.")
 @pass_ctx
-def renderinplace(ctx, top, path, template_filepaths, inplacefile, show_diff=False, define=None, ignore_unknown=False):
+def renderinplace(
+    ctx, top, path, template_filepaths, inplacefile, show_diff=False, define=None, ignore_unknown=False, create=False
+):
     """Render Inplace."""
     top = load_top(ctx, top, path)
-    makolator = get_makolator(show_diff=show_diff, paths=path)
+    makolator = get_makolator(show_diff=show_diff, paths=path, create=create)
     data = defines2data(define)
     render_inplace(
         top,
@@ -548,3 +553,97 @@ def template_paths(ctx, path):
     makolator = get_makolator(paths=path)
     for template_path in makolator.config.template_paths:
         print(str(template_path))
+
+
+@ucdp.command(
+    help="""
+Create Datamodel Skeleton.
+"""
+)
+@click.option("--module", "-m", prompt=True, help="Name of the Module")
+@click.option("--library", "-l", prompt=True, help="Name of the Library")
+@click.option("--regf/--no-regf", "-r/-R", default=True, help="Make use of a Register File")
+@click.option("--descr", "-d", default="", help="Description")
+@click.option("--flavour", "-F", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour")
+@click.option("--tb/--no-tb", "-t/-T", default=None, help="Create testbench for design module")
+@click.option("--force", "-f", is_flag=True, help="Overwrite existing files")
+@pass_ctx
+def create(
+    ctx,
+    module,
+    library,
+    regf,
+    descr,
+    flavour,
+    tb,
+    force,
+):
+    """Let The User Type In The Name And Library Of The File."""
+    if flavour is None:
+        flavour = prompt_flavour()
+
+    info = CreateInfo(module=module, library=library, regf=regf, descr=descr, flavour=flavour)
+    if info.is_tb:
+        if not module.endswith("_tb"):
+            LOGGER.warning(f"Your testbench module name {module!r} does not end with '_tb'")
+
+    else:
+        if module.endswith("_tb"):
+            LOGGER.warning(f"Your design module name {module!r} ends with '_tb'")
+        if tb is None:
+            answer = click.prompt(
+                "Do you want to create a corresponding testbench? (y)es. (n)o.",
+                type=click.Choice(["y", "n"]),
+                default="y",
+            )
+            tb = answer == "y"
+        if tb:
+            tbinfo = CreateInfo(module=f"{module}_tb", library=library, regf=regf, descr=descr, flavour=TB_MAP[flavour])
+            create_(tbinfo, force)
+    create_(info, force)
+
+
+Type = Literal["AConfigurableMod", "AConfigurableTbMod", "AGenericTbMod", "AMod", "ATailoredMod", "ATbMod"]
+
+
+def prompt_flavour() -> Type:
+    """Let The User Choose The Type Of The File."""
+    answer = click.prompt("Do you want to build a (d)esign or (t)estbench?", type=click.Choice(["d", "t"]), default="d")
+    if answer == "d":
+        answer = click.prompt(
+            "Does your design vary more than what `parameter` can cover? (y)es. (n)o.", type=click.Choice(["y", "n"])
+        )
+        if answer == "y":
+            answer = click.prompt(
+                "Do you want to use a (c)onfig or (t) shall the parent module tailor the functionality?",
+                type=click.Choice(["c", "t"]),
+            )
+            if answer == "c":
+                flavour_ = "AConfigurableMod"
+
+            else:
+                flavour_ = "ATailoredMod"
+
+        else:
+            flavour_ = "AMod"
+
+    else:
+        answer = click.prompt(
+            "Do you want to build a generic testbench which tests similar modules? (y)es. (n)o.",
+            type=click.Choice(["y", "n"]),
+        )
+        if answer == "y":
+            answer = click.prompt(
+                "Do you want to automatically adapt your testbench to your (g) dut or use a (c)onfig?",
+                type=click.Choice(["g", "c"]),
+            )
+            if answer == "c":
+                flavour_ = "AConfigurableTbMod"
+
+            else:
+                flavour_ = "AGenericTbMod"
+
+        else:
+            flavour_ = "ATbMod"
+
+    return flavour_

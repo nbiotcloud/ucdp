@@ -31,16 +31,17 @@ from pathlib import Path
 from shutil import rmtree
 
 from anycache import AnyCache
-from appdirs import user_cache_dir
+from platformdirs import user_cache_path
 from pydantic import BaseModel
 
-CACHE_MAXSIZE = 10 * 1024 * 1024
+from .logging import LOGGER
 
 
 class Cache(BaseModel):
     """UCDP Caching System."""
 
     path: Path | None
+    maxsize: int = 10 * 1024 * 1024
 
     @classmethod
     def init(cls) -> "Cache":
@@ -66,9 +67,16 @@ class Cache(BaseModel):
     @property
     def loader_cache(self) -> AnyCache:
         """Path for Loader."""
+        return self._get_anycache("loader")
+
+    def get_cache(self, name: str):
+        """Create Cache Function Decorator."""
+        return self._get_anycache(name).anycache
+
+    def _get_anycache(self, name: str) -> AnyCache:
         if not self.path:
             return AnyCache(maxsize=0)
-        return AnyCache(cachedir=self.path / "loader", maxsize=CACHE_MAXSIZE)
+        return AnyCache(cachedir=self.path / name, maxsize=self.maxsize)
 
 
 def get_cachepath() -> Path | None:
@@ -80,15 +88,17 @@ def get_cachepath() -> Path | None:
         path = Path(envvar)
     except KeyError:
         try:
-            path = Path(user_cache_dir("ucdp", "iccode17"))
-        except RuntimeError:  # pragma: no cover
+            path = user_cache_path("ucdp", "iccode17", ensure_exists=True)
+        except RuntimeError as exc:  # pragma: no cover
+            LOGGER.warning(exc)
             return None
     try:
         path.mkdir(parents=True, exist_ok=True)
-        (path / "loader").mkdir()
-        (path / "templates").mkdir()
+        (path / "loader").mkdir(exist_ok=True)
+        (path / "templates").mkdir(exist_ok=True)
         (path / ".initialized").touch()
-    except Exception:
+    except Exception as exc:
+        LOGGER.warning(exc)
         return None
     return path
 

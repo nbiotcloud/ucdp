@@ -56,7 +56,7 @@ class EnumItem(Object):
 
     Args:
         key (int): key value to be mapped.
-        value: Mapped value.
+        value (Any): Mapped value.
 
     Keyword Args:
         doc (Doc): Documentation Container

@@ -109,6 +109,8 @@ class AConfigurableMod(BaseTopMod):
     def modname(self) -> str:
         """Module Name."""
         config = self.config
+        if config.modname:
+            return config.modname
         name = config.name
         modbasename = get_modname(self.__class__)
         if not name and "config" in self.model_fields_set and not self.is_default:

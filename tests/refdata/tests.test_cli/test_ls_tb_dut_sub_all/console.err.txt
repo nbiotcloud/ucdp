@@ -1,0 +1,1 @@
+WARNING <tests.test_mod_con.TopWarnMod(inst='top_warn', libname='tests', modname='top_warn')>: Cannot assign 'ConstExpr(UintType(5, default=4))' of type UintType(5, default=4) to 'in_i' of type UintType(4).

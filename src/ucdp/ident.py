@@ -111,7 +111,7 @@ from .expr import ConcatExpr, ConstExpr, Expr, Log2Expr, MaximumExpr, MinimumExp
 from .namespace import Namespace
 from .nameutil import join_names, split_suffix
 from .object import Field, Light, NamedObject, PosArgs
-from .orientation import AOrientation
+from .orientation import DIRECTION_SUFFIXES, AOrientation
 from .typearray import ArrayType
 from .typebase import BaseType
 from .typestruct import BaseStructType, StructItem
@@ -196,7 +196,13 @@ class Ident(Expr, NamedObject, Light):
 
     def _new_structitem(self, structitem: StructItem, **kwargs):
         direction = self.direction and self.direction * structitem.orientation
-        suffix = (direction and direction.suffix) or self.suffix
+        if self.suffix:
+            if direction is not None and self.suffix in DIRECTION_SUFFIXES:
+                suffix = direction and direction.suffix
+            else:
+                suffix = self.suffix
+        else:
+            suffix = ""
         basename = join_names(self.basename, structitem.name)
         return self.new(
             type_=structitem.type_,

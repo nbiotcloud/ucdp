@@ -1,21 +1,20 @@
 # CONTRIBUTING
 
-Please follow github workflow. Create a ticket and/or branch. Create a pull-request.
+Please follow the github workflow. Create a ticket and/or branch. Create a pull-request.
 
 ## Local Development
 
 ### Installation
 
-Please these tools:
+Please install these tools:
 
 * [`uv` Installation](https://docs.astral.sh/uv/getting-started/installation/)
-* `make`
-* `git`
-* Visual Studio Code
+* [`make`](https://www.gnu.org/software/make/)
+* [`git`](https://git-scm.com/)
+* [Visual Studio Code](https://code.visualstudio.com/)
 
 
 ### Editor
-
 Start Visual Studio Code:
 
 ```bash

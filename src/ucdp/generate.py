@@ -31,7 +31,7 @@ from contextlib import AbstractContextManager, contextmanager
 from pathlib import Path
 from typing import Any
 
-from makolator import Config, Datamodel, Makolator
+from makolator import Config, Datamodel, Existing, Makolator
 from uniquer import uniquelist
 
 from .cache import CACHE
@@ -61,7 +61,13 @@ def get_template_paths(paths: Iterable[Path] | None = None) -> list[Path]:
     return uniquelist(template_paths)
 
 
-def get_makolator(show_diff: bool = False, verbose: bool = True, paths: Iterable[Path] | None = None) -> Makolator:
+def get_makolator(
+    show_diff: bool = False,
+    verbose: bool = True,
+    paths: Iterable[Path] | None = None,
+    create: bool = False,
+    force: bool | None = None,
+) -> Makolator:
     """
     Create Makolator.
 
@@ -69,9 +75,18 @@ def get_makolator(show_diff: bool = False, verbose: bool = True, paths: Iterable
         show_diff: Show Changes.
         verbose: Display updated files.
         paths: Search Path For Data Model And Template Files.
+        create: Create missing inplace files.
+        force: overwrite existing files.
     """
     diffout = print if show_diff else None
     template_paths = get_template_paths(paths=paths)
+    if force is True:
+        existing = Existing.OVERWRITE
+    elif force is None:
+        existing = Existing.KEEP_TIMESTAMP
+    else:
+        existing = Existing.KEEP
+
     config = Config(
         template_paths=template_paths,
         marker_linelength=80,
@@ -79,6 +94,8 @@ def get_makolator(show_diff: bool = False, verbose: bool = True, paths: Iterable
         verbose=verbose,
         cache_path=CACHE.templates_path,
         track=True,
+        create=create,
+        existing=existing,
     )
     return Makolator(config=config)
 
@@ -169,7 +186,7 @@ class Generator(Object):
         makolator = self.makolator
 
         def _inplace(template_filepaths, filepath, context):
-            if not filepath.exists():
+            if not filepath.exists() and not makolator.config.create:
                 LOGGER.error("Inplace file %r missing", str(filepath))
             else:
                 makolator.inplace(template_filepaths, filepath, context=context)
@@ -180,9 +197,10 @@ class Generator(Object):
         with ThreadPoolExecutor(max_workers=self.maxworkers) as exe:
             jobs = []  # type: ignore [var-annotated]
             for mod, modfilelist in modfilelists:
-                if modfilelist.gen == "no":
+                gen = modfilelist.get_gen(mod, modfilelist.flavor)
+                if gen == "no":
                     continue
-                if modfilelist.gen == "custom":
+                if gen == "custom":
                     jobs.append(exe.submit(modfilelist.generate, mod))
                     continue
                 filepaths: tuple[Path, ...] = modfilelist.filepaths or ()  # type: ignore[assignment]
@@ -190,7 +208,7 @@ class Generator(Object):
                 inc_filepaths: tuple[Path, ...] = modfilelist.inc_filepaths or ()  # type: ignore[assignment]
                 inc_template_filepaths: tuple[Path, ...] = modfilelist.inc_template_filepaths or ()  # type: ignore[assignment]
                 ctx = {"mod": mod, "modfilelist": modfilelist}
-                if modfilelist.gen == "inplace":
+                if gen == "inplace":
                     jobs.extend(exe.submit(_inplace, inc_template_filepaths, path, ctx) for path in inc_filepaths)
                     jobs.extend(exe.submit(_inplace, template_filepaths, path, ctx) for path in filepaths)
                 else:
@@ -210,6 +228,7 @@ def generate(
     maxworkers: int | None = None,
     paths: Iterable[Path] | None = None,
     data: Data | None = None,
+    create: bool = False,
 ):
     """
     Generate for Top-Module.
@@ -226,8 +245,9 @@ def generate(
         maxworkers: Maximal Parallelism.
         paths: Search Path For Data Model And Template Files.
         data: Data added to the datamodel.
+        create: Create missing inplace files.
     """
-    makolator = makolator or get_makolator(paths=paths)
+    makolator = makolator or get_makolator(paths=paths, create=create)
     with Generator(makolator=makolator, maxworkers=maxworkers) as generator:
         generator.generate(
             top=top,

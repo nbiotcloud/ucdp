@@ -147,3 +147,43 @@ def test_leveliter(top):
         "1: sig_uint_s",
         "0: data_i",
     )
+
+
+def test_port_iter():
+    """Port Iteration."""
+    assert tuple(sub.name for sub in u.Port(MyType(), "port_i").iter()) == (
+        "port_i",
+        "port_my0_i",
+        "port_my0_mode_i",
+        "port_my0_send_i",
+        "port_my0_return_o",
+        "port_my1_o",
+        "port_my1_mode_o",
+        "port_my1_send_o",
+        "port_my1_return_i",
+        "port_uint_i",
+    )
+    assert tuple(sub.name for sub in u.Port(MyType(), "port", direction=u.IN).iter()) == (
+        "port",
+        "port_my0",
+        "port_my0_mode",
+        "port_my0_send",
+        "port_my0_return",
+        "port_my1",
+        "port_my1_mode",
+        "port_my1_send",
+        "port_my1_return",
+        "port_uint",
+    )
+    assert tuple(sub.name for sub in u.Port(MyType(), "po_t", direction=u.IN).iter()) == (
+        "po_t",
+        "po_t_my0",
+        "po_t_my0_mode",
+        "po_t_my0_send",
+        "po_t_my0_return",
+        "po_t_my1",
+        "po_t_my1_mode",
+        "po_t_my1_send",
+        "po_t_my1_return",
+        "po_t_uint",
+    )

@@ -1,4 +1,9 @@
 tests.test_flipflops.FlipFlopMod $PRJ/tests/test_flipflops.py
+tests.test_mod_con.SubMod $PRJ/tests/test_mod_con.py
+tests.test_mod_con.TopErrMod $PRJ/tests/test_mod_con.py
+tests.test_mod_con.TopIgnoreMod $PRJ/tests/test_mod_con.py
+tests.test_mod_con.TopMod $PRJ/tests/test_mod_con.py
+tests.test_mod_con.TopWarnMod $PRJ/tests/test_mod_con.py
 tests.test_modconfigurable.AnotherMod $PRJ/tests/test_modconfigurable.py
 tests.test_modconfigurable.DefaultMod $PRJ/tests/test_modconfigurable.py
 tests.test_modconfigurable.MyMod $PRJ/tests/test_modconfigurable.py

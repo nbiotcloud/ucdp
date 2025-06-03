@@ -40,14 +40,6 @@ class ACoreMod(BaseMod):
 
     See [BaseMod][ucdp.modbase.BaseMod] for arguments, attributes and details.
 
-    A [ACoreMod][uart_lib.uart.UartCoreMod] should be use to create intermediate module hierarchies.
-    [ACoreMod][uart_lib.uart.UartCoreMod] do **not** have a `_build` method. They have to be built by the parent module.
-
-    The source code files are typically generated/located next to the parent module of core module.
-    Remember to set the `gen` attribute accordingly to control the file generation.
-    Also the module name is based on the parent module and extended by the instance name.
-    A [ACoreMod][uart_lib.uart.UartCoreMod] can have a Mako template.
-
     Attributes:
         filelists: File Lists.
         parent: parent module.

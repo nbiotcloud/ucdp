@@ -26,8 +26,10 @@
 import subprocess
 from pathlib import Path
 
+from click.testing import CliRunner
 from contextlib_chdir import chdir
 from pydantic import BaseModel
+from pytest import mark
 from test2ref import assert_refdata
 
 import ucdp as u
@@ -65,21 +67,11 @@ def test_check(prjroot, example_simple):
     """Check Command."""
     run2console(prjroot, "check", "uart_lib.uart", output="check-uart.txt")
 
-    run2console(prjroot, "check", "uart_lib.uart2", exit_code=1, output="check-uart2.txt")
+    run("check", "uart_lib.uart2", exit_code=1)
 
     run2console(prjroot, "check", "uart_lib.uart", "--stat", output="check-stat.txt")
 
     assert_refdata(test_check, prjroot)
-
-
-def test_check_topsfile(prjroot, example_simple):
-    """Generate with --tops-file."""
-    topfile = prjroot / "tops.txt"
-    topfile.write_text("# comment\n  uart_lib.uart \n")
-
-    run2console(prjroot, "check", "--tops-file", str(topfile))
-
-    assert_refdata(test_check_topsfile, prjroot)
 
 
 def test_gen(prjroot, example_simple, uartcorefile):
@@ -420,3 +412,182 @@ def test_modinfos_param(example_param, prjroot):
     """Modinfo Command."""
     run2console(prjroot, "modinfo", "*")
     assert_refdata(test_modinfos_param, prjroot)
+
+
+def test_create(tmp_path):
+    """Test Command For The Create Function."""
+    with chdir(tmp_path):
+        run("create", "-T", "--module", "my_name", "--library", "my_library", "--flavour", "AMod")
+    assert_refdata(test_create, tmp_path)
+
+
+def test_create_numbers(tmp_path):
+    """Test Create Command With Specified With Numbers."""
+    with chdir(tmp_path):
+        run("create", "-T", "-m", "my_name2", "-l", "my_library_2", "-F", "AMod")
+    assert_refdata(test_create_numbers, tmp_path)
+
+
+def test_create_invalid_name(tmp_path):
+    """Test Command For The Create Function But To Test Where The Maximum Is."""
+    with chdir(tmp_path):
+        run(
+            "create",
+            "-T",
+            "--module",
+            "my_name_2_previus",
+            "--library",
+            "my_library_2_previus.py",
+            "--flavour",
+            "AMod",
+            exit_code=1,
+        )
+    # Check that no file is generated
+    assert tuple(tmp_path.glob("*")) == ()
+
+
+def test_create_regf(tmp_path):
+    """Test Create Command With Specified With Numbers."""
+    with chdir(tmp_path):
+        run("create", "-T", "--module", "my_name_regf", "--library", "my_library", "--regf", "--flavour", "AMod")
+    assert_refdata(test_create_regf, tmp_path)
+
+
+def test_create_no_regf(tmp_path):
+    """Test Create Command With Specified With Numbers."""
+    with chdir(tmp_path):
+        run("create", "-T", "--module", "my_name_no_regf", "--library", "my_library", "--no-regf", "--flavour", "AMod")
+    assert_refdata(test_create_no_regf, tmp_path)
+
+
+def test_create_descr(tmp_path):
+    """Test Create Command With Specified Description."""
+    with chdir(tmp_path):
+        run(
+            "create",
+            "-T",
+            "--module",
+            "my_name_descr",
+            "--library",
+            "my_library",
+            "--descr",
+            "My Fancy Module",
+            "--flavour",
+            "AMod",
+        )
+    assert_refdata(test_create_descr, tmp_path)
+
+
+def test_create_flavour_amod(tmp_path):
+    """Test Create Command With Specified flavour AMod."""
+    with chdir(tmp_path):
+        run("create", "-T", "--module", "my_name_flavour_amod", "--library", "my_library", "--flavour", "AMod")
+    assert_refdata(test_create_flavour_amod, tmp_path)
+
+
+def test_create_flavour_aconfigurablemod(tmp_path):
+    """Test Create Command With Specified AConfigurableMod."""
+    with chdir(tmp_path):
+        run(
+            "create",
+            "-T",
+            "--module",
+            "my_name_flavour_aconfigurablemod",
+            "--library",
+            "my_library",
+            "--flavour",
+            "AConfigurableMod",
+        )
+    assert_refdata(test_create_flavour_aconfigurablemod, tmp_path)
+
+
+def test_create_flavour_aconfigurabletbmod(tmp_path):
+    """Test Create Command With Specified AConfigurableTbMod."""
+    with chdir(tmp_path):
+        run(
+            "create",
+            "-T",
+            "--module",
+            "my_name_flavour_aconfigurabletbmod",
+            "--library",
+            "my_library",
+            "--flavour",
+            "AConfigurableTbMod",
+        )
+    assert_refdata(test_create_flavour_aconfigurabletbmod, tmp_path)
+
+
+def test_create_flavour_agenerictbmod(tmp_path):
+    """Test Create Command With Specified A Generic TbMod."""
+    with chdir(tmp_path):
+        run(
+            "create",
+            "--module",
+            "my_name_flavour_agenerictbmod",
+            "--library",
+            "my_library",
+            "--flavour",
+            "AGenericTbMod",
+        )
+    assert_refdata(test_create_flavour_agenerictbmod, tmp_path)
+
+
+def test_create_flavour_atailoredmod(tmp_path):
+    """Test Create Command With Specified ATailoredMod."""
+    with chdir(tmp_path):
+        run(
+            "create",
+            "-T",
+            "--module",
+            "my_name_flavour_atailoredmod",
+            "--library",
+            "my_library",
+            "--flavour",
+            "ATailoredMod",
+        )
+    assert_refdata(test_create_flavour_atailoredmod, tmp_path)
+
+
+def test_create_flavour_atbmod(tmp_path):
+    """Test Create Command With Specified ATbMod."""
+    with chdir(tmp_path):
+        run("create", "-T", "--module", "my_name_flavour_atbmod", "--library", "my_library", "--flavour", "ATbMod")
+    assert_refdata(test_create_flavour_atbmod, tmp_path)
+
+
+@mark.parametrize(
+    "input",
+    [
+        ("mod0", "lib", "d", "n"),
+        ("mod1", "lib", "d", "y", "c"),
+        ("mod2", "lib", "d", "y", "t"),
+        ("mod3", "lib", "t", "y", "g"),
+        ("mod4", "lib", "t", "y", "c"),
+        ("mod5", "lib", "t", "n"),
+    ],
+)
+def test_create_type_questions(tmp_path, input):
+    """Test Type Questionnaire."""
+    runner = CliRunner()
+    with chdir(tmp_path):
+        result = runner.invoke(u.cli.ucdp, ["create", "-T"], input="\n".join((*input, "")))
+    assert not result.exception
+    assert_refdata(test_create_type_questions, tmp_path, flavor="-".join(input))
+
+
+@mark.parametrize(
+    "input",
+    [
+        ("mod6", "y"),
+        ("mod7", "n"),
+    ],
+)
+def test_create_tb_questions(tmp_path, input):
+    """Test tb Questionnaire."""
+    runner = CliRunner()
+    with chdir(tmp_path):
+        result = runner.invoke(
+            u.cli.ucdp, ["create", "--library", "lib", "--flavour", "amod"], input="\n".join((*input, ""))
+        )
+    assert not result.exception
+    assert_refdata(test_create_tb_questions, tmp_path, flavor="-".join(input))

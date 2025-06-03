@@ -32,12 +32,13 @@ from . import cli
 from .assigns import Assign, Assigns
 from .baseclassinfo import BaseClassInfo, get_baseclassinfos
 from .buildproduct import ABuildProduct
+from .cache import CACHE
 from .casting import Casting
 from .clkrel import ASYNC, ClkRel
 from .clkrelbase import BaseClkRel
 from .config import AConfig, AVersionConfig, BaseConfig
 from .const import Const
-from .consts import AUTO, PAT_IDENTIFIER
+from .consts import AUTO, PAT_IDENTIFIER, PAT_OPT_IDENTIFIER, PATH, RE_IDENTIFIER, Gen
 from .dict import Dict
 from .doc import Doc
 from .docutil import doc_from_type
@@ -75,6 +76,8 @@ from .modconfigurable import AConfigurableMod
 from .modconfigurabletb import AConfigurableTbMod
 from .modcore import ACoreMod
 from .modfilelist import (
+    Flavor,
+    Flavors,
     ModFileList,
     ModFileLists,
     Paths,
@@ -96,7 +99,7 @@ from .modutil import get_modbaseinfos, is_tb_from_modname
 from .mux import Mux
 from .namespace import Namespace
 from .nameutil import didyoumean, get_snakecasename, join_names, split_prefix, split_suffix, str2identifier
-from .note import OPEN, TODO, Note
+from .note import DEFAULT, OPEN, TODO, UNUSED, Default, Note, note
 from .object import (
     Field,
     IdentLightObject,
@@ -155,6 +158,8 @@ __all__ = [
     "AUTO",
     "BWD",
     "BWDM",
+    "CACHE",
+    "DEFAULT",
     "DOWN",
     "FWD",
     "FWDM",
@@ -164,8 +169,12 @@ __all__ = [
     "OPEN",
     "OUT",
     "OUTM",
+    "PATH",
     "PAT_IDENTIFIER",
+    "PAT_OPT_IDENTIFIER",
+    "RE_IDENTIFIER",
     "TODO",
+    "UNUSED",
     "UP",
     "ABuildProduct",
     "ACompositeType",
@@ -214,6 +223,7 @@ __all__ = [
     "ConcatExpr",
     "Const",
     "ConstExpr",
+    "Default",
     "DescriptiveStructType",
     "Dict",
     "DiffClkRstAnType",
@@ -237,8 +247,11 @@ __all__ = [
     "Field",
     "FileListParser",
     "FileSet",
+    "Flavor",
+    "Flavors",
     "FlipFlop",
     "FloatType",
+    "Gen",
     "Hex",
     "Ident",
     "IdentFilter",
@@ -340,6 +353,7 @@ __all__ = [
     "maximum",
     "minimum",
     "namefilter",
+    "note",
     "parse",
     "parse_routepath",
     "parse_routepaths",

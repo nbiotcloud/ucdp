@@ -35,21 +35,21 @@ classifiers = [
 ]
 requires-python = ">=3.10.0,<4.0"
 dependencies = [
+    "anycache>=2.2.0",
     "anytree>=2.12.1",
     "case-converter>=1.1.0",
+    "click-bash4-2-completion>=0.1.0",
     "click>=8.1.7",
     "fuzzywuzzy>=0.18.0",
     "humannum>=1.2.0",
     "icdutil>=0.3.1",
+    "makolator>=2.11.0",
     "matchor>=0.1.0",
+    "platformdirs>=4.3.7",
     "pydantic>=2.7.0",
     "python-Levenshtein>=0.25.1",
     "rich>=13.7.1",
     "uniquer>=1.0.2",
-    "click-bash4-2-completion>=0.1.0",
-    "anycache>=2.2.0",
-    "makolator>=2.10.3",
-    "appdirs>=1.4.4",
 ]
 
 [project.scripts]
