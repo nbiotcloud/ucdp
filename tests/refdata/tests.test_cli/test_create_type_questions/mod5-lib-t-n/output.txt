@@ -5,4 +5,4 @@ Do you want to build a generic testbench which tests similar modules? (y)es. (n)
 
 You choose the flavour ATbMod.
 
-'lib\mod5.py'... CREATED.
+'lib/mod5.py'... CREATED.

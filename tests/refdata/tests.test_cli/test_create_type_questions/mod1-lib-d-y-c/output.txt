@@ -6,4 +6,4 @@ Do you want to use a (c)onfig or (t) shall the parent module tailor the function
 
 You choose the flavour AConfigurableMod.
 
-'lib\mod1.py'... CREATED.
+'lib/mod1.py'... CREATED.

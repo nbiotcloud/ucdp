@@ -6,4 +6,4 @@ Do you want to automatically adapt your testbench to your (g) dut or use a (c)on
 
 You choose the flavour AGenericTbMod.
 
-'lib\mod3.py'... CREATED.
+'lib/mod3.py'... CREATED.
