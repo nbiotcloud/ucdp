@@ -1,0 +1,8 @@
+Module: mod0
+Library: lib
+Do you want to build a (d)esign or (t)estbench? (d, t) [d]: d
+Does your design vary more than what `parameter` can cover? (y)es. (n)o. (y, n): n
+
+You choose the flavour AMod.
+
+'lib/mod0.py'... CREATED.

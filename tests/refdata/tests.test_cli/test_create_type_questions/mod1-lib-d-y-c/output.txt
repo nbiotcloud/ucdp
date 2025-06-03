@@ -1,0 +1,9 @@
+Module: mod1
+Library: lib
+Do you want to build a (d)esign or (t)estbench? (d, t) [d]: d
+Does your design vary more than what `parameter` can cover? (y)es. (n)o. (y, n): y
+Do you want to use a (c)onfig or (t) shall the parent module tailor the functionality? (c, t): c
+
+You choose the flavour AConfigurableMod.
+
+'lib/mod1.py'... CREATED.

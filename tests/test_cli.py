@@ -478,81 +478,27 @@ def test_create_descr(tmp_path):
     assert_refdata(test_create_descr, tmp_path)
 
 
-def test_create_flavour_amod(tmp_path):
-    """Test Create Command With Specified flavour AMod."""
+@mark.parametrize(
+    "flavour",
+    [
+        "AConfigurableMod",
+        "AConfigurableTbMod",
+        "AGenericTbMod",
+        "AMod",
+        "ATailoredMod",
+        "ATbMod",
+    ],
+)
+def test_create_flavour(tmp_path, flavour):
+    """Test Create Command Flavour."""
+    runner = CliRunner()
     with chdir(tmp_path):
-        run("create", "-T", "--module", "my_name_flavour_amod", "--library", "my_library", "--flavour", "AMod")
-    assert_refdata(test_create_flavour_amod, tmp_path)
-
-
-def test_create_flavour_aconfigurablemod(tmp_path):
-    """Test Create Command With Specified AConfigurableMod."""
-    with chdir(tmp_path):
-        run(
-            "create",
-            "-T",
-            "--module",
-            "my_name_flavour_aconfigurablemod",
-            "--library",
-            "my_library",
-            "--flavour",
-            "AConfigurableMod",
+        runner.invoke(
+            u.cli.ucdp,
+            ["create", "-T", "--name", "my_name_flavour", "--library", "my_library", "--flavour", "{flavour}"],
+            flavour="\n".join((*flavour, "")),
         )
-    assert_refdata(test_create_flavour_aconfigurablemod, tmp_path)
-
-
-def test_create_flavour_aconfigurabletbmod(tmp_path):
-    """Test Create Command With Specified AConfigurableTbMod."""
-    with chdir(tmp_path):
-        run(
-            "create",
-            "-T",
-            "--module",
-            "my_name_flavour_aconfigurabletbmod",
-            "--library",
-            "my_library",
-            "--flavour",
-            "AConfigurableTbMod",
-        )
-    assert_refdata(test_create_flavour_aconfigurabletbmod, tmp_path)
-
-
-def test_create_flavour_agenerictbmod(tmp_path):
-    """Test Create Command With Specified A Generic TbMod."""
-    with chdir(tmp_path):
-        run(
-            "create",
-            "--module",
-            "my_name_flavour_agenerictbmod",
-            "--library",
-            "my_library",
-            "--flavour",
-            "AGenericTbMod",
-        )
-    assert_refdata(test_create_flavour_agenerictbmod, tmp_path)
-
-
-def test_create_flavour_atailoredmod(tmp_path):
-    """Test Create Command With Specified ATailoredMod."""
-    with chdir(tmp_path):
-        run(
-            "create",
-            "-T",
-            "--module",
-            "my_name_flavour_atailoredmod",
-            "--library",
-            "my_library",
-            "--flavour",
-            "ATailoredMod",
-        )
-    assert_refdata(test_create_flavour_atailoredmod, tmp_path)
-
-
-def test_create_flavour_atbmod(tmp_path):
-    """Test Create Command With Specified ATbMod."""
-    with chdir(tmp_path):
-        run("create", "-T", "--module", "my_name_flavour_atbmod", "--library", "my_library", "--flavour", "ATbMod")
-    assert_refdata(test_create_flavour_atbmod, tmp_path)
+    assert_refdata(test_create_flavour, tmp_path, flavor="-".join(flavour))
 
 
 @mark.parametrize(
@@ -574,6 +520,8 @@ def test_create_type_questions(tmp_path, input):
     with chdir(tmp_path):
         result = runner.invoke(u.cli.ucdp, ["create", "-T"], input="\n".join((*input, "")))
     assert not result.exception
+    output_path = tmp_path / "output.txt"
+    output_path.write_text(result.output)
     assert_refdata(test_create_type_questions, tmp_path, flavor="-".join(input))
 
 
