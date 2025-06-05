@@ -31,7 +31,7 @@ from .object import LightObject
 
 class Note(LightObject):
     """
-    Simply Note on Assignments.
+    Note on Assignments Instead Of Value.
 
     Attributes:
         note: Note.
@@ -42,8 +42,6 @@ class Note(LightObject):
             >>> import ucdp as u
             >>> u.OPEN
             Note(note='OPEN')
-            >>> u.TODO
-            Note(note='TODO')
     """
 
     note: str
@@ -52,11 +50,24 @@ class Note(LightObject):
         return self.note
 
 
-OPEN = Note(note="OPEN")
-"""Open Note."""
+class Default(Note):
+    """
+    Note on Assignments With Default Value on Inputs.
 
-TODO = Note(note="TODO")
-"""Todo Note."""
+    Attributes:
+        note: Note.
+
+    ??? Example "Note Examples"
+        Example.
+
+            >>> import ucdp as u
+            >>> u.TODO
+            Default(note='TODO')
+            >>> u.DEFAULT
+            Default(note='DEFAULT')
+            >>> u.UNUSED
+            Default(note='UNUSED')
+    """
 
 
 def note(note: str) -> Note:
@@ -64,12 +75,14 @@ def note(note: str) -> Note:
     return Note(note=note)
 
 
-class Default(Note):
-    """Default Value Note."""
+OPEN = Note(note="OPEN")
+"""Open Note."""
 
+TODO = Default(note="TODO")
+"""Todo Note - Use Defaults."""
 
 DEFAULT = Default(note="DEFAULT")
-"""Default Value Note."""
+"""Use Defaults."""
 
 UNUSED = Default(note="UNUSED")
-"""UNUSED Note."""
+"""UNUSED Note  - Use Defaults."""

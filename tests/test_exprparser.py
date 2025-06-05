@@ -210,11 +210,11 @@ def test_note(parser):
     assert parser.parse_note(2) == u.ConstExpr(u.IntegerType(default=2))
     assert parser.parse_note(u.IntegerType(default=2)) == u.ConstExpr(u.IntegerType(default=2))
 
-    msg = "Note(note='TODO') is not a <class 'ucdp.signal.Signal'>. It is a <class 'ucdp.note.Note'>"
+    msg = "Default(note='TODO') is not a <class 'ucdp.signal.Signal'>. It is a <class 'ucdp.note.Default'>"
     with raises(ValueError, match=re.escape(msg)):
         parser.parse_note(u.TODO, only=u.Signal)
 
-    msg = "Note(note='TODO') does not meet type_ <class 'ucdp.typescalar.BoolType'>."
+    msg = "Default(note='TODO') does not meet type_ <class 'ucdp.typescalar.BoolType'>."
     with raises(ValueError, match=re.escape(msg)):
         parser.parse_note(u.TODO, types=u.BoolType)
 
