@@ -30,11 +30,13 @@ from click.testing import CliRunner
 from contextlib_chdir import chdir
 from pydantic import BaseModel
 from pytest import mark
-from test2ref import assert_refdata
+from test2ref import assert_refdata, configure
 
 import ucdp as u
 
 from .conftest import TESTDATA_PATH
+
+configure(ignore_spaces=True)
 
 
 class Result(BaseModel):
