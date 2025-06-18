@@ -23,10 +23,22 @@ jobs:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
           cache-dependency-glob: "uv.lock"
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit/
+          key: pre-commit|${{ matrix.os }}|${{ matrix.python-version }}|${{ hashFiles('.pre-commit-config.yaml') }}
       - name: Run all
-        run: make all
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: make all
       - name: Upload coverage data to coveralls.io
-        run: uv run --frozen -- coveralls --service=github
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: uv run --frozen -- coveralls --service=github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
@@ -46,7 +58,11 @@ jobs:
           enable-cache: true
           cache-dependency-glob: "uv.lock"
       - name: Upload coverage data to coveralls.io
-        run: uv run --frozen -- coveralls --service=github --finish
+        uses: nick-fields/retry@v3
+        with:
+          timeout_minutes: 10
+          max_attempts: 3
+          command: uv run --frozen -- coveralls --service=github --finish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
