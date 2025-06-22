@@ -36,7 +36,6 @@ from inspect import getfile, isclass
 from pathlib import Path
 from typing import TypeAlias
 
-from .cache import CACHE
 from .consts import PKG_PATHS
 from .modbase import BaseMod, get_modbaseclss
 from .modref import ModRef, get_modclsname
@@ -114,14 +113,11 @@ def find_modrefs(local: bool | None = None) -> tuple[ModRef, ...]:
                 continue
             dirpaths.add(dirpath)
 
-    _find_modrefs_cached = CACHE.loader_cache.anycache(depfilefunc=_find_modrefs_files)(_find_modrefs)
-
     maxworkers = get_maxworkers()
     with ThreadPoolExecutor(max_workers=maxworkers) as exe:
         # start
         jobs = [
-            exe.submit(_find_modrefs_cached, sys.path, tuple(sorted(dirpath.glob("*.py"))))
-            for dirpath in sorted(dirpaths)
+            exe.submit(_find_modrefs, sys.path, tuple(sorted(dirpath.glob("*.py")))) for dirpath in sorted(dirpaths)
         ]
         # collect
         for job in jobs:

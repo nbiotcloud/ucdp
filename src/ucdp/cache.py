@@ -64,11 +64,6 @@ class Cache(BaseModel):
             return None
         return self.path / "templates"
 
-    @property
-    def loader_cache(self) -> AnyCache:
-        """Path for Loader."""
-        return self._get_anycache("loader")
-
     def get_cache(self, name: str):
         """Create Cache Function Decorator."""
         return self._get_anycache(name).anycache
