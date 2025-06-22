@@ -26,7 +26,7 @@
 
 import os
 import sys
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from functools import lru_cache
 from inspect import getfile
@@ -50,7 +50,10 @@ def extend_sys_path(paths: Iterable[Path] | None = None, use_env_default: bool =
     """
     if paths is None and use_env_default:
         paths = get_paths()
-    pathstrs = [str(path) for path in paths or []]
+    globpaths = []
+    for path in paths or []:
+        globpaths.extend(glob(path))
+    pathstrs = [str(path) for path in globpaths]
     LOGGER.debug("paths=%r", pathstrs)
     if pathstrs:
         orig = sys.path
@@ -96,3 +99,16 @@ def guess_path(arg: str) -> Path | None:
     if path.exists() or len(path.parts) > 1:
         return path
     return None
+
+
+def glob(path: Path) -> Iterator[Path]:
+    """Glob `path`."""
+    assert isinstance(path, Path), path
+    path = path.absolute()
+    pathstr = str(path)
+    if "*" in pathstr or "?" in pathstr or "[" in pathstr:
+        root = Path(path.parts[0])
+        pattern = str(path.relative_to(root))
+        yield from sorted(root.glob(pattern))
+    else:
+        yield path
