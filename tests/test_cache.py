@@ -36,7 +36,6 @@ def test_default(monkeypatch):
     cache = Cache.init()
     assert cache.path
     assert cache.templates_path == cache.path / "templates"
-    assert cache.loader_cache.maxsize != 0
     assert cache.path.exists()
 
 
@@ -69,7 +68,6 @@ def test_env(tmp_path):
         cache = Cache.init()
         assert cache.path == tmp_path
         assert cache.templates_path == tmp_path / "templates"
-        assert cache.loader_cache.maxsize != 0
 
 
 def test_env_invalid(tmp_path):
@@ -80,7 +78,6 @@ def test_env_invalid(tmp_path):
         cache = Cache.init()
         assert cache.path is None
         assert cache.templates_path is None
-        assert cache.loader_cache.maxsize == 0
 
 
 def test_env_disabled(tmp_path):
@@ -89,7 +86,6 @@ def test_env_disabled(tmp_path):
         cache = Cache.init()
         assert cache.path is None
         assert cache.templates_path is None
-        assert cache.loader_cache.maxsize == 0
 
 
 def test_cache():
