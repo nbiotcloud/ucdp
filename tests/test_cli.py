@@ -287,7 +287,7 @@ def test_ls_nonlocal(prjroot, example_simple):
 def test_ls_filepath(prjroot, tests):
     """List Command With Filepath."""
     run2console(prjroot, "ls", "-fn")
-    assert_refdata(test_ls_filepath, prjroot)
+    assert_refdata(test_ls_filepath, prjroot, replacements=((Path("tests"), "tests"),))
 
 
 def test_ls_filepath_abs(prjroot, tests):

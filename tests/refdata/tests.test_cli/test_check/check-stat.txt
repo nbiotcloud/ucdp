@@ -1,4 +1,4 @@
-'uart_lib.uart' checked.                                                       
+'uart_lib.uart' checked.                                                        
 Statistics:
   Modules: 4
   Module-Instances: 5
