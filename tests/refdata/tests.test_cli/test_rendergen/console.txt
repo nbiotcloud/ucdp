@@ -1,3 +1,3 @@
-'uart_lib.uart' checked.                                                        
+'uart_lib.uart' checked.                                                       
 '$GEN/output.txt'... CREATED.
 1 files. 1 CREATED.

@@ -1,7 +1,7 @@
-┏━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┓
-┃ Reference              ┃ Top ┃ Tb  ┃ Tags ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━┩
-│ tests.test_mods.IpMod  │  X  │     │ ip   │
-│ tests.test_mods.SubMod │  X  │     │ ip   │
-│ tests.test_mods.TopMod │  X  │     │ ippp │
-└────────────────────────┴─────┴─────┴──────┘
+                                             
+| Reference              | Top | Tb  | Tags |
+|------------------------|-----|-----|------|
+| tests.test_mods.IpMod  |  X  |     | ip   |
+| tests.test_mods.SubMod |  X  |     | ip   |
+| tests.test_mods.TopMod |  X  |     | ippp |
+                                             

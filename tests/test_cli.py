@@ -38,6 +38,8 @@ from .conftest import TESTDATA_PATH
 
 configure(ignore_spaces=True)
 
+REPLACEMENTS = ((Path("$PRJROOT"), "$PRJROOT"),)
+
 
 class Result(BaseModel):
     """Result."""
@@ -49,10 +51,10 @@ class Result(BaseModel):
 
 def run(*cmd, exit_code: int = 0) -> Result:
     """Run."""
-    result = subprocess.run(("ucdp", *cmd), check=False, capture_output=True)  # noqa: S603
+    result = subprocess.run(("ucdp", *cmd), check=False, capture_output=True, text=True)  # noqa: S603
     assert result.returncode == exit_code
-    stdout = result.stdout.decode("utf-8")
-    stderr = result.stderr.decode("utf-8")
+    stdout = result.stdout
+    stderr = result.stderr
     return Result(exit_code=result.returncode, stdout=stdout, stderr=stderr)
 
 
@@ -138,57 +140,57 @@ def test_gen_default(prjroot, example_simple, uartcorefile):
 def test_filelist(prjroot, example_simple):
     """Filelist Command."""
     run2console(prjroot, "filelist", "uart_lib.uart", "-f", "hdl")
-    assert_refdata(test_filelist, prjroot)
+    assert_refdata(test_filelist, prjroot, replacements=REPLACEMENTS)
 
 
 def test_filelist_default(prjroot, example_simple):
     """Filelist Command with Default."""
     run2console(prjroot, "filelist", "uart_lib.uart")
-    assert_refdata(test_filelist_default, prjroot)
+    assert_refdata(test_filelist_default, prjroot, replacements=REPLACEMENTS)
 
 
 def test_filelist_file(prjroot, example_simple):
     """Filelist Command."""
     filepath = prjroot / "file.txt"
     run2console(prjroot, "filelist", "uart_lib.uart", "-f", "hdl", "--file", str(filepath))
-    assert_refdata(test_filelist_file, prjroot)
+    assert_refdata(test_filelist_file, prjroot, replacements=REPLACEMENTS)
 
 
 def test_filelist_other(prjroot, example_filelist):
     """Filelist Command."""
     run2console(prjroot, "filelist", "filelist_lib.filelist", "-f", "hdl")
-    assert_refdata(test_filelist_other, prjroot)
+    assert_refdata(test_filelist_other, prjroot, replacements=REPLACEMENTS)
 
 
 def test_fileinfo(prjroot, example_simple):
     """Fileinfo Command."""
     run2console(prjroot, "fileinfo", "uart_lib.uart", "-f", "hdl")
-    assert_refdata(test_fileinfo, prjroot)
+    assert_refdata(test_fileinfo, prjroot, replacements=REPLACEMENTS)
 
 
 def test_fileinfo_default(prjroot, example_simple):
     """Fileinfo Command."""
     run2console(prjroot, "fileinfo", "uart_lib.uart")
-    assert_refdata(test_fileinfo_default, prjroot)
+    assert_refdata(test_fileinfo_default, prjroot, replacements=REPLACEMENTS)
 
 
 def test_fileinfo_minimal(prjroot, example_simple):
     """Fileinfo Command Minimal."""
     run2console(prjroot, "fileinfo", "uart_lib.uart", "-m")
-    assert_refdata(test_fileinfo_minimal, prjroot)
+    assert_refdata(test_fileinfo_minimal, prjroot, replacements=REPLACEMENTS)
 
 
 def test_fileinfo_maxlevel(prjroot, example_simple):
     """Fileinfo Command with Maxlevel."""
     run2console(prjroot, "fileinfo", "uart_lib.uart", "-f", "hdl", "--maxlevel=1")
-    assert_refdata(test_fileinfo_maxlevel, prjroot)
+    assert_refdata(test_fileinfo_maxlevel, prjroot, replacements=REPLACEMENTS)
 
 
 def test_fileinfo_file(prjroot, example_simple):
     """Fileinfo Command with File."""
     filepath = prjroot / "file.txt"
     run2console(prjroot, "fileinfo", "uart_lib.uart", "-f", "hdl", "--file", str(filepath))
-    assert_refdata(test_fileinfo_file, prjroot)
+    assert_refdata(test_fileinfo_file, prjroot, replacements=REPLACEMENTS)
 
 
 def test_overview(prjroot, example_simple):
@@ -344,7 +346,7 @@ def test_ls_tags(prjroot, tests):
 
 def test_ls_tb_dut(prjroot, tests):
     """List Testbenches DUTs."""
-    run2console(prjroot, "ls", "*", "-n")
+    run2console(prjroot, "ls", "tests.*", "-n")
     assert_refdata(test_ls_tb_dut, prjroot)
 
 
@@ -406,13 +408,13 @@ def test_modinfo(prjroot, example_simple):
 
 def test_modinfos(prjroot, example_simple):
     """Modinfo Command."""
-    run2console(prjroot, "modinfo", "*", "-S")
+    run2console(prjroot, "modinfo", "*_lib.*", "-S")
     assert_refdata(test_modinfos, prjroot)
 
 
 def test_modinfos_param(example_param, prjroot):
     """Modinfo Command."""
-    run2console(prjroot, "modinfo", "*")
+    run2console(prjroot, "modinfo", "*_lib.*")
     assert_refdata(test_modinfos_param, prjroot)
 
 
@@ -420,14 +422,14 @@ def test_create(tmp_path):
     """Test Command For The Create Function."""
     with chdir(tmp_path):
         run("create", "-T", "--module", "my_name", "--library", "my_library", "--flavour", "AMod")
-    assert_refdata(test_create, tmp_path)
+    assert_refdata(test_create, tmp_path, replacements=((Path("my_library"), "my_library"),))
 
 
 def test_create_numbers(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
         run("create", "-T", "-m", "my_name2", "-l", "my_library_2", "-F", "AMod")
-    assert_refdata(test_create_numbers, tmp_path)
+    assert_refdata(test_create_numbers, tmp_path, replacements=((Path("my_library_2"), "my_library"),))
 
 
 def test_create_invalid_name(tmp_path):
@@ -452,14 +454,14 @@ def test_create_regf(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
         run("create", "-T", "--module", "my_name_regf", "--library", "my_library", "--regf", "--flavour", "AMod")
-    assert_refdata(test_create_regf, tmp_path)
+    assert_refdata(test_create_regf, tmp_path, replacements=((Path("my_library"), "my_library"),))
 
 
 def test_create_no_regf(tmp_path):
     """Test Create Command With Specified With Numbers."""
     with chdir(tmp_path):
         run("create", "-T", "--module", "my_name_no_regf", "--library", "my_library", "--no-regf", "--flavour", "AMod")
-    assert_refdata(test_create_no_regf, tmp_path)
+    assert_refdata(test_create_no_regf, tmp_path, replacements=((Path("my_library"), "my_library"),))
 
 
 def test_create_descr(tmp_path):
@@ -477,7 +479,7 @@ def test_create_descr(tmp_path):
             "--flavour",
             "AMod",
         )
-    assert_refdata(test_create_descr, tmp_path)
+    assert_refdata(test_create_descr, tmp_path, replacements=((Path("my_library"), "my_library"),))
 
 
 @mark.parametrize(
@@ -500,7 +502,9 @@ def test_create_flavour(tmp_path, flavour):
             ["create", "-T", "--name", "my_name_flavour", "--library", "my_library", "--flavour", "{flavour}"],
             flavour="\n".join((*flavour, "")),
         )
-    assert_refdata(test_create_flavour, tmp_path, flavor="-".join(flavour))
+    assert_refdata(
+        test_create_flavour, tmp_path, flavor="-".join(flavour), replacements=((Path("my_library"), "my_library"),)
+    )
 
 
 @mark.parametrize(
@@ -524,7 +528,9 @@ def test_create_type_questions(tmp_path, input):
     assert not result.exception
     output_path = tmp_path / "output.txt"
     output_path.write_text(result.output)
-    assert_refdata(test_create_type_questions, tmp_path, flavor="-".join(input))
+    assert_refdata(
+        test_create_type_questions, tmp_path, flavor="-".join(input), replacements=((Path("lib_type"), "lib_type"),)
+    )
 
 
 @mark.parametrize("input", [("mod0", "y"), ("mod1", "n")])
@@ -536,4 +542,6 @@ def test_create_tb_questions(tmp_path, input):
             u.cli.ucdp, ["create", "--library", "lib_tb", "--flavour", "amod"], input="\n".join((*input, ""))
         )
     assert not result.exception
-    assert_refdata(test_create_tb_questions, tmp_path, flavor="-".join(input))
+    assert_refdata(
+        test_create_tb_questions, tmp_path, flavor="-".join(input), replacements=((Path("lib_tb"), "lib_tb"),)
+    )

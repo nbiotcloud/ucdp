@@ -1,6 +1,6 @@
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┓
-┃ Reference                   ┃ Top ┃ Tb  ┃ Tags ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━┩
-│ tests.test_mods.SomeMod     │  X  │     │      │
-│ tests.test_mods.SomeSomeMod │  X  │     │      │
-└─────────────────────────────┴─────┴─────┴──────┘
+                                                  
+| Reference                   | Top | Tb  | Tags |
+|-----------------------------|-----|-----|------|
+| tests.test_mods.SomeMod     |  X  |     |      |
+| tests.test_mods.SomeSomeMod |  X  |     |      |
+                                                  

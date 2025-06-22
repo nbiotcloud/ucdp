@@ -1,4 +1,4 @@
-'uart_lib.uart' checked.                                                        
+'uart_lib.uart' checked.                                                       
 '$GEN/uart_lib/uart/rtl/uart_regf.sv'... identical. untouched.
 '$GEN/uart_lib/uart/rtl/uart_core.sv'... identical. untouched.
 '$GEN/uart_lib/uart/rtl/uart.sv'... identical. untouched.
