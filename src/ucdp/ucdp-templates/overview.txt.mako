@@ -22,7 +22,7 @@ tags = getattr(datamodel, 'tags', None)
 root = u.get_overview_tree(datamodel.top.mod, minimal=minimal, tags=tags)
 %>\
 % if root:
-%   for pre, fill, node in anytree.RenderTree(root):
+%   for pre, fill, node in anytree.RenderTree(root, style=anytree.AsciiStyle()):
 ${pre}${node.title}
 %     if node.overview:
 %       for line in iter_rect(node.overview):

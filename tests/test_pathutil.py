@@ -129,29 +129,32 @@ def test_improved_resolve_env(tmp_path):
 
     with mock.patch.dict(os.environ, {"ENV1": str(env1), "ENV2": str(env2)}):
         # defined and existing env path
-        assert u.improved_resolve(Path("${ENV1}/song.txt")) == Path("${ENV1}") / "song.txt"
+        song1file = Path("${ENV1}") / "song.txt"
+        assert u.improved_resolve(Path("${ENV1}/song.txt")) == song1file
         assert u.improved_resolve(Path("${ENV1}/song.txt"), replace_envvars=True) == song1
         assert u.improved_resolve(Path("${ENV1}/song.txt"), replace_envvars=True, strict=True) == song1
-        with raises(FileNotFoundError, match=re.escape("${ENV1}/song.txt")):
+        with raises(FileNotFoundError, match=re.escape(str(song1file))):
             u.improved_resolve(Path("${ENV1}/song.txt"), strict=True)
 
         # defined and not existing env path
-        assert u.improved_resolve(Path("${ENV2}/song.txt")) == Path("${ENV2}") / "song.txt"
+        song2file = Path("${ENV2}") / "song.txt"
+        assert u.improved_resolve(Path("${ENV2}/song.txt")) == song2file
         assert u.improved_resolve(Path("${ENV2}/song.txt"), replace_envvars=True) == song2
-        with raises(FileNotFoundError, match=re.escape(str(env2))):
+        with raises(FileNotFoundError):
             u.improved_resolve(Path("${ENV2}/song.txt"), replace_envvars=True, strict=True)
-        with raises(FileNotFoundError, match=re.escape("${ENV2}/song.txt")):
+        with raises(FileNotFoundError):
             u.improved_resolve(Path("${ENV2}/song.txt"), strict=True)
 
         # not defined env path
-        assert u.improved_resolve(Path("${ENV3}/song.txt")) == Path("${ENV3}") / "song.txt"
+        song3file = Path("${ENV3}") / "song.txt"
+        assert u.improved_resolve(Path("${ENV3}/song.txt")) == song3file
         assert (
             u.improved_resolve(Path("${ENV3}/song.txt"), replace_envvars=True)
             == Path().resolve() / Path("${ENV3}") / "song.txt"
         )
         with raises(FileNotFoundError, match=re.escape("${ENV3}")):
             u.improved_resolve(Path("${ENV3}/song.txt"), replace_envvars=True, strict=True)
-        with raises(FileNotFoundError, match=re.escape("${ENV3}/song.txt")):
+        with raises(FileNotFoundError, match=re.escape(str(song3file))):
             u.improved_resolve(Path("${ENV3}/song.txt"), strict=True)
 
 

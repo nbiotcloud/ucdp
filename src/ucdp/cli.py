@@ -35,6 +35,7 @@ from typing import Literal
 import click
 from click_bash42_completion import patch
 from pydantic import BaseModel, ConfigDict
+from rich import box
 from rich.console import Console
 from rich.logging import RichHandler
 from rich.pretty import pprint
@@ -462,7 +463,7 @@ def ls(  # noqa: C901
             fill_row(row, info)
             print(*row)
     else:
-        table = Table(expand=filepath or abs_filepath)
+        table = Table(expand=filepath or abs_filepath, box=box.MARKDOWN)
         table.add_column("Reference")
         table.add_column("Top", justify="center")
         table.add_column("Tb ", justify="center")

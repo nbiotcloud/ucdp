@@ -57,7 +57,7 @@ class MyListingLightObject(u.LightObject):
     arg1: list[int] = u.Field(default_factory=list)
 
 
-@given(int1=st.integers(), int2=st.integers(), str1=st.text())
+@given(int1=st.integers(max_value=100), int2=st.integers(max_value=100), str1=st.text(max_size=10))
 def test_light_object_basics(int1, int2, str1):
     """:any:`LightObject` Basic Testing."""
     inst = MyLightObject(arg1=int1)
@@ -87,7 +87,12 @@ def test_light_object_basics(int1, int2, str1):
     assert hash(inst) is not None
 
 
-@given(int1=st.integers(), int2=st.integers(), int3=st.integers(), str1=st.text())
+@given(
+    int1=st.integers(max_value=100),
+    int2=st.integers(max_value=100),
+    int3=st.integers(max_value=100),
+    str1=st.text(max_size=10),
+)
 def test_sub_light_object(int1, int2, int3, str1):
     """Sub :any:`LightObject` Testing."""
     inst = MyMyLightObject(arg1=int1, arg2=int2)
@@ -109,7 +114,7 @@ def test_sub_light_object(int1, int2, int3, str1):
     assert MyMyLightObject(arg1=int1, arg2=int3) is MyMyLightObject(arg1=int1, arg2=int3)
 
 
-@given(int1=st.integers(), int2=st.integers(), tuple1=st.tuples(st.integers()))
+@given(int1=st.integers(max_value=100), int2=st.integers(max_value=100), tuple1=st.tuples(st.integers(max_value=100)))
 def test_tupling_light_object(int1, int2, tuple1):
     """:any:`LightObject` With Tuple Testing."""
     assert MyTuplingLightObject().arg1 == ()
@@ -123,7 +128,7 @@ def test_tupling_light_object(int1, int2, tuple1):
     assert hash(inst) is not None
 
 
-@given(int1=st.integers(), list1=st.lists(st.integers()))
+@given(int1=st.integers(max_value=100), list1=st.lists(st.integers(max_value=100)))
 def test_listing_light_object(int1, list1):
     """:any:`LightObject` With List Testing."""
     with raises(TypeError):

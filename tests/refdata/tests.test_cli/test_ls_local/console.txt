@@ -1,9 +1,9 @@
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┓
-┃ Reference                 ┃ Top ┃ Tb  ┃ Tags ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━┩
-│ glbl_lib.clk_gate         │  X  │     │      │
-│ glbl_lib.regf             │     │     │ bus  │
-│ glbl_lib.regf_tb          │     │  X  │      │
-│ uart_lib.uart             │  X  │     │ intf │
-│ uart_lib.uart.UartCoreMod │     │     │      │
-└───────────────────────────┴─────┴─────┴──────┘
+                                                
+| Reference                 | Top | Tb  | Tags |
+|---------------------------|-----|-----|------|
+| glbl_lib.clk_gate         |  X  |     |      |
+| glbl_lib.regf             |     |     | bus  |
+| glbl_lib.regf_tb          |     |  X  |      |
+| uart_lib.uart             |  X  |     | intf |
+| uart_lib.uart.UartCoreMod |     |     |      |
+                                                

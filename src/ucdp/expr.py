@@ -78,7 +78,7 @@ _SOPERMAP = {
 }
 
 
-class Expr(Object):
+class Expr(Object):  # noqa: PLW1641
     """Base Class for all Expressions.
 
     Attributes:

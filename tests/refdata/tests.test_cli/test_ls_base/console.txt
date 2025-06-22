@@ -1,9 +1,9 @@
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━┳━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━┓
-┃ Reference                 ┃ Top ┃ Tb  ┃ Tags ┃      Bases on ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━╇━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━┩
-│ glbl_lib.clk_gate         │  X  │     │      │          AMod │
-│ glbl_lib.regf             │     │     │ bus  │  ATailoredMod │
-│ glbl_lib.regf_tb          │     │  X  │      │ AGenericTbMod │
-│ uart_lib.uart             │  X  │     │ intf │          AMod │
-│ uart_lib.uart.UartCoreMod │     │     │      │      ACoreMod │
-└───────────────────────────┴─────┴─────┴──────┴───────────────┘
+                                                                
+| Reference                 | Top | Tb  | Tags |      Bases on |
+|---------------------------|-----|-----|------|---------------|
+| glbl_lib.clk_gate         |  X  |     |      |          AMod |
+| glbl_lib.regf             |     |     | bus  |  ATailoredMod |
+| glbl_lib.regf_tb          |     |  X  |      | AGenericTbMod |
+| uart_lib.uart             |  X  |     | intf |          AMod |
+| uart_lib.uart.UartCoreMod |     |     |      |      ACoreMod |
+                                                                
