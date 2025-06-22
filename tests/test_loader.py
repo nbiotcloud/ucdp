@@ -24,7 +24,10 @@
 """Test Loader and Top."""
 
 import re
+from pathlib import Path
 
+from caseconverter import pascalcase
+from contextlib_chdir import chdir
 from pytest import raises
 
 import ucdp as u
@@ -204,3 +207,35 @@ def test_typo(example_simple):
     msg = "'glbl_lib.clk_gate' does not contain GateMod. Did you mean 'glbl_lib.clk_gate', '"
     with raises(NameError, match=re.escape(msg)):
         u.load("glbl_lib.clk_gate.GateMod", paths=None)
+
+
+def test_paths(tmp_path):
+    """Paths Argument."""
+    for name in ("one", "two", "three", "four", "five"):
+        one_path = tmp_path / name / f"{name}_lib"
+        one_path.mkdir(parents=True)
+        (one_path / f"{name}.py").write_text(f"""\
+import ucdp as u
+
+class {pascalcase(name)}Mod(u.AMod):
+    def _build(self) -> None:
+        pass
+""")
+
+    with raises(NameError):
+        assert u.load("one_lib.one")
+
+    # relative path
+    with chdir(tmp_path):
+        assert u.load("one_lib.one", paths=(Path("one"),)).mod.name == "one"
+
+    with raises(NameError):
+        assert u.load("two_lib.two")
+
+    # absolute path
+    with chdir(tmp_path):
+        assert u.load("two_lib.two", paths=(tmp_path / "two",)).mod.name == "two"
+
+    # glob
+    with chdir(tmp_path):
+        assert u.load("four_lib.four", paths=(tmp_path / "*",)).mod.name == "four"

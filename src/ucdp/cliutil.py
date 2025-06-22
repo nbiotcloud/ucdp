@@ -64,6 +64,7 @@ opt_path = click.option(
     default=[],
     multiple=True,
     envvar="UCDP_PATH",
+    type=click.Path(path_type=Path),
     shell_complete=auto_path,
     help="""
 Search Path For Data Model And Template Files.
