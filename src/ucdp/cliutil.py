@@ -64,6 +64,7 @@ opt_path = click.option(
     default=[],
     multiple=True,
     envvar="UCDP_PATH",
+    type=click.Path(path_type=Path),
     shell_complete=auto_path,
     help="""
 Search Path For Data Model And Template Files.
@@ -140,9 +141,9 @@ arg_template_filepaths = click.argument(
 opt_local = click.option(
     "--local/--no-local",
     "-l/-L",
-    default=None,
+    default=True,
     is_flag=True,
-    help="List local/non-local modules only.",
+    help="List local/non-local modules only. Selected by default.",
 )
 opt_check = click.option(
     "--check",
