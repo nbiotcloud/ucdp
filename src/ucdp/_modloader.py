@@ -41,6 +41,7 @@ from .modbase import BaseMod, get_modbaseclss
 from .modref import ModRef, get_modclsname
 from .modtopref import TopModRef
 from .object import Object
+from .pathutil import absolute
 from .util import LOGGER, get_maxworkers, guess_path
 
 Patterns: TypeAlias = Iterable[str]
@@ -104,7 +105,7 @@ def find_modrefs(local: bool | None = None) -> tuple[ModRef, ...]:
     dirpaths: set[Path] = set()
     modrefs: list[ModRef] = []
     for syspathstr in sys.path:
-        syspath = Path(syspathstr).resolve()
+        syspath = absolute(Path(syspathstr))
         if local is not None and local is any(syspath.is_relative_to(pkg_path) for pkg_path in PKG_PATHS):
             continue
         for filepath in syspath.glob("*/*.py"):
