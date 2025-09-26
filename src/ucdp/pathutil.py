@@ -25,6 +25,7 @@
 """Path Utilities."""
 
 import os
+import os.path
 import re
 from collections.abc import Iterator
 from pathlib import Path
@@ -76,7 +77,10 @@ def improved_resolve(path: Path, basedir: Path | None = None, strict: bool = Fal
     if not path.is_absolute():
         basedir = basedir or Path()
         path = basedir / path
-    return path.resolve(strict=strict)
+    path = absolute(path)
+    if strict:
+        path.resolve(strict=True)
+    return path
 
 
 def use_envvars(path: Path, envvarnames: tuple[str, ...]) -> Path:
@@ -122,8 +126,13 @@ def _is_pattern(pattern: str) -> bool:
 
 def relative(path: Path, base: Path | None = None) -> Path:
     """Relative."""
-    base = base or Path().resolve()
+    base = base or absolute(Path())
     try:
         return path.relative_to(base)
     except ValueError:
         return Path(os.path.relpath(str(path), str(base)))
+
+
+def absolute(path: Path) -> Path:
+    """Resolve `..`, but keep symlinks."""
+    return Path(os.path.abspath(path))  # noqa: PTH100

@@ -78,7 +78,7 @@ from .iterutil import namefilter
 from .loader import load
 from .modfilelist import iter_modfilelists
 from .modtopref import PAT_TOPMODREF, TopModRef
-from .pathutil import relative
+from .pathutil import absolute, relative
 from .top import Top
 from .util import LOGGER, guess_path
 
@@ -562,7 +562,7 @@ Create Datamodel Skeleton.
 """
 )
 @click.option("--module", "-m", prompt=True, help="Name of the Module")
-@click.option("--library", "-l", default=Path().resolve().name, prompt=True, help="Name of the Library")
+@click.option("--library", "-l", default=absolute(Path()).name, prompt=True, help="Name of the Library")
 @click.option("--regf/--no-regf", "-r/-R", default=True, help="Make use of a Register File")
 @click.option("--descr", "-d", default="", help="Description")
 @click.option("--flavour", "-F", type=click.Choice(TYPE_CHOICES, case_sensitive=False), help="Choose a Module Flavour")

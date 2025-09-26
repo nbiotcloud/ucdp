@@ -30,6 +30,7 @@ from typing import ClassVar, Union
 
 from .modref import ModRef
 from .object import Field, LightObject, PosArgs
+from .pathutil import absolute
 
 RE_TOPMODREF = re.compile(
     # [tb]#
@@ -99,7 +100,7 @@ class TopModRef(LightObject):
             return value
 
         if isinstance(value, Path):
-            path = value.resolve()
+            path = absolute(value)
             modname = path.stem
             libname = path.parent.name
             return TopModRef(top=ModRef(libname=libname, modname=modname))
