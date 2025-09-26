@@ -38,7 +38,7 @@ jobs:
         with:
           timeout_minutes: 10
           max_attempts: 3
-          command: uv run --frozen -- coveralls --service=github
+          command: uv run --frozen -- coveralls --service=github || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: ${{ matrix.test-name }}
@@ -62,7 +62,7 @@ jobs:
         with:
           timeout_minutes: 10
           max_attempts: 3
-          command: uv run --frozen -- coveralls --service=github --finish
+          command: uv run --frozen -- coveralls --service=github --finish || true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
