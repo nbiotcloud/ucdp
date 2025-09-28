@@ -42,6 +42,7 @@ def test_basic(example_simple):
         gen="full",
         filepaths=(filepath,),
         template_filepaths=(example_simple / "uart_lib" / "main.mako",),
+        clean_filepaths=(),
     )
 
 

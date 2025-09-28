@@ -4,7 +4,8 @@
             'filepaths': ('$PRJROOT/glbl_lib/clk_gate/rtl/clk_gate.sv',),
             'template_filepaths': (
                 '$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako',
-            )
+            ),
+            'clean_filepaths': ()
         }
     ],
     "<glbl_lib.regf.RegfMod(inst='uart/u_regf', libname='uart_lib', modname='uart_regf')>": [
@@ -13,7 +14,8 @@
             'filepaths': ('$PRJROOT/uart_lib/uart/rtl/uart_regf.sv',),
             'template_filepaths': (
                 '$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako',
-            )
+            ),
+            'clean_filepaths': ()
         }
     ],
     "<uart_lib.uart.UartCoreMod(inst='uart/u_core', libname='uart_lib', modname='uart_core')>": [
@@ -22,7 +24,8 @@
             'filepaths': ('$PRJROOT/uart_lib/uart/rtl/uart_core.sv',),
             'template_filepaths': (
                 '$PRJ/src/ucdp/examples/simple/uart_lib/main.mako',
-            )
+            ),
+            'clean_filepaths': ()
         }
     ],
     "<uart_lib.uart.UartMod(inst='uart', libname='uart_lib', modname='uart')>": [
@@ -31,7 +34,8 @@
             'filepaths': ('$PRJROOT/uart_lib/uart/rtl/uart.sv',),
             'template_filepaths': (
                 '$PRJ/src/ucdp/examples/simple/uart_lib/main.mako',
-            )
+            ),
+            'clean_filepaths': ()
         },
         {
             'name': 'header',

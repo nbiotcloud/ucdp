@@ -36,7 +36,9 @@ class HdlFileList(u.ModFileList):
         # Wildcards are supported. Also in combination with environment variables!
         "$PRJROOT/{mod.libname}/{mod.topmodname}/{view}/{mod.modname}.sv",
     )
-
+    clean_filepaths: u.ToPaths = (
+        "$PRJROOT/{mod.libname}/{mod.topmodname}/{view}/*.sv",
+    )
     template_filepaths: u.ToPaths = ("main.mako",)
 
     @staticmethod
