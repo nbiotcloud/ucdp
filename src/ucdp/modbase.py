@@ -51,7 +51,7 @@ from .flipflop import FlipFlop
 from .ident import Ident, Idents
 from .iterutil import namefilter
 from .logging import LOGGER
-from .modref import ModRef
+from .modref import ModRef, get_modclsname
 from .modutil import get_modbaseinfos
 from .mux import Mux
 from .namespace import Namespace
@@ -167,13 +167,15 @@ class BaseMod(NamedObject):
         return uniquetuple(f"{bci.libname}.{bci.modname}" for bci in get_modbaseinfos(self))
 
     @classmethod
-    def get_modref(cls) -> ModRef:
+    def get_modref(cls, minimal: bool = False) -> ModRef:
         """Python Class Reference."""
         bci = next(get_baseclassinfos(cls))
+        modclsname = bci.clsname if not minimal or bci.clsname != get_modclsname(bci.modname) else None
+
         return ModRef(
             libname=bci.libname,
             modname=bci.modname,
-            modclsname=bci.clsname,
+            modclsname=modclsname,
         )
 
     @classmethod

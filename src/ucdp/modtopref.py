@@ -26,9 +26,16 @@
 
 import re
 from pathlib import Path
-from typing import ClassVar, Union
+from typing import ClassVar, Literal, Optional, Union
 
+from pydantic_core import PydanticUndefined
+
+from .mod import AMod
+from .modbase import BaseMod, ModCls
+from .modconfigurable import AConfigurableMod
+from .modgenerictb import AGenericTbMod
 from .modref import ModRef
+from .modtb import ATbMod
 from .object import Field, LightObject, PosArgs
 from .pathutil import absolute
 
@@ -42,6 +49,9 @@ RE_TOPMODREF = re.compile(
 )
 PAT_TOPMODREF = "[tb_lib.tb#]top_lib.top[-sub_lib.sub]"
 RE_MODREF = r"[a-zA-Z][a-zA-Z_0-9]*\.[a-zA-Z][a-zA-Z_0-9]*"
+
+
+TbType = Literal["Static", "Generic", ""]
 
 
 class TopModRef(LightObject):
@@ -113,3 +123,45 @@ class TopModRef(LightObject):
             return TopModRef(top=top, sub=sub, tb=tb)
 
         raise ValueError(f"{value!r} does not match pattern {PAT_TOPMODREF!r}")
+
+    @staticmethod
+    def from_mod(mod: BaseMod) -> Optional["TopModRef"]:
+        """From Module."""
+        if get_tb(mod.__class__) == "Generic":
+            tbref = mod.get_modref(minimal=True)
+            mod = mod.dut
+        else:
+            tbref = None
+        if not is_top(mod.__class__):
+            sub = f"{mod.libname}.{mod.modname}"
+            while mod.parent:
+                mod = mod.parent
+                if is_top(mod.__class__):
+                    break
+        else:
+            sub = None
+        modref = mod.get_modref(minimal=True)
+        return TopModRef(top=modref, sub=sub, tb=tbref)
+
+
+def is_top(modcls: ModCls) -> bool:
+    """Module is Direct Loadable."""
+    if issubclass(modcls, AGenericTbMod):
+        return modcls.build_dut.__qualname__ != AGenericTbMod.build_dut.__qualname__
+    if issubclass(modcls, AConfigurableMod):
+        if modcls.get_default_config is not AConfigurableMod.get_default_config:
+            return True
+        config_field = modcls.model_fields["config"]
+        return config_field.default is not PydanticUndefined
+    if issubclass(modcls, (AMod, ATbMod)):
+        return True
+    return modcls.build_top.__qualname__ != BaseMod.build_top.__qualname__
+
+
+def get_tb(modcls: ModCls) -> TbType:
+    """Module Testbench."""
+    if issubclass(modcls, AGenericTbMod):
+        return "Generic"
+    if issubclass(modcls, ATbMod):
+        return "Static"
+    return ""
