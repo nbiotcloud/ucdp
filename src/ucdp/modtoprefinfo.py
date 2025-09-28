@@ -26,9 +26,6 @@
 
 from inspect import getfile
 from pathlib import Path
-from typing import Literal
-
-from pydantic_core import PydanticUndefined
 
 from .consts import PKG_PATHS
 from .mod import AMod
@@ -39,13 +36,10 @@ from .modcore import ACoreMod
 from .modgenerictb import AGenericTbMod
 from .modtailored import ATailoredMod
 from .modtb import ATbMod
-from .modtopref import TopModRef
+from .modtopref import TbType, TopModRef, get_tb, is_top
 from .object import Object
 
 BASECLSS = (AConfigurableMod, ACoreMod, ATailoredMod, AMod, AGenericTbMod, ATbMod, BaseMod, AConfigurableTbMod)
-
-
-TbType = Literal["Static", "Generic", ""]
 
 
 class TopModRefInfo(Object):
@@ -86,26 +80,3 @@ def get_modbasecls(modcls: ModCls) -> type[BaseMod] | None:
 def is_local(filepath: Path) -> bool:
     """Determine If Module Is From Local Environment And Not Installed Through A Package."""
     return not any(filepath.is_relative_to(pkg_path) for pkg_path in PKG_PATHS)
-
-
-def is_top(modcls: ModCls) -> bool:
-    """Module is Direct Loadable."""
-    if issubclass(modcls, AGenericTbMod):
-        return modcls.build_dut.__qualname__ != AGenericTbMod.build_dut.__qualname__
-    if issubclass(modcls, AConfigurableMod):
-        if modcls.get_default_config is not AConfigurableMod.get_default_config:
-            return True
-        config_field = modcls.model_fields["config"]
-        return config_field.default is not PydanticUndefined
-    if issubclass(modcls, (AMod, ATbMod)):
-        return True
-    return modcls.build_top.__qualname__ != BaseMod.build_top.__qualname__
-
-
-def get_tb(modcls: ModCls) -> TbType:
-    """Module Testbench."""
-    if issubclass(modcls, AGenericTbMod):
-        return "Generic"
-    if issubclass(modcls, ATbMod):
-        return "Static"
-    return ""
