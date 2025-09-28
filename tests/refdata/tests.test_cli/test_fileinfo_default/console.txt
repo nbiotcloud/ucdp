@@ -13,6 +13,7 @@
                 '$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako',
             ),
             'inc_template_filepaths': (),
+            'clean_filepaths': (),
             'flavors': None,
             'flavor': None,
             'is_leaf': False
@@ -32,6 +33,7 @@
                 '$PRJ/src/ucdp/examples/simple/glbl_lib/main.mako',
             ),
             'inc_template_filepaths': (),
+            'clean_filepaths': (),
             'flavors': None,
             'flavor': None,
             'is_leaf': False
@@ -51,6 +53,7 @@
                 '$PRJ/src/ucdp/examples/simple/uart_lib/main.mako',
             ),
             'inc_template_filepaths': (),
+            'clean_filepaths': (),
             'flavors': None,
             'flavor': None,
             'is_leaf': False
@@ -70,6 +73,7 @@
                 '$PRJ/src/ucdp/examples/simple/uart_lib/main.mako',
             ),
             'inc_template_filepaths': (),
+            'clean_filepaths': (),
             'flavors': None,
             'flavor': None,
             'is_leaf': False
@@ -87,6 +91,7 @@
                 '$PRJ/src/ucdp/examples/simple/uart_lib/hpp.mako',
             ),
             'inc_template_filepaths': (),
+            'clean_filepaths': (),
             'flavors': None,
             'flavor': None,
             'is_leaf': False

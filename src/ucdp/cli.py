@@ -52,6 +52,7 @@ from .cliutil import (
     auto_path,
     defines2data,
     opt_check,
+    opt_clean,
     opt_create,
     opt_defines,
     opt_dry_run,
@@ -221,6 +222,7 @@ TOP: Top Module. {PAT_TOPMODREF}. Environment Variable 'UCDP_TOP'
 @opt_topsfile
 @opt_check
 @opt_create
+@opt_clean
 @pass_ctx
 def gen(
     ctx,
@@ -234,6 +236,7 @@ def gen(
     local=None,
     check=False,
     create=False,
+    clean=False,
     tops_file=None,
 ):
     """Generate."""
@@ -253,7 +256,7 @@ def gen(
                 LOGGER.warning(f"Debug with 'ucdp check {info.topmodref}'")
                 continue
             for item in filelist:
-                generator.generate(top, item, target=target, data=data)
+                generator.generate(top, item, target=target, data=data, clean=clean)
 
 
 @ucdp.command(

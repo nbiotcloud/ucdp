@@ -155,6 +155,7 @@ class Generator(Object):
         filelistparser: FileListParser | None = None,
         maxlevel: int | None = None,
         data: Data | None = None,
+        clean: bool = False,
     ):
         """
         Generate for Top-Module.
@@ -169,6 +170,7 @@ class Generator(Object):
             filelistparser: Specific File List Parser
             maxlevel: Stop Generation on given hierarchy level.
             data: Data added to the datamodel.
+            clean: Remove obsolete fully-generated files.
         """
         with self.top(top, data=data) as top_:
             modfilelists = iter_modfilelists(
@@ -180,9 +182,9 @@ class Generator(Object):
                 maxlevel=maxlevel,
             )
             with extend_sys_path(paths, use_env_default=True):
-                self._generate(modfilelists)
+                self._generate(modfilelists, clean)
 
-    def _generate(self, modfilelists) -> None:
+    def _generate(self, modfilelists, clean: bool) -> None:  # noqa: C901
         makolator = self.makolator
 
         def _inplace(template_filepaths, filepath, context):
@@ -194,8 +196,14 @@ class Generator(Object):
         def _gen(template_filepaths, filepath, context):
             makolator.gen(template_filepaths, filepath, context=context)
 
+        def _clean(filepath):
+            if makolator.is_fully_generated(filepath):
+                makolator.remove(filepath)
+
         with ThreadPoolExecutor(max_workers=self.maxworkers) as exe:
             jobs = []  # type: ignore [var-annotated]
+            all_filepaths: list[Path] = []
+            all_clean_filepaths: list[Path] = []
             for mod, modfilelist in modfilelists:
                 gen = modfilelist.get_gen(mod, modfilelist.flavor)
                 if gen == "no":
@@ -207,6 +215,9 @@ class Generator(Object):
                 template_filepaths: tuple[Path, ...] = modfilelist.template_filepaths or ()  # type: ignore[assignment]
                 inc_filepaths: tuple[Path, ...] = modfilelist.inc_filepaths or ()  # type: ignore[assignment]
                 inc_template_filepaths: tuple[Path, ...] = modfilelist.inc_template_filepaths or ()  # type: ignore[assignment]
+                for filepath in modfilelist.clean_filepaths:
+                    if filepath not in all_clean_filepaths:
+                        all_clean_filepaths.append(filepath)
                 ctx = {"mod": mod, "modfilelist": modfilelist}
                 if gen == "inplace":
                     jobs.extend(exe.submit(_inplace, inc_template_filepaths, path, ctx) for path in inc_filepaths)
@@ -214,6 +225,13 @@ class Generator(Object):
                 else:
                     jobs.extend(exe.submit(_gen, inc_template_filepaths, path, ctx) for path in inc_filepaths)
                     jobs.extend(exe.submit(_gen, template_filepaths, path, ctx) for path in filepaths)
+                    for filepath in filepaths + inc_filepaths:
+                        if filepath not in all_filepaths:
+                            all_filepaths.append(filepath)
+            for clean_filepath in all_clean_filepaths:
+                if clean_filepath in all_filepaths:
+                    continue
+                jobs.append(exe.submit(_clean, clean_filepath))
             for job in jobs:
                 job.result()
 
@@ -229,6 +247,7 @@ def generate(
     paths: Iterable[Path] | None = None,
     data: Data | None = None,
     create: bool = False,
+    clean: bool = False,
 ):
     """
     Generate for Top-Module.
@@ -246,6 +265,7 @@ def generate(
         paths: Search Path For Data Model And Template Files.
         data: Data added to the datamodel.
         create: Create missing inplace files.
+        clean: Remove obsolete fully-generated files.
     """
     makolator = makolator or get_makolator(paths=paths, create=create)
     with Generator(makolator=makolator, maxworkers=maxworkers) as generator:
@@ -256,6 +276,7 @@ def generate(
             filelistparser=filelistparser,
             maxlevel=maxlevel,
             data=data,
+            clean=clean,
         )
 
 

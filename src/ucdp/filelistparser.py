@@ -30,7 +30,7 @@ from pathlib import Path
 
 from .logging import LOGGER
 from .object import Object
-from .pathutil import improved_resolve
+from .pathutil import improved_glob, improved_resolve
 
 _RE_COMMENT = re.compile(r"\A(.*?)(\s*(#|//).*)\Z")
 _RE_FILELIST = re.compile(r"\A-([fF])\s+(.*?)\Z")
@@ -47,6 +47,7 @@ class FileListParser(Object):
         inc_dirs: list[Path],
         filepath: Path,
         replace_envvars: bool = False,
+        glob: bool = False,
     ):
         """Read File List File.
 
@@ -55,16 +56,25 @@ class FileListParser(Object):
             inc_dirs: Include Directories Container.
             filepath: File to be parsed.
             replace_envvars: Resolve Environment Variables.
+            glob: Expand wildcards.
         """
         with filepath.open(encoding="utf-8") as file:
             basepath = filepath.parent
-            self.parse(filepaths, inc_dirs, basepath, file)
+            self.parse(filepaths, inc_dirs, basepath, file, glob=glob)
 
         with filepath.open(encoding="utf-8") as file:
             basepath = filepath.parent
-            self.parse(filepaths, inc_dirs, basepath, file, replace_envvars=replace_envvars, context=str(filepath))
+            self.parse(
+                filepaths,
+                inc_dirs,
+                basepath,
+                file,
+                replace_envvars=replace_envvars,
+                context=str(filepath),
+                glob=glob,
+            )
 
-    def parse(
+    def parse(  # noqa: C901
         self,
         filepaths: list[Path],
         inc_dirs: list[Path],
@@ -72,6 +82,7 @@ class FileListParser(Object):
         items: Iterable[str | Path],
         replace_envvars: bool = False,
         context: str = "",
+        glob: bool = False,
     ):
         """File List File.
 
@@ -82,6 +93,7 @@ class FileListParser(Object):
             items: Items to be parsed.
             replace_envvars: Resolve Environment Variables.
             context: Context for error reporting.
+            glob: Expand wildcards.
         """
         for lineno, item in enumerate(items, 1):
             line = str(item).strip()
@@ -95,7 +107,7 @@ class FileListParser(Object):
             mat = _RE_FILELIST.match(line)
             if mat:
                 filelistpath = self.resolve(basedir, Path(mat.group(2)))
-                self.parse_file(filepaths, inc_dirs, filelistpath)
+                self.parse_file(filepaths, inc_dirs, filelistpath, glob=glob)
                 continue
             # -incdir
             mat = _RE_INCDIR.match(line)
@@ -107,9 +119,14 @@ class FileListParser(Object):
             # file
             mat = _RE_FILE.match(line)
             if mat:
-                filepath = self.normalize(basedir, Path(mat.group("filepath")), replace_envvars)
-                if filepath not in filepaths:
-                    filepaths.append(filepath)
+                if glob:
+                    items = improved_glob(Path(mat.group("filepath")), basedir=basedir)
+                else:
+                    items = [Path(mat.group("filepath"))]
+                for sitem in items:
+                    filepath = self.normalize(basedir, sitem, replace_envvars)
+                    if filepath not in filepaths:
+                        filepaths.append(filepath)
                 continue
             LOGGER.warning("%s:%d Cannot parse %s", context, lineno, line)
 

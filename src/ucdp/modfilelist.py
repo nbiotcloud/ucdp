@@ -98,6 +98,7 @@ class ModFileList(IdentObject):
     dep_filepaths: ToPaths = Field(default=(), strict=False)
     template_filepaths: ToPaths = Field(default=(), strict=False)
     inc_template_filepaths: ToPaths = Field(default=(), strict=False)
+    clean_filepaths: ToPaths = Field(default=(), strict=False)
     flavors: Flavors | None = None
     flavor: Flavor | None = None
     is_leaf: bool = False
@@ -204,6 +205,7 @@ def resolve_modfilelists(
             inc_dirs: list[Path] = []
             inc_filepaths: list[Path] = []
             filepaths: list[Path] = []
+            clean_filepaths: list[Path] = []
             mod_placeholder = modfilelist.get_mod_placeholder(mod, flavor=flavor)
             _resolve_mod(
                 filelistparser,
@@ -259,6 +261,17 @@ def resolve_modfilelists(
                         basemodfilelist.inc_template_filepaths,
                         replace_envvars,
                     )
+            _resolve_mod(
+                filelistparser,
+                mod,
+                mod_placeholder,
+                clean_filepaths,
+                (),
+                modfilelist.clean_filepaths,
+                (),
+                replace_envvars,
+                glob=True,
+            )
             # result
             yield modfilelist.new(
                 inc_dirs=tuple(inc_dirs),
@@ -268,6 +281,7 @@ def resolve_modfilelists(
                 dep_inc_dirs=tuple(dep_inc_dirs),
                 template_filepaths=tuple(template_filepaths),
                 inc_template_filepaths=tuple(inc_template_filepaths),
+                clean_filepaths=tuple(clean_filepaths),
                 flavors=(flavor,) if flavor is not None else None,
                 flavor=flavor,
             )
@@ -321,12 +335,15 @@ def _resolve_mod(
     add_filepaths: StrPaths,
     add_inc_dirs: StrPaths,
     replace_envvars: bool,
+    glob: bool = False,
 ) -> None:
     basefile = Path(getfile(mod.__class__))
     basedir = basefile.parent
     if add_inc_dirs:
         items = (Path(str(filepath).format_map(placeholder)) for filepath in add_inc_dirs)
-        filelistparser.parse(inc_dirs, inc_dirs, basedir, items, replace_envvars=replace_envvars, context=str(basefile))
+        filelistparser.parse(
+            inc_dirs, inc_dirs, basedir, items, replace_envvars=replace_envvars, context=str(basefile), glob=glob
+        )
     if add_filepaths:
         items = (Path(str(filepath).format_map(placeholder)) for filepath in add_filepaths)
         filelistparser.parse(
@@ -336,6 +353,7 @@ def _resolve_mod(
             items,
             replace_envvars=replace_envvars,
             context=str(basefile),
+            glob=glob,
         )
 
 

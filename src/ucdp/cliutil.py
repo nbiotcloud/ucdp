@@ -158,6 +158,13 @@ opt_create = click.option(
     is_flag=True,
     help="Create missing inplace files.",
 )
+opt_clean = click.option(
+    "--clean",
+    "-n",
+    default=False,
+    is_flag=True,
+    help="Remove obsolete fully-generated files.",
+)
 
 
 def defines2data(defines: list[str]) -> dict[str, str]:
