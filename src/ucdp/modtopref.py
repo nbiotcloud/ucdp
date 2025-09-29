@@ -134,13 +134,14 @@ class TopModRef(LightObject):
             tbref = None
         if not is_top(mod.__class__):
             sub = f"{mod.libname}.{mod.modname}"
-            while mod.parent:
-                mod = mod.parent
+            while mod is not None:
                 if is_top(mod.__class__):
                     break
                 if isinstance(mod, AConfigurableMod):
                     # no standalone configuration
                     mod = None
+                    break
+                mod = mod.parent
         else:
             sub = None
         if mod is None:
