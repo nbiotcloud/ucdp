@@ -138,8 +138,13 @@ class TopModRef(LightObject):
                 mod = mod.parent
                 if is_top(mod.__class__):
                     break
+                if isinstance(mod, AConfigurableMod):
+                    # no standalone configuration
+                    mod = None
         else:
             sub = None
+        if mod is None:
+            return None
         modref = mod.get_modref(minimal=True)
         return TopModRef(top=modref, sub=sub, tb=tbref)
 
