@@ -27,8 +27,10 @@
 from collections.abc import Iterator
 from logging import FATAL, getLogger
 from pathlib import Path
+from typing import IO, Any
 
 import click
+from rich.console import Console
 
 from ucdp.finder import find
 from ucdp.pathutil import improved_glob
@@ -181,3 +183,15 @@ def read_file(filepath: Path) -> Iterator[str]:
                 continue
             if line:
                 yield line
+
+
+class Exit(click.ClickException):
+    """Graceful Exit."""
+
+    def __init__(self, console: Console, message: str) -> None:
+        super().__init__(message)
+        self.console = console
+
+    def show(self, file: IO[Any] | None = None) -> None:
+        """Show."""
+        self.console.print(f"[red][bold]{self.message}.")
