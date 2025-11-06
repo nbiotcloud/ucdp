@@ -45,6 +45,7 @@ from ._cligroup import MainGroup
 from ._logging import HasErrorHandler
 from .cache import CACHE
 from .cliutil import (
+    Exit,
     PathType,
     arg_template_filepaths,
     arg_top,
@@ -138,12 +139,7 @@ class Ctx(BaseModel):
         return self
 
     def __exit__(self, exc_type, exc_value, tb):
-        if exc_type or self.has_error_handler.has_errors:
-            if exc_type is KeyboardInterrupt:
-                self.console.print("[red]Aborted.")
-            else:
-                self.console.print("[red][bold]Failed.")
-            sys.exit(1)
+        pass
 
 
 @click.group(cls=MainGroup, context_settings={"help_option_names": ["-h", "--help"]})
@@ -158,6 +154,13 @@ def ucdp(ctx, verbose=0, no_cache=False, no_color=False):
 
 
 pass_ctx = click.make_pass_decorator(Ctx)
+
+
+@ucdp.result_callback()
+@pass_ctx
+def _end(ctx: Ctx, *args, **kwargs):
+    if ctx.has_error_handler.has_errors:
+        raise Exit(ctx.console, "FAILED")
 
 
 def get_group(help=None):  # pragma: no cover
