@@ -56,3 +56,6 @@ PKG_PATHS = {sys.prefix, sys.base_prefix}
 
 TEMPLATE_PATHS = ("ucdp-templates/",)
 """Search Directories for Templates."""
+
+CLINAME: str = "ucdp"
+"""Name of Command-Line-Script - Used for documentation purposes."""
