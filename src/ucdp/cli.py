@@ -41,6 +41,7 @@ from rich.logging import RichHandler
 from rich.pretty import pprint
 from rich.table import Table
 
+from . import consts
 from ._cligroup import MainGroup
 from ._logging import HasErrorHandler
 from .cache import CACHE
@@ -70,7 +71,6 @@ from .cliutil import (
     opt_topsfile,
     read_file,
 )
-from .consts import PATH
 from .create import TB_MAP, TYPE_CHOICES, CreateInfo
 from .create import create as create_
 from .fileset import FileSet
@@ -256,7 +256,7 @@ def gen(
             except Exception as exc:
                 LOGGER.warning(f"Cannot load '{info.topmodref}'")
                 LOGGER.warning(str(exc))
-                LOGGER.warning(f"Debug with 'ucdp check {info.topmodref}'")
+                LOGGER.warning(f"Debug with '{consts.CLINAME} check {info.topmodref}'")
                 continue
             for item in filelist:
                 generator.generate(top, item, target=target, data=data, clean=clean)
@@ -402,18 +402,18 @@ def fileinfo(ctx, top, path, filelist, target=None, maxlevel=None, minimal=False
 
 
 @ucdp.command(
-    help="""
+    help=f"""
               List Available Data Models.
 
               PATTERN: Limit list to these modules only.
 
               Examples:
 
-                ucdp ls
+                {consts.CLINAME} ls
 
-                ucdp ls -n
+                {consts.CLINAME} ls -n
 
-                ucdp ls glbl_lib*
+                {consts.CLINAME} ls glbl_lib*
               """
 )
 @arg_tops
@@ -536,7 +536,7 @@ def overview(ctx, top, path, minimal=False, file=None, tag=None):
     # Load quiet, otherwise stdout is messed-up
     top = load_top(ctx, top, path, quiet=True)
     data = {"minimal": minimal, "tags": tag}
-    render_generate(top, [PATH / "ucdp-templates" / "overview.txt.mako"], genfile=file, data=data, no_stat=True)
+    render_generate(top, [consts.PATH / "ucdp-templates" / "overview.txt.mako"], genfile=file, data=data, no_stat=True)
 
 
 @ucdp.group(context_settings={"help_option_names": ["-h", "--help"]})
