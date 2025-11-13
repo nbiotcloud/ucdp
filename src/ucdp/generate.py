@@ -24,6 +24,8 @@
 
 """Code Generator based of FileLists."""
 
+import importlib
+import re
 import sys
 from collections.abc import Iterable
 from concurrent.futures import ThreadPoolExecutor
@@ -35,6 +37,7 @@ from makolator import Config, Datamodel, Existing, Makolator
 from uniquer import uniquelist
 
 from .cache import CACHE
+from .consts import TEMPLATE_PATHS
 from .filelistparser import FileListParser
 from .logging import LOGGER
 from .modbase import BaseMod
@@ -45,6 +48,8 @@ from .util import extend_sys_path
 
 Paths = Path | Iterable[Path]
 Data = dict[str, Any]
+
+_RE_PATH_EDITABLE = re.compile(r"__editable__\.([^-]+)-")
 
 
 def get_template_paths(paths: Iterable[Path] | None = None) -> list[Path]:
@@ -57,7 +62,23 @@ def get_template_paths(paths: Iterable[Path] | None = None) -> list[Path]:
     template_paths: list[Path] = []
     with extend_sys_path(paths, use_env_default=True):
         for path in sys.path:
-            template_paths.extend(Path(path).glob("*/ucdp-templates/"))
+            editable = _RE_PATH_EDITABLE.match(path)
+            if editable:
+                package_name = editable.group(1)
+                spec = importlib.util.find_spec(package_name)
+                if spec and spec.submodule_search_locations:
+                    for location in spec.submodule_search_locations:
+                        for pattern in TEMPLATE_PATHS:
+                            add_paths = tuple(Path(location).glob(pattern))
+                            LOGGER.debug(f"get_template_paths: editable={path} {location}/{pattern}: {add_paths}")
+                            template_paths.extend(add_paths)
+                else:
+                    LOGGER.warning(f"Cannot determine template_path for editable path {path}")
+            else:
+                for pattern in TEMPLATE_PATHS:
+                    add_paths = tuple(Path(path).glob(f"*/{pattern}"))
+                    LOGGER.debug(f"get_template_paths: {path}/*/{pattern}: {add_paths}")
+                    template_paths.extend(add_paths)
     return uniquelist(template_paths)
 
 

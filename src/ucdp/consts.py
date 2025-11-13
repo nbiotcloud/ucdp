@@ -53,3 +53,6 @@ Gen = Literal["no", "inplace", "full", "custom"]
 PATH = Path(__file__).parent
 
 PKG_PATHS = {sys.prefix, sys.base_prefix}
+
+TEMPLATE_PATHS = ("ucdp-templates/",)
+"""Search Directories for Templates."""
