@@ -113,7 +113,7 @@ def _dump_assigns(assigns: u.Assigns, path: Path, name: str = "assigns", full: b
 def test_basic(top):
     """Assign Basics."""
     doc = u.Doc(title="title", descr="descr", comment="comment")
-    target = u.Port(u.UintType(8), "a_i", doc=doc, ifdef="IFDEF")
+    target = u.Port(u.UintType(8), "a_i", doc=doc, ifdefs=("IFDEF",))
     source = u.Signal(u.UintType(8), "b_s")
     assign = u.Assign(target=target, source=source)
 
@@ -121,7 +121,7 @@ def test_basic(top):
     assert assign.type_ == u.UintType(8)
     assert assign.doc is doc
     assert assign.direction == u.IN
-    assert assign.ifdef == "IFDEF"
+    assert assign.ifdefs == ("IFDEF",)
 
 
 def test_assign_empty(top, tmp_path):

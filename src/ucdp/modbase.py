@@ -27,6 +27,7 @@ Base Hardware Module.
 [BaseMod][ucdp.modbase.BaseMod] defines the base interface which is **common to all hardware modules**.
 """
 
+import warnings
 from abc import abstractmethod
 from functools import cached_property
 from inspect import getmro
@@ -49,6 +50,7 @@ from .expr import BoolOp, Expr
 from .exprparser import ExprParser, Parseable, cast_booltype
 from .flipflop import FlipFlop
 from .ident import Ident, Idents
+from .ifdef import Ifdefs, cast_ifdefs
 from .iterutil import namefilter
 from .logging import LOGGER
 from .modref import ModRef, get_modclsname
@@ -267,6 +269,7 @@ class BaseMod(NamedObject):
         descr: str | None = None,
         comment: str | None = None,
         ifdef: str | None = None,
+        ifdefs: Ifdefs | str | None = None,
         exist_ok: bool = False,
     ) -> Param:
         """
@@ -280,9 +283,15 @@ class BaseMod(NamedObject):
             title: Full Spoken Name.
             descr: Documentation Description.
             comment: Source Code Comment.
-            ifdef: IFDEF pragma
+            ifdef: IFDEF pragma. Obsolete.
+            ifdefs: IFDEFs pragmas.
             exist_ok: Do not complain about already existing item
         """
+        if ifdef:
+            warnings.warn(
+                "add_param(..., ifdef=...) is obsolete, please use ifdefs=", category=DeprecationWarning, stacklevel=1
+            )
+        ifdefs = cast_ifdefs(ifdefs or ifdef)
         if isinstance(arg, Param):
             value = self.paramdict.pop(arg.name, None)
             param: Param = arg.new(value=value)
@@ -291,7 +300,7 @@ class BaseMod(NamedObject):
             type_: BaseType = arg
             doc = doc_from_type(type_, title=title, descr=descr, comment=comment)
             value = self.paramdict.pop(name, None)
-            param = Param(type_=type_, name=name, doc=doc, ifdef=ifdef, value=value)
+            param = Param(type_=type_, name=name, doc=doc, ifdefs=ifdefs, value=value)
         if self.__is_locked:
             raise LockError(f"{self}: Cannot add parameter {name!r}.")
         self.namespace.add(param, exist_ok=exist_ok)
@@ -306,6 +315,7 @@ class BaseMod(NamedObject):
         descr: str | None = None,
         comment: str | None = None,
         ifdef: str | None = None,
+        ifdefs: Ifdefs | str | None = None,
         exist_ok: bool = False,
     ) -> Const:
         """
@@ -319,16 +329,22 @@ class BaseMod(NamedObject):
             title: Full Spoken Name.
             descr: Documentation Description.
             comment: Source Code Comment.
-            ifdef: IFDEF pragma
+            ifdef: IFDEF pragma. Obsolete.
+            ifdefs: IFDEFs pragmas.
             exist_ok: Do not complain about already existing item
         """
+        if ifdef:
+            warnings.warn(
+                "add_const(..., ifdef=...) is obsolete, please use ifdefs=", category=DeprecationWarning, stacklevel=1
+            )
+        ifdefs = cast_ifdefs(ifdefs or ifdef)
         if isinstance(arg, Const):
             const: Const = arg
             assert name is None
         else:
             type_: BaseType = arg
             doc = doc_from_type(type_, title=title, descr=descr, comment=comment)
-            const = Const(type_=type_, name=name, doc=doc, ifdef=ifdef)
+            const = Const(type_=type_, name=name, doc=doc, ifdefs=ifdefs)
         if self.__is_locked:
             raise LockError(f"{self}: Cannot add constant {name!r}.")
         self.namespace.add(const, exist_ok=exist_ok)
@@ -368,6 +384,7 @@ class BaseMod(NamedObject):
         descr: str | None = None,
         comment: str | None = None,
         ifdef: str | None = None,
+        ifdefs: Ifdefs | str | None = None,
         route: Routeables | None = None,
         clkrel: str | Port | BaseClkRel | None = None,
     ) -> Port:
@@ -383,16 +400,22 @@ class BaseMod(NamedObject):
             title: Full Spoken Name.
             descr: Documentation Description.
             comment: Source Code Comment. Default is 'title'
-            ifdef: IFDEF mapping
+            ifdef: IFDEF pragma. Obsolete.
+            ifdefs: IFDEFs pragmas.
             route: Routes (iterable or string separated by ';')
             clkrel: Clock relation.
         """
+        if ifdef:
+            warnings.warn(
+                "add_port(..., ifdef=...) is obsolete, please use ifdefs=", category=DeprecationWarning, stacklevel=1
+            )
         doc = doc_from_type(type_, title, descr, comment)
         if direction is None:
             direction = Direction.from_name(name) or IN
         if clkrel is not None:
             clkrel = self._resolve_clkrel(clkrel)
-        port = Port(type_, name, direction=direction, doc=doc, ifdef=ifdef, clkrel=clkrel)
+        ifdefs = cast_ifdefs(ifdefs or ifdef)
+        port = Port(type_, name, direction=direction, doc=doc, ifdefs=ifdefs, clkrel=clkrel)
         if self.__is_locked:
             raise LockError(f"{self}: Cannot add port {name!r}.")
         self.namespace[name] = port
@@ -421,6 +444,7 @@ class BaseMod(NamedObject):
         descr: str | None = None,
         comment: str | None = None,
         ifdef: str | None = None,
+        ifdefs: Ifdefs | str | None = None,
         route: Routeables | None = None,
         clkrel: str | Port | BaseClkRel | None = None,
     ) -> Signal:
@@ -436,14 +460,20 @@ class BaseMod(NamedObject):
             title: Full Spoken Name.
             descr: Documentation Description.
             comment: Source Code Comment. Default is 'title'
-            ifdef: IFDEF mapping
+            ifdef: IFDEF pragma. Obsolete.
+            ifdefs: IFDEFs pragmas.
             route: Routes (iterable or string separated by ';')
             clkrel: Clock relation.
         """
+        if ifdef:
+            warnings.warn(
+                "add_signal(..., ifdef=...) is obsolete, please use ifdefs=", category=DeprecationWarning, stacklevel=1
+            )
         doc = doc_from_type(type_, title, descr, comment)
         if clkrel is not None:
             clkrel = self._resolve_clkrel(clkrel)
-        signal = Signal(type_, name, direction=direction, doc=doc, ifdef=ifdef, clkrel=clkrel)
+        ifdefs = cast_ifdefs(ifdefs or ifdef)
+        signal = Signal(type_, name, direction=direction, doc=doc, ifdefs=ifdefs, clkrel=clkrel)
         if self.__is_locked:
             raise LockError(f"{self}: Cannot add signal {name!r}.")
         self.namespace[name] = signal
@@ -461,6 +491,7 @@ class BaseMod(NamedObject):
         descr: str | None = None,
         comment: str | None = None,
         ifdef: str | None = None,
+        ifdefs: Ifdefs | str | None = None,
         route: Routeables | None = None,
         clkrel: str | Port | BaseClkRel | None = None,
     ) -> BaseSignal:
@@ -476,10 +507,18 @@ class BaseMod(NamedObject):
             title: Full Spoken Name.
             descr: Documentation Description.
             comment: Source Code Comment. Default is 'title'
-            ifdef: IFDEF mapping
+            ifdef: IFDEF pragma. Obsolete.
+            ifdefs: IFDEFs pragmas.
             route: Routes (iterable or string separated by ';')
             clkrel: Clock relation.
         """
+        if ifdef:
+            warnings.warn(
+                "add_port_or_signal(..., ifdef=...) is obsolete, please use ifdefs=",
+                category=DeprecationWarning,
+                stacklevel=1,
+            )
+        ifdefs = cast_ifdefs(ifdefs or ifdef)
         if direction is None:
             direction = Direction.from_name(name)
         if direction is None:
@@ -489,7 +528,7 @@ class BaseMod(NamedObject):
                 title=title,
                 descr=descr,
                 comment=comment,
-                ifdef=ifdef,
+                ifdefs=ifdefs,
                 route=route,
                 clkrel=clkrel,
             )
@@ -500,7 +539,7 @@ class BaseMod(NamedObject):
             title=title,
             descr=descr,
             comment=comment,
-            ifdef=ifdef,
+            ifdefs=ifdefs,
             route=route,
             clkrel=clkrel,
         )
@@ -941,7 +980,7 @@ class Router(Object):
                 if tcon is None and scon is None:
                     modname = split_prefix(tmod.name)[1]
                     name = join_names(modname, rident.name, "s")
-                    rsig = mod.add_signal(rident.type_, name, ifdef=rident.ifdef, direction=direction)
+                    rsig = mod.add_signal(rident.type_, name, ifdefs=rident.ifdefs, direction=direction)
                     Router.__routesubmod(mod, tmod, rident, texpr, rsig, tname=tpath.expr, cast=tpath.cast)
                     Router.__routesubmod(mod, smod, rident, sexpr, rsig, tname=spath.expr, cast=spath.cast)
                 elif tcon is None:
@@ -982,7 +1021,7 @@ class Router(Object):
         if texpr is None:
             assert tname is not None
             assert rident is not None and rident.type_
-            texpr = submod.add_port(rident.type_, tname, ifdef=rident.ifdef)
+            texpr = submod.add_port(rident.type_, tname, ifdefs=rident.ifdefs)
         if sexpr is None:
             sexpr = Router.__create_port_or_signal(mod, rident, sname)
         if not isinstance(texpr, Port):
@@ -1002,9 +1041,9 @@ class Router(Object):
         direction = Direction.from_name(name)
         signal: BaseSignal
         if direction is not None:
-            signal = mod.add_port(type_, name, ifdef=rident.ifdef, direction=direction)
+            signal = mod.add_port(type_, name, ifdefs=rident.ifdefs, direction=direction)
         else:
-            signal = mod.add_signal(type_, name, ifdef=rident.ifdef)
+            signal = mod.add_signal(type_, name, ifdefs=rident.ifdefs)
         LOGGER.debug("%s: router: creating %r", mod, signal)
         return signal
 

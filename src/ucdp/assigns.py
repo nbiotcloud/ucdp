@@ -162,6 +162,11 @@ class Assign(Object):
         return self.target.ifdef
 
     @property
+    def ifdefs(self) -> str | None:
+        """IFDEF."""
+        return self.target.ifdefs
+
+    @property
     def sign(self) -> str | None:
         """Sign."""
         return _DIRECTION_MAP[self.direction]
