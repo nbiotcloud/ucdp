@@ -44,6 +44,12 @@ PAT_OPT_IDENTIFIER: str = r"^([a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?)?$"
 PAT_IDENTIFIER_LOWER: str = r"^[a-z]([a-z_0-9]*[a-z0-9])?$"
 """Pattern for Identifier."""
 
+PAT_IFDEF: str = r"^!?[a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?$"
+"""Pattern for IFDEF."""
+
+RE_IFDEF = re.compile(PAT_IFDEF)
+"""Regular Expression for IFDEF."""
+
 UPWARDS: str = ".."
 """UPWARDS."""
 
