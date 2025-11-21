@@ -172,8 +172,6 @@ ignore = [
     'D107',
     # Magic Method Documentation is optional
     'D105',
-    # We use faster isinstance checks
-    'UP038',
     # Assert
     'S101',
      # ClassVar

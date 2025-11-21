@@ -26,6 +26,8 @@
 
 from typing import TypeAlias
 
+from .consts import RE_IFDEF
+
 Ifdefs: TypeAlias = tuple[str, ...]
 
 
@@ -33,21 +35,81 @@ def cast_ifdefs(value: Ifdefs | str | None) -> Ifdefs:
     """
     Cast Ifdefs.
 
-    >>> cast_ifdefs('ASIC')
-    ('ASIC',)
-    >>> cast_ifdefs(('ASIC',))
-    ('ASIC',)
-    >>> cast_ifdefs(('ASIC', 'BEHAV'))
-    ('ASIC', 'BEHAV')
-    >>> cast_ifdefs('')
-    ()
-    >>> cast_ifdefs(None)
-    ()
+    Examples:
+
+        >>> cast_ifdefs('ASIC')
+        ('ASIC',)
+        >>> cast_ifdefs('!ASIC')
+        ('!ASIC',)
+        >>> cast_ifdefs(('ASIC',))
+        ('ASIC',)
+        >>> cast_ifdefs(('ASIC', 'BEHAV'))
+        ('ASIC', 'BEHAV')
+        >>> cast_ifdefs('')
+        ()
+        >>> cast_ifdefs(None)
+        ()
+
+    Forbidden:
+
+        >>> cast_ifdefs('AS!')
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid ifdef 'AS!'
+        >>> cast_ifdefs('!!AS')
+        Traceback (most recent call last):
+            ...
+        ValueError: Invalid ifdef '!!AS'
     """
     if not value:
         return ()
     if isinstance(value, str):
-        return (value,)
-    if isinstance(value, tuple) and all(isinstance(item, str) for item in value):
+        value = (value,)
+    if isinstance(value, tuple):
+        for item in value:
+            if not RE_IFDEF.match(item):
+                raise ValueError(f"Invalid ifdef {item!r}")
         return value
     raise ValueError(f"Invalid ifdefs: {value}")
+
+
+def join_ifdefs(base: Ifdefs, add: Ifdefs) -> Ifdefs:
+    """
+    Join Ifdefs.
+
+    Examples:
+
+        >>> join_ifdefs(('ASIC',), ('ASIC',))
+        ('ASIC',)
+        >>> join_ifdefs(('ASIC',), ('BEHAV',))
+        ('ASIC', 'BEHAV')
+        >>> join_ifdefs(('ASIC',), ('!ASIC',))
+        ('!ASIC',)
+        >>> join_ifdefs(('!ASIC',), ('ASIC',))
+        ('ASIC',)
+        >>> join_ifdefs(('ASIC', 'FOO'), ('!ASIC',))
+        ('FOO', '!ASIC')
+        >>> join_ifdefs(('ASIC', 'FOO'), ('!ASIC', 'FOO'))
+        ('FOO', '!ASIC')
+        >>> join_ifdefs(('ASIC', 'FOO'), ('!ASIC', 'BAR'))
+        ('FOO', '!ASIC', 'BAR')
+        >>> join_ifdefs(('!ASIC', 'FOO'), ('ASIC',))
+        ('FOO', 'ASIC')
+        >>> join_ifdefs(('!ASIC', 'FOO'), ('ASIC', 'FOO'))
+        ('FOO', 'ASIC')
+        >>> join_ifdefs(('!ASIC', 'FOO'), ('ASIC', 'BAR'))
+        ('FOO', 'ASIC', 'BAR')
+    """
+    result = list(base)
+    for ifdef in add:
+        # remove inverse
+        if ifdef.startswith("!"):
+            if ifdef[1:] in result:
+                result.remove(ifdef[1:])
+        elif f"!{ifdef}" in result:
+            result.remove(f"!{ifdef}")
+
+        # add - if missing
+        if ifdef not in result:
+            result.append(ifdef)
+    return tuple(result)

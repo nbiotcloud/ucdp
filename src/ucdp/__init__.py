@@ -38,7 +38,7 @@ from .clkrel import ASYNC, ClkRel
 from .clkrelbase import BaseClkRel
 from .config import AConfig, AVersionConfig, BaseConfig
 from .const import Const
-from .consts import AUTO, PAT_IDENTIFIER, PAT_OPT_IDENTIFIER, PATH, RE_IDENTIFIER, Gen
+from .consts import AUTO, PAT_IDENTIFIER, PAT_IFDEF, PAT_OPT_IDENTIFIER, PATH, RE_IDENTIFIER, RE_IFDEF, Gen
 from .dict import Dict
 from .doc import Doc
 from .docutil import doc_from_type
@@ -67,6 +67,7 @@ from .flipflop import FlipFlop
 from .generate import clean, generate, get_makolator, render_generate, render_inplace
 from .humannum import Bin, Bytes, Bytesize, Hex
 from .ident import Ident, IdentFilter, Idents, IdentStop, get_expridents, get_ident
+from .ifdef import Ifdefs, cast_ifdefs, join_ifdefs
 from .iterutil import Names, namefilter, split
 from .loader import load
 from .mod import AMod
@@ -167,8 +168,10 @@ __all__ = [
     "OUT",
     "PATH",
     "PAT_IDENTIFIER",
+    "PAT_IFDEF",
     "PAT_OPT_IDENTIFIER",
     "RE_IDENTIFIER",
+    "RE_IFDEF",
     "TODO",
     "UNUSED",
     "UP",
@@ -254,6 +257,7 @@ __all__ = [
     "IdentObject",
     "IdentStop",
     "Idents",
+    "Ifdefs",
     "IntegerType",
     "InvalidExpr",
     "LibPath",
@@ -316,6 +320,7 @@ __all__ = [
     "ValidationError",
     "bwdfilter",
     "cast_booltype",
+    "cast_ifdefs",
     "clean",
     "cli",
     "concat",
@@ -341,6 +346,7 @@ __all__ = [
     "is_signed",
     "is_tb_from_modname",
     "iter_modfilelists",
+    "join_ifdefs",
     "join_names",
     "load",
     "log2",

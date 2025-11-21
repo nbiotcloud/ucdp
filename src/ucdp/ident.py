@@ -109,7 +109,7 @@ from .casting import Casting
 from .consts import PAT_IDENTIFIER
 from .doc import Doc
 from .expr import ConcatExpr, ConstExpr, Expr, Log2Expr, MaximumExpr, MinimumExpr, Op, SliceOp, SOp, TernaryExpr
-from .ifdef import Ifdefs
+from .ifdef import Ifdefs, join_ifdefs
 from .namespace import Namespace
 from .nameutil import join_names, split_suffix
 from .object import Field, Light, NamedObject, PosArgs
@@ -220,7 +220,7 @@ class Ident(Expr, NamedObject, Light):
             name=f"{basename}{suffix}",
             direction=direction,
             doc=structitem.doc,
-            ifdefs=structitem.ifdefs or self.ifdefs,
+            ifdefs=join_ifdefs(self.ifdefs, structitem.ifdefs),
             **kwargs,
         )
 
