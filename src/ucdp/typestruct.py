@@ -43,6 +43,7 @@ from .dict import Dict
 from .doc import Doc
 from .docutil import doc_from_type
 from .exceptions import LockError
+from .ifdef import Ifdefs, cast_ifdefs
 from .object import Field, Light, Object, PosArgs, PrivateField
 from .orientation import BWD, FWD, Orientation
 from .typebase import ACompositeType, BaseType
@@ -57,7 +58,7 @@ class StructItem(Object):
         type_: Type of struct member
         orientation: Orientation of struct member. `FWD` by default
         doc: Documentation Container
-        ifdef: IFDEF encapsulation
+        ifdefs: IFDEF encapsulations
         clkrel: Clock Relation
     """
 
@@ -65,7 +66,7 @@ class StructItem(Object):
     type_: BaseType
     orientation: Orientation = FWD
     doc: Doc = Doc()
-    ifdef: str | None = None
+    ifdefs: Ifdefs = ()
     clkrel: BaseClkRel | None = None
 
     _posargs: ClassVar[PosArgs] = ("name", "type_")
@@ -108,6 +109,7 @@ class BaseStructType(Dict, ACompositeType):
         descr: str | None = None,
         comment: str | None = None,
         ifdef: str | None = None,
+        ifdefs: Ifdefs | str | None = None,
         clkrel: BaseClkRel | None = None,
     ) -> None:
         """
@@ -122,17 +124,19 @@ class BaseStructType(Dict, ACompositeType):
             title: Full Spoken Name.
             descr: Documentation Description.
             comment: Source Code Comment.
-            ifdef: IFDEF encapsulation.
+            ifdef: IFDEF pragma. Obsolete.
+            ifdefs: IFDEFs pragmas.
             clkrel: Clock Relation (For signals and ports only).
 
         :meta public:
         """
         if self._is_locked:
             raise LockError(f"{self}: Cannot add item {name!r}.")
+        ifdefs = cast_ifdefs(ifdefs or ifdef)
         items = self._items
         if name not in items.keys():
             doc = doc_from_type(type_, title=title, descr=descr, comment=comment)
-            structitem = StructItem(name, type_, orientation=orientation, doc=doc, ifdef=ifdef, clkrel=clkrel)
+            structitem = StructItem(name, type_, orientation=orientation, doc=doc, ifdefs=ifdefs, clkrel=clkrel)
             if not self.filter_ or self.filter_(structitem):
                 items[name] = structitem
         else:
@@ -156,7 +160,7 @@ class BaseStructType(Dict, ACompositeType):
             selfitem.name == otheritem.name
             and selfitem.type_.is_connectable(otheritem.type_)
             and selfitem.orientation == otheritem.orientation
-            and selfitem.ifdef == otheritem.ifdef
+            and selfitem.ifdefs == otheritem.ifdefs
         )
 
     @property
@@ -292,6 +296,7 @@ class AGlobalStructType(BaseStructType, Light):
         descr: str | None = None,
         comment: str | None = None,
         ifdef: str | None = None,
+        ifdefs: Ifdefs | str | None = None,
     ) -> None:
         """
         Add member `name` with `type_` and `orientation`.
@@ -305,8 +310,10 @@ class AGlobalStructType(BaseStructType, Light):
             title: Full Spoken Name.
             descr: Documentation Description.
             comment: Source Code Comment.
-            ifdef: IFDEF encapsulation.
+            ifdef: IFDEF pragma. Obsolete.
+            ifdefs: IFDEFs pragmas.
         """
+        ifdefs = cast_ifdefs(ifdefs or ifdef)
         self._add(
             name,
             type_,
@@ -314,7 +321,7 @@ class AGlobalStructType(BaseStructType, Light):
             title=title,
             descr=descr,
             comment=comment,
-            ifdef=ifdef,
+            ifdefs=ifdefs,
         )
 
     def _build(self) -> None:
@@ -365,6 +372,7 @@ class DynamicStructType(BaseStructType):
         descr: str | None = None,
         comment: str | None = None,
         ifdef: str | None = None,
+        ifdefs: Ifdefs | str | None = None,
     ) -> None:
         """
         Add member `name` with `type_` and `orientation`.
@@ -378,8 +386,10 @@ class DynamicStructType(BaseStructType):
             title: Full Spoken Name.
             descr: Documentation Description.
             comment: Source Code Comment.
-            ifdef: IFDEF encapsulation.
+            ifdef: IFDEF pragma. Obsolete.
+            ifdefs: IFDEFs pragmas.
         """
+        ifdefs = cast_ifdefs(ifdefs or ifdef)
         self._add(
             name,
             type_,
@@ -387,7 +397,7 @@ class DynamicStructType(BaseStructType):
             title=title,
             descr=descr,
             comment=comment,
-            ifdef=ifdef,
+            ifdefs=ifdefs,
         )
 
     def _build(self) -> None:

@@ -212,6 +212,7 @@ addopts ="""
 """
 filterwarnings = [
     "error",
+    # "ignore::DeprecationWarning"
 ]
 
 [tool.coverage.report]

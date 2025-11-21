@@ -100,6 +100,7 @@ Identifier are itself part of an expression and therefore a child of [Expr][ucdp
 
 """
 
+import warnings
 from collections import deque
 from collections.abc import Callable, Iterable, Iterator
 from typing import Any, ClassVar
@@ -108,6 +109,7 @@ from .casting import Casting
 from .consts import PAT_IDENTIFIER
 from .doc import Doc
 from .expr import ConcatExpr, ConstExpr, Expr, Log2Expr, MaximumExpr, MinimumExpr, Op, SliceOp, SOp, TernaryExpr
+from .ifdef import Ifdefs
 from .namespace import Namespace
 from .nameutil import join_names, split_suffix
 from .object import Field, Light, NamedObject, PosArgs
@@ -154,7 +156,7 @@ class Ident(Expr, NamedObject, Light):
     name: str = Field(pattern=PAT_IDENTIFIER)
     direction: AOrientation | None = Field(default=None, init=False)
     doc: Doc = Doc()
-    ifdef: str | None = None
+    ifdefs: Ifdefs = ()
 
     _posargs: ClassVar[PosArgs] = ("type_", "name")
 
@@ -170,6 +172,15 @@ class Ident(Expr, NamedObject, Light):
     def suffix(self):
         """Suffix."""
         return split_suffix(self.name)[1]
+
+    @property
+    def ifdef(self) -> str | None:
+        """Legacy ifdef."""
+        warnings.warn(".ifdef is obsolete. Please use .ifdefs", category=DeprecationWarning, stacklevel=2)
+        ifdefs = self.ifdefs
+        if ifdefs:
+            return ifdefs[0]
+        return None
 
     def __str__(self) -> str:
         return self.name
@@ -209,7 +220,7 @@ class Ident(Expr, NamedObject, Light):
             name=f"{basename}{suffix}",
             direction=direction,
             doc=structitem.doc,
-            ifdef=structitem.ifdef or self.ifdef,
+            ifdefs=structitem.ifdefs or self.ifdefs,
             **kwargs,
         )
 

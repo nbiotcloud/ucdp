@@ -41,12 +41,12 @@ def test_struct():
 
         def _build(self) -> None:
             self._add("data", u.UintType(8), title="title")
-            self._add("valid", u.BitType(), descr="descr", ifdef="IFDEF")
+            self._add("valid", u.BitType(), descr="descr", ifdefs=("IFDEF",))
             self._add("accept", u.BitType(), u.BWD, comment="comment")
 
             msg = (
                 "name 'valid' already exists in test_struct.<locals>.MyStructType() "
-                "(StructItem('valid', BitType(), doc=Doc(descr='descr'), ifdef='IFDEF'))"
+                "(StructItem('valid', BitType(), doc=Doc(descr='descr'), ifdefs=('IFDEF',)))"
             )
             with raises(ValueError, match=re.escape(msg)):
                 self._add("valid", u.BitType())
@@ -61,7 +61,7 @@ def test_struct():
     assert tuple(struct.keys()) == ("data", "valid", "accept")
     assert tuple(struct.values()) == (
         u.StructItem("data", u.UintType(8), doc=u.Doc(title="title")),
-        u.StructItem("valid", u.BitType(), doc=u.Doc(descr="descr"), ifdef="IFDEF"),
+        u.StructItem("valid", u.BitType(), doc=u.Doc(descr="descr"), ifdefs=("IFDEF",)),
         u.StructItem("accept", u.BitType(), orientation=u.BWD, doc=u.Doc(comment="comment")),
     )
     assert [item.doc for item in struct.values()] == [

@@ -162,7 +162,8 @@ class Signal(BaseSignal):
             '_s'
             >>> count.direction
             FWD
-            >>> count.ifdef
+            >>> count.ifdefs
+            ()
 
     Note:
         Signal names should end with '_r' or '_s', but must not.
@@ -201,7 +202,8 @@ class Port(BaseSignal):
             'count'
             >>> count.suffix
             '_i'
-            >>> count.ifdef
+            >>> count.ifdefs
+            ()
 
     ??? Example "Direction"
         The port direction is automatically determined from the name or needs to be specified explicitly:
