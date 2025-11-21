@@ -63,6 +63,7 @@ _OPERMAP = {
     "-": operator.sub,
     "*": operator.mul,
     "//": operator.floordiv,
+    "/": operator.truediv,
     "%": operator.mod,
     "**": operator.pow,
     "<<": operator.lshift,
@@ -157,6 +158,13 @@ class Expr(Object):  # noqa: PLW1641
             return NotImplemented
         return Op(self, "//", other)
 
+    def __truediv__(self, other) -> "Op":
+        if isinstance(other, int):
+            other = _parse_const(other, reftype=self.type_)
+        if not isinstance(other, Expr):
+            return NotImplemented
+        return Op(self, "/", other)
+
     def __mod__(self, other) -> "Op":
         if isinstance(other, int):
             other = _parse_const(other, reftype=self.type_)
@@ -233,6 +241,13 @@ class Expr(Object):  # noqa: PLW1641
         if not isinstance(other, Expr):
             return NotImplemented
         return Op(other, "//", self)
+
+    def __rtruediv__(self, other) -> "Op":
+        if isinstance(other, int):
+            other = _parse_const(other, reftype=self.type_)
+        if not isinstance(other, Expr):
+            return NotImplemented
+        return Op(other, "/", self)
 
     def __rmod__(self, other) -> "Op":
         if isinstance(other, int):
