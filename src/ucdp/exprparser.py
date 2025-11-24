@@ -33,6 +33,7 @@ from ._castingnamespace import CastingNamespace
 from .consts import RE_IDENTIFIER
 from .exceptions import InvalidExpr
 from .expr import (
+    _RE_CONST,
     BoolOp,
     ConcatExpr,
     ConstExpr,
@@ -234,6 +235,8 @@ class ExprParser(Object):
                     return self.namespace[expr]
                 except ValueError:
                     pass
+        if _RE_CONST.fullmatch(expr.strip()):
+            return _parse_const(expr)
         try:
             globals: dict[str, Any] = self._globals  # type: ignore[assignment]
             return eval(expr, globals)  # noqa: S307
