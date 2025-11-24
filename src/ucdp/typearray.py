@@ -76,16 +76,25 @@ class ArrayType(ACompositeType, Light):
     left: Any = None
     right: Any = None
     direction: SliceDirection = UP
+    packed: bool = False
 
     _posargs: ClassVar[PosArgs] = ("itemtype", "depth")
 
-    def __init__(self, itemtype: BaseType, depth: Any, left=None, right=None, direction: SliceDirection = UP):
+    def __init__(
+        self,
+        itemtype: BaseType,
+        depth: Any,
+        left=None,
+        right=None,
+        direction: SliceDirection = UP,
+        packed: bool = False,
+    ):
         if direction is UP:
             if (left == 0) and (right == depth - 1):
                 left, right = None, None
         elif (right == 0) and (left == depth - 1):
             left, right = None, None
-        super().__init__(itemtype=itemtype, depth=depth, left=left, right=right, direction=direction)  # type: ignore[call-arg]
+        super().__init__(itemtype=itemtype, depth=depth, left=left, right=right, direction=direction, packed=packed)  # type: ignore[call-arg]
 
     @property
     def slice_(self):
