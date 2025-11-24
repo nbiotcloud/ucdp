@@ -43,7 +43,7 @@ from .typescalar import BitType, BoolType, IntegerType, SintType, UintType
 
 _RE_CONST = re.compile(
     r"(?P<sign>[-+])?"
-    r"(((?P<width>\d+)'?(?P<is_signed>s)?(?P<bnum>(b[01]+)|(o[0-7]+)|(d[0-9]+)|(h[0-9a-fA-F]+))))|(?P<num>[+-]?\d+)\b"
+    r"(((?P<width>\d+)?'?(?P<is_signed>s)?(?P<bnum>(b[01]+)|(o[0-7]+)|(d[0-9]+)|(h[0-9a-fA-F]+))))|(?P<num>[+-]?\d+)\b"
 )
 _NUM_BASEMAP = {
     "b": 2,
@@ -51,6 +51,12 @@ _NUM_BASEMAP = {
     "d": 10,
     "h": 16,
     None: 10,
+}
+_WIDTH_BASEMAP = {
+    "b": 1,
+    "o": 3,
+    "d": math.log(10) / math.log(2),
+    "h": 4,
 }
 _OPERMAP = {
     "<": operator.lt,
@@ -716,14 +722,17 @@ def _parse_const(value, reftype: BaseType | None = None) -> ConstExpr:
     raise InvalidExpr(repr(value))
 
 
-def __parse_const(sign, width, is_signed, bnum, num, reftype) -> ConstExpr:
+def __parse_const(sign, width, is_signed, bnum, num, reftype) -> ConstExpr:  # noqa: C901
     # Bin/Oct/Dec/Hex Number with given width
     if num is None:
         base, num = bnum[0], bnum[1:]
         value = int(num, _NUM_BASEMAP[base])
         if sign == "-":
             value = -value
-        width = int(width)
+        if width is None:
+            width = math.ceil(_WIDTH_BASEMAP[base] * len(num))
+        else:
+            width = int(width)
         type_: BaseType
         if base == "b" and width == 1 and not is_signed:
             type_ = BitType(default=value)

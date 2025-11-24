@@ -138,6 +138,7 @@ def test_const():
     assert u.const(u.IntegerType.max_ + 1) is u.ConstExpr(u.UintType(32, default=u.IntegerType.max_ + 1))
 
     assert u.const(4) == u.ConstExpr(u.IntegerType(default=4))
+    assert u.const("'b10") is u.ConstExpr(u.UintType(2, default=2))
 
 
 def test_concat(parser):
@@ -254,3 +255,14 @@ def test_log2():
     """Log 2."""
     a = u.const(67)
     assert u.log2(a) == u.Log2Expr(a)
+
+
+def test_parse_const(parser):
+    """Parse Constants."""
+    assert parser("3'd4") == u.ConstExpr(u.UintType(3, default=4))
+    assert parser("3'b0") == u.ConstExpr(u.UintType(3, default=0))
+    assert parser("'b0") == u.ConstExpr(u.BitType())
+    assert parser("'b010") == u.ConstExpr(u.UintType(3, default=2))
+    assert parser("'o210") == u.ConstExpr(u.UintType(9, default=136))
+    assert parser("'d10") == u.ConstExpr(u.UintType(7, default=10))
+    assert parser("'hAF") == u.ConstExpr(u.UintType(8, default=175))
