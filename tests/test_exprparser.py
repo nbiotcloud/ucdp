@@ -139,6 +139,10 @@ def test_const():
 
     assert u.const(4) == u.ConstExpr(u.IntegerType(default=4))
     assert u.const("'b10") is u.ConstExpr(u.UintType(2, default=2))
+    assert u.const("'b1_0") is u.ConstExpr(u.UintType(2, default=2))
+    assert u.const("'o2_1_0") is u.ConstExpr(u.UintType(9, default=136))
+    assert u.const("'d1_0") is u.ConstExpr(u.UintType(7, default=10))
+    assert u.const("'h4_21_0") is u.ConstExpr(u.UintType(16, default=16912))
 
 
 def test_concat(parser):
