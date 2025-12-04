@@ -95,7 +95,7 @@ class Param(Ident):
 
 
     Note:
-        Parameter names should end with '_p', but must not.
+        Parameter names should end with '_p'.
 
     ??? Example "Param Examples"
         Example:
