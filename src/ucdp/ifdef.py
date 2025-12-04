@@ -27,6 +27,7 @@
 from typing import TypeAlias
 
 from .consts import RE_IFDEF
+from .define import Defines
 
 Ifdefs: TypeAlias = tuple[str, ...]
 
@@ -112,4 +113,33 @@ def join_ifdefs(base: Ifdefs, add: Ifdefs) -> Ifdefs:
         # add - if missing
         if ifdef not in result:
             result.append(ifdef)
+    return tuple(result)
+
+
+def resolve_ifdefs(defines: Defines, ifdefs: Ifdefs) -> Ifdefs | None:
+    """
+    Resolve Ifdefs.
+
+    >>> import ucdp as u
+    >>> defines = u.Defines([u.Define('FOO'), u.Define('BAR', value=3)])
+    >>> resolve_ifdefs(defines, ())
+    ()
+    >>> resolve_ifdefs(defines, ('FOO',))
+    ('FOO',)
+    >>> resolve_ifdefs(defines, ('BAR',))
+    ('BAR',)
+    >>> resolve_ifdefs(defines, ('FOO', 'BAR'))
+    ('FOO', 'BAR')
+    >>> resolve_ifdefs(defines, ('FOO', '!BAR'))
+    >>> resolve_ifdefs(defines, ('BAZ',))
+    >>> resolve_ifdefs(defines, ('!BAZ',))
+    ('!BAZ',)
+    """
+    result = []
+    for ifdef in ifdefs:
+        # abort if ifdef is not there OR
+        # abort if ifdef is there but forbidden
+        if (ifdef.removeprefix("!") in defines) == ifdef.startswith("!"):
+            return None
+        result.append(ifdef)
     return tuple(result)

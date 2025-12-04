@@ -39,7 +39,7 @@ from .clkrelbase import BaseClkRel
 from .config import AConfig, AVersionConfig, BaseConfig
 from .const import Const
 from .consts import AUTO, PAT_IDENTIFIER, PAT_IFDEF, PAT_OPT_IDENTIFIER, PATH, RE_IDENTIFIER, RE_IFDEF, Gen
-from .define import Define
+from .define import Define, Defines
 from .dict import Dict
 from .doc import Doc
 from .docutil import doc_from_type
@@ -68,7 +68,7 @@ from .flipflop import FlipFlop
 from .generate import clean, generate, get_makolator, render_generate, render_inplace
 from .humannum import Bin, Bytes, Bytesize, Hex
 from .ident import Ident, IdentFilter, Idents, IdentStop, get_expridents, get_ident
-from .ifdef import Ifdefs, cast_ifdefs, join_ifdefs
+from .ifdef import Ifdefs, cast_ifdefs, join_ifdefs, resolve_ifdefs
 from .iterutil import Names, namefilter, split
 from .loader import load
 from .mod import AMod
@@ -225,6 +225,8 @@ __all__ = [
     "ConstExpr",
     "Default",
     "Define",
+    "Define",
+    "Defines",
     "DescriptiveStructType",
     "Dict",
     "DiffClkRstAnType",
@@ -361,6 +363,7 @@ __all__ = [
     "parse_routepaths",
     "render_generate",
     "render_inplace",
+    "resolve_ifdefs",
     "resolve_modfilelist",
     "resolve_modfilelists",
     "search_modfilelists",

@@ -29,33 +29,30 @@ Define.
 
         >>> from tabulate import tabulate
         >>> import ucdp as u
-        >>> u.Define(u.UintType(6), "param_p")
-        Define(UintType(6), 'param_p')
+        >>> u.Define("param_p")
+        Define('param_p')
 
         Complex types are NOT supported.
 
-        >>> param = u.Define(u.UintType(6), "param_p")
+        >>> param = u.Define("param_p")
         >>> for item in param:
         ...     print(repr(item))
-        Define(UintType(6), 'param_p')
+        Define('param_p')
 """
 
 from typing import Any, ClassVar
 
-from .casting import Casting
 from .consts import PAT_IDENTIFIER
 from .doc import Doc
-from .expr import Expr
+from .namespace import Namespace
 from .nameutil import split_suffix
 from .object import Field, Light, NamedObject, PosArgs
-from .typescalar import AScalarType
 
 
-class Define(Expr, NamedObject, Light):
+class Define(NamedObject, Light):
     """Define.
 
     Args:
-        type_: Type.
         name: Name.
 
     Attributes:
@@ -66,11 +63,9 @@ class Define(Expr, NamedObject, Light):
         Example:
 
             >>> import ucdp as u
-            >>> cnt = u.Define(u.UintType(6), "cnt_p")
+            >>> cnt = u.Define("cnt_p")
             >>> cnt
-            Define(UintType(6), 'cnt_p')
-            >>> cnt.type_
-            UintType(6)
+            Define('cnt_p')
             >>> cnt.name
             'cnt_p'
             >>> cnt.basename
@@ -83,26 +78,25 @@ class Define(Expr, NamedObject, Light):
 
         If the parameter is casted via `int()` it returns `value` if set, other `type_.default`.
 
-            >>> int(u.Define(u.UintType(6, default=2), "cnt_p"))
-            2
-            >>> int(u.Define(u.UintType(6, default=2), "cnt_p", value=4))
+            >>> int(u.Define("cnt_p"))
+            0
+            >>> int(u.Define("cnt_p", value=4))
             4
 
         Define are Singleton:
 
-            >>> u.Define(u.UintType(6), "cnt_p") is u.Define(u.UintType(6), "cnt_p")
+            >>> u.Define("cnt_p") is u.Define("cnt_p")
             True
     """
 
-    type_: AScalarType
     name: str = Field(pattern=PAT_IDENTIFIER)
     doc: Doc = Doc()
     value: Any = None
 
-    _posargs: ClassVar[PosArgs] = ("type_", "name")
+    _posargs: ClassVar[PosArgs] = ("name",)
 
-    def __init__(self, type_: AScalarType, name: str, **kwargs):
-        super().__init__(type_=type_, name=name, **kwargs)  # type: ignore[call-arg]
+    def __init__(self, name: str, **kwargs):
+        super().__init__(name=name, **kwargs)  # type: ignore[call-arg]
 
     @property
     def basename(self):
@@ -118,14 +112,11 @@ class Define(Expr, NamedObject, Light):
         return self.name
 
     def __int__(self):
-        value = self.value
-        if value is None:
-            value = self.type_.default
-        return int(value or 0)
+        return int(self.value or 0)
 
     def __iter__(self):
         yield self
 
-    def cast(self, other: "Define") -> Casting:
-        """Cast self=cast(other)."""
-        return None
+
+class Defines(Namespace):
+    """Defines."""
