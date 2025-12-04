@@ -25,6 +25,7 @@
 Expression Parser.
 """
 
+import re
 from collections.abc import Iterable
 from functools import cached_property
 from typing import Any
@@ -33,7 +34,6 @@ from ._castingnamespace import CastingNamespace
 from .consts import RE_IDENTIFIER
 from .exceptions import InvalidExpr
 from .expr import (
-    _RE_CONST,
     BoolOp,
     ConcatExpr,
     ConstExpr,
@@ -58,6 +58,20 @@ Constable = int | str | ConstExpr
 Concatable = list | tuple | ConcatExpr
 Only = type[Expr] | Iterable[type[Expr]] | type[Note]
 Types = type[BaseType] | Iterable[type[BaseType]]
+
+_RE_SUB_CONST = re.compile(
+    r'(const\("[^"]*"\))|'
+    r"(const\('[^']*'\))|"
+    r"([-+]?((\d*'?s?((b[01]+)|(o[0-7]+)|(d[0-9]+)|(h[0-9a-fA-F]+)))))\b"
+)
+
+
+def _sub_const(mat):
+    if mat.group(1):
+        return mat.group(1)
+    if mat.group(2):
+        return mat.group(2)
+    return f'const("{mat.group(3)}")'
 
 
 class _Globals(dict):
@@ -235,8 +249,7 @@ class ExprParser(Object):
                     return self.namespace[expr]
                 except ValueError:
                     pass
-        if _RE_CONST.fullmatch(expr.strip()):
-            return _parse_const(expr)
+        expr = _RE_SUB_CONST.sub(_sub_const, expr)
         try:
             globals: dict[str, Any] = self._globals  # type: ignore[assignment]
             return eval(expr, globals)  # noqa: S307

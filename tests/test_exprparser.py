@@ -78,6 +78,16 @@ def test_parse(parser):
     with raises(u.InvalidExpr, match=re.escape(msg)):
         parser.parse("uint_s *** uint_s")
 
+    assert parser.parse("uint_s - 3") == u.Op(
+        u.Signal(u.UintType(16, default=15), "uint_s"), "-", u.ConstExpr(u.UintType(16, default=3))
+    )
+    assert parser.parse("uint_s - 16'd3") == u.Op(
+        u.Signal(u.UintType(16, default=15), "uint_s"), "-", u.ConstExpr(u.UintType(16, default=3))
+    )
+    assert parser.parse("uint_s - 16d3") == u.Op(
+        u.Signal(u.UintType(16, default=15), "uint_s"), "-", u.ConstExpr(u.UintType(16, default=3))
+    )
+
 
 def test_parse_undefined(parser):
     """Undefined names."""
