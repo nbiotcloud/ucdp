@@ -12,6 +12,8 @@ tests.test_modconfigurable.RootMod $PRJ/tests/test_modconfigurable.py
 tests.test_modconfigurable.SubMod $PRJ/tests/test_modconfigurable.py
 tests.test_modconfigurable.TopMod $PRJ/tests/test_modconfigurable.py
 tests.test_modconfigurable.UniqueMod $PRJ/tests/test_modconfigurable.py
+tests.test_moddefines.IpMod $PRJ/tests/test_moddefines.py
+tests.test_moddefines.TopMod $PRJ/tests/test_moddefines.py
 tests.test_modfilelist.FlavorMod $PRJ/tests/test_modfilelist.py
 tests.test_modfilelist.MultiMod $PRJ/tests/test_modfilelist.py
 tests.test_mods.DeclMod $PRJ/tests/test_mods.py

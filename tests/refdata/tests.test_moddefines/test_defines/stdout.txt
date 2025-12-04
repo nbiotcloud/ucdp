@@ -1,0 +1,11 @@
+<tests.test_moddefines.IpMod(inst='top/u_a', libname='tests', modname='ip' defines={'HAS_E': None})>
+  Port(BitType(), 'd_i', direction=IN)
+  Port(BitType(), 'e_i', direction=IN, ifdefs=('HAS_E', '!NO_EXTRA'))
+  Port(BitType(), 'd_o', direction=OUT)
+<tests.test_moddefines.IpMod(inst='top/u_b', libname='tests', modname='ip')>
+  Port(BitType(), 'd_i', direction=IN)
+  Port(BitType(), 'f_i', direction=IN, ifdefs=('!HAS_E', '!NO_EXTRA'))
+  Port(BitType(), 'd_o', direction=OUT)
+<tests.test_moddefines.IpMod(inst='top/u_c', libname='tests', modname='ip' defines={'HAS_E': 1, 'NO_EXTRA': 1})>
+  Port(BitType(), 'd_i', direction=IN)
+  Port(BitType(), 'd_o', direction=OUT)

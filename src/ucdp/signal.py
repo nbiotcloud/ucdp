@@ -166,7 +166,7 @@ class Signal(BaseSignal):
             ()
 
     Note:
-        Signal names should end with '_r' or '_s', but must not.
+        Signal names should end with '_r' or '_s'.
     """
 
     def __init__(self, type_: BaseType, name: str, **kwargs):

@@ -31,10 +31,11 @@ import warnings
 from abc import abstractmethod
 from functools import cached_property
 from inspect import getmro
-from typing import Any, ClassVar, Literal, Optional, TypeAlias, Union, no_type_check
+from typing import Annotated, Any, ClassVar, Literal, Optional, TypeAlias, Union, no_type_check
 
 from aligntext import align
 from caseconverter import snakecase
+from pydantic import PlainValidator
 from uniquer import uniquetuple
 
 from .assigns import Assigns, Drivers, Note, Source
@@ -43,6 +44,7 @@ from .clkrel import ClkRel
 from .clkrelbase import BaseClkRel
 from .const import Const
 from .consts import UPWARDS
+from .define import Define, Defines
 from .doc import Doc
 from .docutil import doc_from_type
 from .exceptions import LockError
@@ -50,7 +52,7 @@ from .expr import BoolOp, Expr
 from .exprparser import ExprParser, Parseable, cast_booltype
 from .flipflop import FlipFlop
 from .ident import Ident, Idents
-from .ifdef import Ifdefs, cast_ifdefs
+from .ifdef import Ifdefs, cast_ifdefs, resolve_ifdefs
 from .iterutil import namefilter
 from .logging import LOGGER
 from .modref import ModRef, get_modclsname
@@ -69,6 +71,20 @@ from .typestruct import StructItem
 
 ModTags: TypeAlias = set[str]
 RoutingError: TypeAlias = Literal["error", "warn", "ignore"]
+
+
+def _to_defines(value):
+    if value is None:
+        return Namespace()
+    if isinstance(value, Namespace):
+        value.lock()
+        return value
+    if isinstance(value, dict):
+        defines = Namespace()
+        for key, val in value.items():
+            defines.add(Define(key, value=val))
+        return defines
+    raise ValueError(value)
 
 
 class BaseMod(NamedObject):
@@ -103,6 +119,7 @@ class BaseMod(NamedObject):
     # private
 
     drivers: Drivers = Field(default_factory=Drivers, init=False, repr=False)
+    defines: Annotated[Defines, PlainValidator(_to_defines)] = Field(default_factory=Defines)
     namespace: Idents = Field(default_factory=Idents, init=False, repr=False)
     params: Idents = Field(default_factory=Idents, init=False, repr=False)
     ports: Idents = Field(default_factory=Idents, init=False, repr=False)
@@ -118,7 +135,7 @@ class BaseMod(NamedObject):
     __muxes: Namespace = PrivateField(default_factory=Namespace)
     __parents = PrivateField(default_factory=list)
 
-    def __init__(self, parent: Optional["BaseMod"] = None, name: str | None = None, **kwargs):
+    def __init__(self, parent: Optional["BaseMod"] = None, name: str | None = None, defines=None, **kwargs):
         cls = self.__class__
         if not cls.__name__.endswith("Mod"):
             raise NameError(f"Name of {cls} MUST end with 'Mod'")
@@ -126,7 +143,7 @@ class BaseMod(NamedObject):
             if parent:
                 raise ValueError("'name' is required for sub modules.")
             name = snakecase(cls.__name__.removesuffix("Mod"))
-        super().__init__(parent=parent, name=name, **kwargs)  # type: ignore[call-arg]
+        super().__init__(parent=parent, name=name, defines=defines, **kwargs)  # type: ignore[call-arg]
 
     @property
     def doc(self) -> Doc:
@@ -271,7 +288,7 @@ class BaseMod(NamedObject):
         ifdef: str | None = None,
         ifdefs: Ifdefs | str | None = None,
         exist_ok: bool = False,
-    ) -> Param:
+    ) -> Param | None:
         """
         Add Module Parameter (:any:`Param`).
 
@@ -292,6 +309,9 @@ class BaseMod(NamedObject):
                 "add_param(..., ifdef=...) is obsolete, please use ifdefs=", category=DeprecationWarning, stacklevel=1
             )
         ifdefs = cast_ifdefs(ifdefs or ifdef)
+        rifdefs = resolve_ifdefs(self.defines, ifdefs)
+        if rifdefs is None:
+            return None
         if isinstance(arg, Param):
             value = self.paramdict.pop(arg.name, None)
             param: Param = arg.new(value=value)
@@ -300,7 +320,7 @@ class BaseMod(NamedObject):
             type_: BaseType = arg
             doc = doc_from_type(type_, title=title, descr=descr, comment=comment)
             value = self.paramdict.pop(name, None)
-            param = Param(type_=type_, name=name, doc=doc, ifdefs=ifdefs, value=value)
+            param = Param(type_=type_, name=name, doc=doc, ifdefs=rifdefs, value=value)
         if self.__is_locked:
             raise LockError(f"{self}: Cannot add parameter {name!r}.")
         self.namespace.add(param, exist_ok=exist_ok)
@@ -317,7 +337,7 @@ class BaseMod(NamedObject):
         ifdef: str | None = None,
         ifdefs: Ifdefs | str | None = None,
         exist_ok: bool = False,
-    ) -> Const:
+    ) -> Const | None:
         """
         Add Module Internal Constant (:any:`Const`).
 
@@ -338,13 +358,16 @@ class BaseMod(NamedObject):
                 "add_const(..., ifdef=...) is obsolete, please use ifdefs=", category=DeprecationWarning, stacklevel=1
             )
         ifdefs = cast_ifdefs(ifdefs or ifdef)
+        rifdefs = resolve_ifdefs(self.defines, ifdefs)
+        if rifdefs is None:
+            return None
         if isinstance(arg, Const):
             const: Const = arg
             assert name is None
         else:
             type_: BaseType = arg
             doc = doc_from_type(type_, title=title, descr=descr, comment=comment)
-            const = Const(type_=type_, name=name, doc=doc, ifdefs=ifdefs)
+            const = Const(type_=type_, name=name, doc=doc, ifdefs=rifdefs)
         if self.__is_locked:
             raise LockError(f"{self}: Cannot add constant {name!r}.")
         self.namespace.add(const, exist_ok=exist_ok)
@@ -387,7 +410,7 @@ class BaseMod(NamedObject):
         ifdefs: Ifdefs | str | None = None,
         route: Routeables | None = None,
         clkrel: str | Port | BaseClkRel | None = None,
-    ) -> Port:
+    ) -> Port | None:
         """
         Add Module Port (:any:`Port`).
 
@@ -415,7 +438,10 @@ class BaseMod(NamedObject):
         if clkrel is not None:
             clkrel = self._resolve_clkrel(clkrel)
         ifdefs = cast_ifdefs(ifdefs or ifdef)
-        port = Port(type_, name, direction=direction, doc=doc, ifdefs=ifdefs, clkrel=clkrel)
+        rifdefs = resolve_ifdefs(self.defines, ifdefs)
+        if rifdefs is None:
+            return None
+        port = Port(type_, name, direction=direction, doc=doc, ifdefs=rifdefs, clkrel=clkrel)
         if self.__is_locked:
             raise LockError(f"{self}: Cannot add port {name!r}.")
         self.namespace[name] = port
@@ -447,7 +473,7 @@ class BaseMod(NamedObject):
         ifdefs: Ifdefs | str | None = None,
         route: Routeables | None = None,
         clkrel: str | Port | BaseClkRel | None = None,
-    ) -> Signal:
+    ) -> Signal | None:
         """
         Add Module Internal Signal (:any:`Signal`).
 
@@ -473,7 +499,10 @@ class BaseMod(NamedObject):
         if clkrel is not None:
             clkrel = self._resolve_clkrel(clkrel)
         ifdefs = cast_ifdefs(ifdefs or ifdef)
-        signal = Signal(type_, name, direction=direction, doc=doc, ifdefs=ifdefs, clkrel=clkrel)
+        rifdefs = resolve_ifdefs(self.defines, ifdefs)
+        if rifdefs is None:
+            return None
+        signal = Signal(type_, name, direction=direction, doc=doc, ifdefs=rifdefs, clkrel=clkrel)
         if self.__is_locked:
             raise LockError(f"{self}: Cannot add signal {name!r}.")
         self.namespace[name] = signal
@@ -494,7 +523,7 @@ class BaseMod(NamedObject):
         ifdefs: Ifdefs | str | None = None,
         route: Routeables | None = None,
         clkrel: str | Port | BaseClkRel | None = None,
-    ) -> BaseSignal:
+    ) -> BaseSignal | None:
         """
         Add Module Port (:any:`Port`) or Signal (:any:`Signal`) depending on name.
 
@@ -829,11 +858,19 @@ class BaseMod(NamedObject):
 
     def __str__(self):
         modref = self.get_modref()
-        return f"<{modref}(inst={self.inst!r}, libname={self.libname!r}, modname={self.modname!r})>"
+        defines = ""
+        if self.defines:
+            definesdict = {define.name: define.value for define in self.defines}
+            defines = f" defines={definesdict!r}"
+        return f"<{modref}(inst={self.inst!r}, libname={self.libname!r}, modname={self.modname!r}{defines})>"
 
     def __repr__(self):
         modref = self.get_modref()
-        return f"<{modref}(inst={self.inst!r}, libname={self.libname!r}, modname={self.modname!r})>"
+        defines = ""
+        if self.defines:
+            definesdict = {define.name: define.value for define in self.defines}
+            defines = f" defines={definesdict!r}"
+        return f"<{modref}(inst={self.inst!r}, libname={self.libname!r}, modname={self.modname!r}{defines})>"
 
     def get_overview(self) -> str:
         """

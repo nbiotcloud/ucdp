@@ -12,6 +12,8 @@ tests.test_modconfigurable.RootMod
 tests.test_modconfigurable.SubMod
 tests.test_modconfigurable.TopMod
 tests.test_modconfigurable.UniqueMod
+tests.test_moddefines.IpMod
+tests.test_moddefines.TopMod
 tests.test_modfilelist.FlavorMod
 tests.test_modfilelist.MultiMod
 tests.test_mods.DeclMod
