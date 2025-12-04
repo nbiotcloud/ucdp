@@ -39,6 +39,7 @@ from .clkrelbase import BaseClkRel
 from .config import AConfig, AVersionConfig, BaseConfig
 from .const import Const
 from .consts import AUTO, PAT_IDENTIFIER, PAT_IFDEF, PAT_OPT_IDENTIFIER, PATH, RE_IDENTIFIER, RE_IFDEF, Gen
+from .define import Define
 from .dict import Dict
 from .doc import Doc
 from .docutil import doc_from_type
@@ -223,6 +224,7 @@ __all__ = [
     "Const",
     "ConstExpr",
     "Default",
+    "Define",
     "DescriptiveStructType",
     "Dict",
     "DiffClkRstAnType",
