@@ -73,14 +73,14 @@ ModTags: TypeAlias = set[str]
 RoutingError: TypeAlias = Literal["error", "warn", "ignore"]
 
 
-def _to_defines(value):
+def _to_defines(value: Defines | dict | None) -> Defines | None:
     if value is None:
-        return Namespace()
-    if isinstance(value, Namespace):
+        return None
+    if isinstance(value, Defines):
         value.lock()
         return value
     if isinstance(value, dict):
-        defines = Namespace()
+        defines = Defines()
         for key, val in value.items():
             defines.add(Define(key, value=val))
         return defines
@@ -119,7 +119,7 @@ class BaseMod(NamedObject):
     # private
 
     drivers: Drivers = Field(default_factory=Drivers, init=False, repr=False)
-    defines: Annotated[Defines, PlainValidator(_to_defines)] = Field(default_factory=Defines)
+    defines: Annotated[Defines | None, PlainValidator(_to_defines)] = None
     namespace: Idents = Field(default_factory=Idents, init=False, repr=False)
     params: Idents = Field(default_factory=Idents, init=False, repr=False)
     ports: Idents = Field(default_factory=Idents, init=False, repr=False)

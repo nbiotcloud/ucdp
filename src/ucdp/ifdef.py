@@ -116,7 +116,7 @@ def join_ifdefs(base: Ifdefs, add: Ifdefs) -> Ifdefs:
     return tuple(result)
 
 
-def resolve_ifdefs(defines: Defines, ifdefs: Ifdefs) -> Ifdefs | None:
+def resolve_ifdefs(defines: Defines | None, ifdefs: Ifdefs) -> Ifdefs | None:
     """
     Resolve Ifdefs.
 
@@ -134,7 +134,13 @@ def resolve_ifdefs(defines: Defines, ifdefs: Ifdefs) -> Ifdefs | None:
     >>> resolve_ifdefs(defines, ('BAZ',))
     >>> resolve_ifdefs(defines, ('!BAZ',))
     ('!BAZ',)
+
+    >>> defines = None
+    >>> resolve_ifdefs(defines, ('FOO', '!BAR'))
+    ('FOO', '!BAR')
     """
+    if defines is None:
+        return ifdefs
     result = []
     for ifdef in ifdefs:
         # abort if ifdef is not there OR

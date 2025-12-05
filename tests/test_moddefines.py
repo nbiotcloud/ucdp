@@ -45,6 +45,7 @@ class TopMod(u.AMod):
         IpMod(self, "u_a", defines={"HAS_E": None})
         IpMod(self, "u_b")
         IpMod(self, "u_c", defines={"HAS_E": 1, "NO_EXTRA": 1})
+        IpMod(self, "u_d", defines={})
 
 
 def test_defines(tmp_path, capsys):
