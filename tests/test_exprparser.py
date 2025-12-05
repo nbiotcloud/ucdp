@@ -87,6 +87,12 @@ def test_parse(parser):
     assert parser.parse("uint_s - 16d3") == u.Op(
         u.Signal(u.UintType(16, default=15), "uint_s"), "-", u.ConstExpr(u.UintType(16, default=3))
     )
+    assert parser.parse("'{8, 16, 6'd32, 4h6}") == (
+        8,
+        16,
+        u.ConstExpr(u.UintType(6, default=32)),
+        u.ConstExpr(u.UintType(4, default=6)),
+    )
 
 
 def test_parse_undefined(parser):
