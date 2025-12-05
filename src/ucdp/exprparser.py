@@ -59,6 +59,7 @@ Concatable = list | tuple | ConcatExpr
 Only = type[Expr] | Iterable[type[Expr]] | type[Note]
 Types = type[BaseType] | Iterable[type[BaseType]]
 
+_RE_SUB_ARRAY = re.compile(r"'{([^}]*)}")
 _RE_SUB_CONST = re.compile(
     r'(const\("[^"]*"\))|'
     r"(const\('[^']*'\))|"
@@ -249,7 +250,17 @@ class ExprParser(Object):
                     return self.namespace[expr]
                 except ValueError:
                     pass
+
+        # convert non-python lists
+        mat = _RE_SUB_ARRAY.match(expr)
+        while mat:
+            expr = mat.expand("(\\1)")
+            mat = _RE_SUB_ARRAY.match(expr)
+
+        # convert non-python constants
         expr = _RE_SUB_CONST.sub(_sub_const, expr)
+
+        # start python parser
         try:
             globals: dict[str, Any] = self._globals  # type: ignore[assignment]
             return eval(expr, globals)  # noqa: S307
