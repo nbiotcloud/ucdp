@@ -32,6 +32,7 @@ from typing import Any
 
 from ._castingnamespace import CastingNamespace
 from .consts import RE_IDENTIFIER
+from .define import Define
 from .exceptions import InvalidExpr
 from .expr import (
     BoolOp,
@@ -59,6 +60,7 @@ Concatable = list | tuple | ConcatExpr
 Only = type[Expr] | Iterable[type[Expr]] | type[Note]
 Types = type[BaseType] | Iterable[type[BaseType]]
 
+_RE_DEFINE = re.compile(r"`([a-zA-Z]([a-zA-Z_0-9]*[a-zA-Z0-9])?)")
 _RE_SUB_ARRAY = re.compile(r"'{([^}]*)}")
 _RE_SUB_CONST = re.compile(
     r'(const\("[^"]*"\))|'
@@ -123,6 +125,7 @@ class ExprParser(Object):
             "log2": self.log2,
             "minimum": self.minimum,
             "maximum": self.maximum,
+            "Define": Define,
         }
         return _Globals(globals=globals_, namespace=self.namespace, context=self.context)
 
@@ -257,6 +260,9 @@ class ExprParser(Object):
             expr = mat.expand("(\\1)")
             mat = _RE_SUB_ARRAY.match(expr)
 
+        # convert Defines
+        expr = _RE_DEFINE.sub(self._sub_define, expr)
+
         # convert non-python constants
         expr = _RE_SUB_CONST.sub(_sub_const, expr)
 
@@ -268,6 +274,15 @@ class ExprParser(Object):
             raise InvalidExpr(expr) from None
         except SyntaxError as exc:
             raise InvalidExpr(f"{expr!r}: {exc!s}") from None
+
+    def _sub_define(self, mat) -> str:
+        name = f"_{mat.group(1)}"
+        namespace = self.namespace
+        if namespace:
+            if name in namespace:
+                return name
+
+        return f"Define({name!r})"
 
     def const(self, value: Constable) -> ConstExpr:
         """

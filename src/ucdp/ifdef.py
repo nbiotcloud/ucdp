@@ -121,19 +121,19 @@ def resolve_ifdefs(defines: Defines | None, ifdefs: Ifdefs) -> Ifdefs | None:
     Resolve Ifdefs.
 
     >>> import ucdp as u
-    >>> defines = u.Defines([u.Define('FOO'), u.Define('BAR', value=3)])
+    >>> defines = u.Defines([u.Define('_FOO'), u.Define('_BAR', value=3)])
     >>> resolve_ifdefs(defines, ())
     ()
     >>> resolve_ifdefs(defines, ('FOO',))
-    ('FOO',)
+    ()
     >>> resolve_ifdefs(defines, ('BAR',))
-    ('BAR',)
+    ()
     >>> resolve_ifdefs(defines, ('FOO', 'BAR'))
-    ('FOO', 'BAR')
+    ()
     >>> resolve_ifdefs(defines, ('FOO', '!BAR'))
     >>> resolve_ifdefs(defines, ('BAZ',))
     >>> resolve_ifdefs(defines, ('!BAZ',))
-    ('!BAZ',)
+    ()
 
     >>> defines = None
     >>> resolve_ifdefs(defines, ('FOO', '!BAR'))
@@ -141,11 +141,11 @@ def resolve_ifdefs(defines: Defines | None, ifdefs: Ifdefs) -> Ifdefs | None:
     """
     if defines is None:
         return ifdefs
-    result = []
     for ifdef in ifdefs:
         # abort if ifdef is not there OR
         # abort if ifdef is there but forbidden
-        if (ifdef.removeprefix("!") in defines) == ifdef.startswith("!"):
+        define = "_" + ifdef.removeprefix("!")
+        if (define in defines) == ifdef.startswith("!"):
             return None
-        result.append(ifdef)
-    return tuple(result)
+
+    return ()

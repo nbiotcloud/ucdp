@@ -37,6 +37,8 @@ def idents() -> u.Idents:
         [
             u.Signal(u.UintType(16, default=15), "uint_s"),
             u.Signal(u.SintType(16, default=-15), "sint_s"),
+            u.Define("_A"),
+            u.Define("_C", value=3),
         ]
     )
 
@@ -92,6 +94,12 @@ def test_parse(parser):
         16,
         u.ConstExpr(u.UintType(6, default=32)),
         u.ConstExpr(u.UintType(4, default=6)),
+    )
+
+    assert parser.parse("`A + `BC * `C + 4") == u.Op(
+        u.Op(u.Define("_A"), "+", u.Op(u.Define("_BC"), "*", u.Define("_C", value=3))),
+        "+",
+        u.ConstExpr(u.IntegerType(default=4)),
     )
 
 
