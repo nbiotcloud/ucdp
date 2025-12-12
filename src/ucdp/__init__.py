@@ -38,8 +38,19 @@ from .clkrel import ASYNC, ClkRel
 from .clkrelbase import BaseClkRel
 from .config import AConfig, AVersionConfig, BaseConfig
 from .const import Const
-from .consts import AUTO, PAT_IDENTIFIER, PAT_IFDEF, PAT_OPT_IDENTIFIER, PATH, RE_IDENTIFIER, RE_IFDEF, Gen
-from .define import Define, Defines
+from .consts import (
+    AUTO,
+    PAT_DEFINE,
+    PAT_IDENTIFIER,
+    PAT_IFDEF,
+    PAT_OPT_IDENTIFIER,
+    PATH,
+    RE_DEFINE,
+    RE_IDENTIFIER,
+    RE_IFDEF,
+    Gen,
+)
+from .define import Define, Defines, cast_defines
 from .dict import Dict
 from .doc import Doc
 from .docutil import doc_from_type
@@ -168,9 +179,11 @@ __all__ = [
     "OPEN",
     "OUT",
     "PATH",
+    "PAT_DEFINE",
     "PAT_IDENTIFIER",
     "PAT_IFDEF",
     "PAT_OPT_IDENTIFIER",
+    "RE_DEFINE",
     "RE_IDENTIFIER",
     "RE_IFDEF",
     "TODO",
@@ -324,6 +337,7 @@ __all__ = [
     "ValidationError",
     "bwdfilter",
     "cast_booltype",
+    "cast_defines",
     "cast_ifdefs",
     "clean",
     "cli",

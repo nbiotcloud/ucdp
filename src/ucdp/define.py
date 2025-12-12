@@ -27,29 +27,32 @@ Define.
 ??? Example "Define Examples"
     Usage:
 
-        >>> from tabulate import tabulate
         >>> import ucdp as u
-        >>> u.Define("param_p")
-        Define('param_p')
+        >>> u.Define("_MYEFINE")
+        Define('_MYEFINE')
 
         Complex types are NOT supported.
 
-        >>> param = u.Define("param_p")
+        >>> param = u.Define("_MYEFINE")
         >>> for item in param:
         ...     print(repr(item))
-        Define('param_p')
+        Define('_MYEFINE')
 """
 
 from typing import Any, ClassVar
 
-from .consts import PAT_IDENTIFIER
+from .consts import PAT_DEFINE
 from .doc import Doc
+from .expr import Expr, _parse_const
 from .namespace import Namespace
 from .nameutil import split_suffix
 from .object import Field, Light, NamedObject, PosArgs
+from .typebase import BaseType
+from .typescalar import BoolType
+from .typestring import StringType
 
 
-class Define(NamedObject, Light):
+class Define(Expr, NamedObject, Light):
     """Define.
 
     Args:
@@ -63,40 +66,47 @@ class Define(NamedObject, Light):
         Example:
 
             >>> import ucdp as u
-            >>> cnt = u.Define("cnt_p")
-            >>> cnt
-            Define('cnt_p')
-            >>> cnt.name
-            'cnt_p'
-            >>> cnt.basename
-            'cnt'
-            >>> cnt.suffix
-            '_p'
-            >>> cnt.doc
+            >>> define = u.Define("_MYDEFINE")
+            >>> define
+            Define('_MYDEFINE')
+            >>> define.name
+            '_MYDEFINE'
+            >>> define.basename
+            '_MYDEFINE'
+            >>> define.suffix
+            ''
+            >>> define.doc
             Doc()
-            >>> cnt.value
+            >>> define.value
 
         If the parameter is casted via `int()` it returns `value` if set, other `type_.default`.
 
-            >>> int(u.Define("cnt_p"))
+            >>> int(u.Define("_MYDEFINE"))
             0
-            >>> int(u.Define("cnt_p", value=4))
+            >>> int(u.Define("_MYDEFINE", value=4))
             4
 
         Define are Singleton:
 
-            >>> u.Define("cnt_p") is u.Define("cnt_p")
+            >>> u.Define("_MYDEFINE") is u.Define("_MYDEFINE")
             True
     """
 
-    name: str = Field(pattern=PAT_IDENTIFIER)
+    name: str = Field(pattern=PAT_DEFINE)
     doc: Doc = Doc()
     value: Any = None
 
     _posargs: ClassVar[PosArgs] = ("name",)
 
-    def __init__(self, name: str, **kwargs):
-        super().__init__(name=name, **kwargs)  # type: ignore[call-arg]
+    def __init__(self, name: str, type_: BaseType | None = None, value=None, **kwargs):
+        if type_ is None:
+            if value is None:
+                type_ = BoolType()
+            elif isinstance(value, str):
+                type_ = StringType(default=value)
+            else:
+                type_ = _parse_const(value).type_
+        super().__init__(name=name, type_=type_, value=value, **kwargs)  # type: ignore[call-arg]
 
     @property
     def basename(self):
@@ -120,3 +130,31 @@ class Define(NamedObject, Light):
 
 class Defines(Namespace):
     """Defines."""
+
+
+def cast_defines(value: Defines | dict | None) -> Defines | None:
+    """
+    Cast Defines.
+
+    >>> cast_defines({})
+    Defines([])
+    >>> defines = cast_defines({'A': None, '_BC': 42, 'DE': 'foo'})
+    >>> defines
+    Defines([Define('_A'), Define('_BC', value=42), Define('_DE', value='foo')])
+    >>> cast_defines(defines)
+    Defines([Define('_A'), Define('_BC', value=42), Define('_DE', value='foo')])
+    >>> cast_defines(None)
+    """
+    if value is None:
+        return None
+    if isinstance(value, Defines):
+        value.lock(ensure=True)
+        return value
+    if isinstance(value, dict):
+        defines = Defines()
+        for key, val in value.items():
+            key = key if key.startswith("_") else f"_{key}"  # noqa: PLW2901
+            defines.add(Define(key, value=val))
+        defines.lock()
+        return defines
+    raise ValueError(value)

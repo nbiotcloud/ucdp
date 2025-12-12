@@ -108,9 +108,14 @@ class Namespace(dict):
         """Locked."""
         return self.__is_locked
 
-    def lock(self) -> None:
-        """Lock."""
-        if self.__is_locked:
+    def lock(self, ensure: bool = False) -> None:
+        """
+        Lock.
+
+        Keyword Args:
+            ensure: Do not complain if already locked
+        """
+        if not ensure and self.__is_locked:
             raise LockError("Namespace is already locked. Cannot lock again.")
         self.__is_locked = True
 

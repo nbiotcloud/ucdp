@@ -31,11 +31,10 @@ import warnings
 from abc import abstractmethod
 from functools import cached_property
 from inspect import getmro
-from typing import Annotated, Any, ClassVar, Literal, Optional, TypeAlias, Union, no_type_check
+from typing import Any, ClassVar, Literal, Optional, TypeAlias, Union, no_type_check
 
 from aligntext import align
 from caseconverter import snakecase
-from pydantic import PlainValidator
 from uniquer import uniquetuple
 
 from .assigns import Assigns, Drivers, Note, Source
@@ -44,7 +43,7 @@ from .clkrel import ClkRel
 from .clkrelbase import BaseClkRel
 from .const import Const
 from .consts import UPWARDS
-from .define import Define, Defines
+from .define import Defines, cast_defines
 from .doc import Doc
 from .docutil import doc_from_type
 from .exceptions import LockError
@@ -71,20 +70,6 @@ from .typestruct import StructItem
 
 ModTags: TypeAlias = set[str]
 RoutingError: TypeAlias = Literal["error", "warn", "ignore"]
-
-
-def _to_defines(value: Defines | dict | None) -> Defines | None:
-    if value is None:
-        return None
-    if isinstance(value, Defines):
-        value.lock()
-        return value
-    if isinstance(value, dict):
-        defines = Defines()
-        for key, val in value.items():
-            defines.add(Define(key, value=val))
-        return defines
-    raise ValueError(value)
 
 
 class BaseMod(NamedObject):
@@ -119,8 +104,8 @@ class BaseMod(NamedObject):
     # private
 
     drivers: Drivers = Field(default_factory=Drivers, init=False, repr=False)
-    defines: Annotated[Defines | None, PlainValidator(_to_defines)] = None
-    namespace: Idents = Field(default_factory=Idents, init=False, repr=False)
+    defines: Defines | None  # initialized by __init__
+    namespace: Idents = Field(repr=False)  # initialized by __init__
     params: Idents = Field(default_factory=Idents, init=False, repr=False)
     ports: Idents = Field(default_factory=Idents, init=False, repr=False)
     portssignals: Idents = Field(default_factory=Idents, init=False, repr=False)
@@ -143,7 +128,11 @@ class BaseMod(NamedObject):
             if parent:
                 raise ValueError("'name' is required for sub modules.")
             name = snakecase(cls.__name__.removesuffix("Mod"))
-        super().__init__(parent=parent, name=name, defines=defines, **kwargs)  # type: ignore[call-arg]
+        namespace = Idents()
+        defines = cast_defines(defines)
+        if defines:
+            namespace.update(defines)
+        super().__init__(parent=parent, name=name, namespace=namespace, defines=defines, **kwargs)  # type: ignore[call-arg]
 
     @property
     def doc(self) -> Doc:
@@ -831,7 +820,7 @@ class BaseMod(NamedObject):
             raise LockError(f"{self} is already locked. Cannot lock again.")
         for _, obj in self:
             if isinstance(obj, Namespace):
-                obj.lock()
+                obj.lock(ensure=True)
         self.__is_locked = True
 
     def check_lock(self):
@@ -865,12 +854,7 @@ class BaseMod(NamedObject):
         return f"<{modref}(inst={self.inst!r}, libname={self.libname!r}, modname={self.modname!r}{defines})>"
 
     def __repr__(self):
-        modref = self.get_modref()
-        defines = ""
-        if self.defines:
-            definesdict = {define.name: define.value for define in self.defines}
-            defines = f" defines={definesdict!r}"
-        return f"<{modref}(inst={self.inst!r}, libname={self.libname!r}, modname={self.modname!r}{defines})>"
+        return str(self)
 
     def get_overview(self) -> str:
         """

@@ -27,6 +27,7 @@ Expression Resolver.
 
 from typing import Any, ClassVar
 
+from .define import Define
 from .expr import (
     BoolOp,
     ConcatExpr,
@@ -131,6 +132,8 @@ class ExprResolver(Object):
             resolved = self._resolve_rangeexpr(expr)
         elif isinstance(expr, Note):
             resolved = self._get_note(expr)
+        elif isinstance(expr, Define):
+            resolved = self._get_define(expr)
         else:
             raise ValueError(f"{expr!r} is not a valid expression.")
         if brackets and isinstance(expr, self._BRACKETTYPES):
@@ -313,6 +316,10 @@ class ExprResolver(Object):
     @staticmethod
     def _get_note(note: Note) -> str:
         return repr(note.note)
+
+    @staticmethod
+    def _get_define(define: Define) -> str:
+        return repr(define)
 
     def _get_array_value(self, itemvalue: str, slice_: Slice) -> str:
         raise NotImplementedError
