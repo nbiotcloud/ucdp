@@ -32,7 +32,7 @@ test: .venv/.valid ## [ALL] Run Unittests via 'pytest' with {PYTEST_OPTIONS}
 	@echo  "See coverage report:\n\n    file://${PWD}/htmlcov/index.html\n"
 
 .PHONY: test-ff
-test-ff: ## [ALL] Run Failing Testcases First, Stop on First Fail
+test-ff: ## Run Failing Testcases First, Stop on First Fail
 	make test PYTEST_OPTIONS="-x --ff"
 
 
