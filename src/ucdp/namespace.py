@@ -206,8 +206,16 @@ class Namespace(dict):
     def __or__(self, other) -> "Namespace":
         if not isinstance(other, dict):
             return NotImplemented
-        if self.__is_locked:
-            raise LockError("Namespace is already locked. Cannot add items anymore.")
+
+        items = dict(self)
+        items.update(other)
+        namespace = self.__class__()
+        namespace._set_items(items.items())
+        return namespace
+
+    def __add__(self, other) -> "Namespace":
+        if not isinstance(other, dict):
+            return NotImplemented
         items = dict(self)
         items.update(other)
         namespace = self.__class__()

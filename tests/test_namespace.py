@@ -414,7 +414,7 @@ def test_or():
 
     msg = "Namespace is already locked. Cannot add items anymore."
     with raises(ucdp.LockError, match=re.escape(msg)):
-        namespace2 | {"str3": myobject3}
+        namespace2 |= {"str3": myobject3}
 
     assert tuple(namespace2) == (myobject1, myobject2)
 
