@@ -65,7 +65,7 @@ _RE_SUB_ARRAY = re.compile(r"'{([^}]*)}")
 _RE_SUB_CONST = re.compile(
     r'(const\("[^"]*"\))|'
     r"(const\('[^']*'\))|"
-    r"([-+]?((\d*'?s?((b[01]+)|(o[0-7]+)|(d[0-9]+)|(h[0-9a-fA-F]+)))))\b"
+    r"((\d*'?s?((b[01]+)|(o[0-7]+)|(d[0-9]+)|(h[0-9a-fA-F]+))))\b"
 )
 
 
@@ -75,6 +75,9 @@ def _sub_const(mat):
     if mat.group(2):
         return mat.group(2)
     return f'const("{mat.group(3)}")'
+
+
+_RE_TERNARY = re.compile(r"(\(([^\?]+)\?(.+?):([^:]+)\))|(([^\?]+)\?(.+?):([^:]+))\Z")
 
 
 class _Globals(dict):
@@ -217,22 +220,21 @@ class ExprParser(Object):
                 ...
                 u.exceptions.InvalidExpr: 'sig_s[2': '[' was never closed (<string>, line 1)
         """
+        # Parseable: Expr | str | int | BaseType | list | tuple
+
         result: Expr
         if isinstance(expr, Expr):
             result = expr
         elif isinstance(expr, BaseType):
             result = ConstExpr(expr)
+        elif isinstance(expr, (list, tuple)):
+            result = self.concat(expr)
         else:
             try:
-                if isinstance(expr, (list, tuple)):
-                    result = self.concat(expr)
-                else:
-                    try:
-                        result = self.const(expr)
-                    except InvalidExpr:
-                        result = self._parse(str(expr))
-            except NameError as exc:
-                raise exc
+                result = self.const(expr)
+            except InvalidExpr:
+                expr = self._escape(str(expr))
+                result = self._parse_str(expr)
         self._check(result, only=only, types=types)
         return result
 
@@ -245,14 +247,11 @@ class ExprParser(Object):
             if not isinstance(expr.type_, types):  # type: ignore[arg-type]
                 raise ValueError(f"{expr!r} requires type_ {types}. It is a {expr.type_}") from None
 
-    def _parse(self, expr: str) -> Expr:
-        if self.namespace:
-            # avoid eval call on simple identifiers
-            if isinstance(expr, str) and RE_IDENTIFIER.match(expr):
-                try:
-                    return self.namespace[expr]
-                except ValueError:
-                    pass
+    def _escape(self, expr: str) -> str:
+        """Escape non-python patterns."""
+        expr = expr.replace("\n", "").strip()
+        if RE_IDENTIFIER.match(expr):
+            return expr
 
         # convert non-python lists
         mat = _RE_SUB_ARRAY.match(expr)
@@ -263,17 +262,11 @@ class ExprParser(Object):
         # convert Defines
         expr = _RE_DEFINE.sub(self._sub_define, expr)
 
-        # convert non-python constants
-        expr = _RE_SUB_CONST.sub(_sub_const, expr)
+        # convert Ternary
+        expr = _RE_TERNARY.sub(self._sub_ternary, expr)
 
-        # start python parser
-        try:
-            globals: dict[str, Any] = self._globals  # type: ignore[assignment]
-            return eval(expr, globals)  # noqa: S307
-        except TypeError:
-            raise InvalidExpr(expr) from None
-        except SyntaxError as exc:
-            raise InvalidExpr(f"{expr!r}: {exc!s}") from None
+        # convert non-python constants
+        return _RE_SUB_CONST.sub(_sub_const, expr)
 
     def _sub_define(self, mat) -> str:
         name = f"_{mat.group(1)}"
@@ -283,6 +276,30 @@ class ExprParser(Object):
                 return name
 
         return f"Define({name!r})"
+
+    def _sub_ternary(self, mat: re.Match) -> str:
+        cond = self._escape(mat.group(2) or mat.group(6))
+        one = self._escape(mat.group(3) or mat.group(7))
+        other = self._escape(mat.group(4) or mat.group(8))
+        return f"ternary({cond}, {one}, {other})"
+
+    def _parse_str(self, expr: str) -> Expr:
+        if self.namespace:
+            # avoid eval call on simple identifiers
+            if isinstance(expr, str) and RE_IDENTIFIER.match(expr):
+                try:
+                    return self.namespace[expr]
+                except ValueError:
+                    pass
+
+        # start python parser
+        try:
+            globals: dict[str, Any] = self._globals  # type: ignore[assignment]
+            return eval(expr, globals)  # noqa: S307
+        except TypeError:
+            raise InvalidExpr(expr) from None
+        except SyntaxError as exc:
+            raise InvalidExpr(f"{expr!r}: {exc!s}") from None
 
     def const(self, value: Constable) -> ConstExpr:
         """

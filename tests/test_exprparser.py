@@ -37,6 +37,7 @@ def idents() -> u.Idents:
         [
             u.Signal(u.UintType(16, default=15), "uint_s"),
             u.Signal(u.SintType(16, default=-15), "sint_s"),
+            u.Param(u.UintType(4), "my_p"),
             u.Define("_A"),
             u.Define("_C", value=3),
         ]
@@ -100,6 +101,29 @@ def test_parse(parser):
         u.Op(u.Define("_A"), "+", u.Op(u.Define("_BC"), "*", u.Define("_C", value=3))),
         "+",
         u.ConstExpr(u.IntegerType(default=4)),
+    )
+
+    # newline
+    assert parser.parse("uint_s\n- 16d3") == u.Op(
+        u.Signal(u.UintType(16, default=15), "uint_s"), "-", u.ConstExpr(u.UintType(16, default=3))
+    )
+
+
+def test_parse_ternary(parser):
+    """Test Question Operator."""
+    assert parser.parse("my_p > 4 ? uint_s : sint_s") == u.TernaryExpr(
+        u.BoolOp(u.Param(u.UintType(4), "my_p"), ">", u.ConstExpr(u.UintType(4, default=4))),
+        u.Signal(u.UintType(16, default=15), "uint_s"),
+        u.Signal(u.SintType(16, default=-15), "sint_s"),
+    )
+    assert parser.parse("my_p > 2 ? (my_p > 4 ? uint_s : 4) : uint_s") == u.TernaryExpr(
+        u.BoolOp(u.Param(u.UintType(4), "my_p"), ">", u.ConstExpr(u.UintType(4, default=2))),
+        u.TernaryExpr(
+            u.BoolOp(u.Param(u.UintType(4), "my_p"), ">", u.ConstExpr(u.UintType(4, default=4))),
+            u.Signal(u.UintType(16, default=15), "uint_s"),
+            u.ConstExpr(u.IntegerType(default=4)),
+        ),
+        u.Signal(u.UintType(16, default=15), "uint_s"),
     )
 
 

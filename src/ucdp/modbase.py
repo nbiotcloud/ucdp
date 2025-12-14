@@ -107,6 +107,7 @@ class BaseMod(NamedObject):
     defines: Defines | None  # initialized by __init__
     namespace: Idents = Field(repr=False)  # initialized by __init__
     params: Idents = Field(default_factory=Idents, init=False, repr=False)
+    consts: Idents = Field(default_factory=Idents, init=False, repr=False)
     ports: Idents = Field(default_factory=Idents, init=False, repr=False)
     portssignals: Idents = Field(default_factory=Idents, init=False, repr=False)
     insts: Namespace = Field(default_factory=Namespace, init=False, repr=False)
@@ -360,6 +361,7 @@ class BaseMod(NamedObject):
         if self.__is_locked:
             raise LockError(f"{self}: Cannot add constant {name!r}.")
         self.namespace.add(const, exist_ok=exist_ok)
+        self.consts.add(const, exist_ok=exist_ok)
         return const
 
     def add_type_consts(self, type_: BaseType, exist_ok: bool = False, only=None, name=None, item_suffix="e"):

@@ -37,8 +37,15 @@ Define.
         >>> for item in param:
         ...     print(repr(item))
         Define('_MYEFINE')
+        >>> for item in param.iter():
+        ...     print(repr(item))
+        Define('_MYEFINE')
+        >>> for item in param.leveliter():
+        ...     print(repr(item))
+        (0, Define('_MYEFINE'))
 """
 
+from collections.abc import Iterable, Iterator
 from typing import Any, ClassVar
 
 from .consts import PAT_DEFINE
@@ -127,6 +134,15 @@ class Define(Expr, NamedObject, Light):
     def __iter__(self):
         yield self
 
+    def iter(self, filter_=None, stop=None, value=None) -> Iterator:
+        """Iterate over Hierarchy."""
+        for _, ident in _iters([self], filter_=filter_, stop=stop, value=value):
+            yield ident
+
+    def leveliter(self, filter_=None, stop=None, value=None) -> Iterator:
+        """Iterate over Hierarchy."""
+        yield from _iters([self], filter_=filter_, stop=stop, value=value)
+
 
 class Defines(Namespace):
     """Defines."""
@@ -158,3 +174,19 @@ def cast_defines(value: Defines | dict | None) -> Defines | None:
         defines.lock()
         return defines
     raise ValueError(value)
+
+
+def _iters(
+    defines: Iterable[Define], filter_=None, stop=None, value=None, level: int = 0
+) -> Iterator[tuple[int, Define]]:
+    for define in defines:
+        if stop and stop(define):
+            break
+
+        type_ = define.type_
+        if value is not None:
+            type_ = type_.new(default=value)
+            define = define.new(type_=type_)  # noqa: PLW2901
+
+        if not filter_ or filter_(define):
+            yield level, define
