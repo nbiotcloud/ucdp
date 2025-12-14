@@ -118,6 +118,26 @@ class Define(Expr, NamedObject, Light):
         """Suffix."""
         return split_suffix(self.name)[1]
 
+    @property
+    def title(self) -> str | None:
+        """Alias to `doc.title`."""
+        return self.doc.title
+
+    @property
+    def descr(self) -> str | None:
+        """Alias to `doc.descr`."""
+        return self.doc.descr
+
+    @property
+    def comment(self) -> str | None:
+        """Alias to `doc.comment`."""
+        return self.doc.comment
+
+    @property
+    def comment_or_title(self) -> str | None:
+        """Return `comment` if set, otherwise `title`."""
+        return self.doc.comment_or_title
+
     def __str__(self) -> str:
         return self.name
 

@@ -187,3 +187,35 @@ def test_port_iter():
         "po_t_my1_return",
         "po_t_uint",
     )
+
+
+def test_title_descr_attribute():
+    """Title, Descr, Comment."""
+    ident = u.Ident(u.BitType(), "ident")
+    assert ident.type_ is u.BitType()
+    assert ident.name == "ident"
+    assert ident.direction is None
+    assert ident.ifdefs == ()
+    assert str(ident) == "ident"
+    assert int(ident) == 0
+    assert ident.doc == u.Doc()
+    assert ident.title is None
+    assert ident.descr is None
+    assert ident.comment is None
+    assert ident.comment_or_title is None
+
+    ident = u.Ident(u.BitType(), "ident", doc=u.Doc(title="my title", comment="my comment"))
+    assert ident.name == "ident"
+    assert ident.doc == u.Doc(title="my title", comment="my comment")
+    assert ident.title == "my title"
+    assert ident.descr is None
+    assert ident.comment == "my comment"
+    assert ident.comment_or_title == "my comment"
+
+    ident = u.Ident(u.BitType(), "ident", doc=u.Doc(descr="my descr"))
+    assert ident.name == "ident"
+    assert ident.doc == u.Doc(descr="my descr")
+    assert ident.title is None
+    assert ident.descr == "my descr"
+    assert ident.comment is None
+    assert ident.comment_or_title is None
